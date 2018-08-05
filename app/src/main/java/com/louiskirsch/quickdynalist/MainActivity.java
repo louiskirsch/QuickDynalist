@@ -9,13 +9,17 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -53,6 +57,13 @@ public class MainActivity extends Activity {
         itemContents = findViewById(R.id.item_content);
         submitButton = findViewById(R.id.btn_add_item);
 
+        // These properties must be set programmatically because order of execution matters
+        itemContents.setInputType(
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        itemContents.setSingleLine(true);
+        itemContents.setMaxLines(5);
+        itemContents.setHorizontallyScrolling(false);
+        itemContents.setImeOptions(EditorInfo.IME_ACTION_DONE);
         itemContents.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -63,6 +74,16 @@ public class MainActivity extends Activity {
             @Override
             public void afterTextChanged(Editable editable) {
                 updateSubmitEnabled();
+            }
+        });
+        itemContents.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    submitButton.performClick();
+                    return true;
+                }
+                return false;
             }
         });
 
@@ -117,15 +138,18 @@ public class MainActivity extends Activity {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            if (response.getString("_code").equals("Ok")) {
-                                Toast.makeText(MainActivity.this,
-                                        R.string.add_item_success, Toast.LENGTH_SHORT).show();
-                                finish();
+                            String code = response.getString("_code");
+                            if (code.equals("Ok")) {
+                                // All OK, pass
+                            } else if (code.equals("InvalidToken")) {
+                                showItemAddError();
+                                authenticate();
                             } else {
-                                showValidationError();
+                                showItemAddError();
                             }
                         } catch (JSONException e) {
-                            showValidationError();
+                            e.printStackTrace();
+                            showItemAddError();
                         }
                     }
                 },
@@ -133,11 +157,15 @@ public class MainActivity extends Activity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        Toast.makeText(MainActivity.this,
-                                R.string.add_item_error, Toast.LENGTH_SHORT).show();
+                        showItemAddError();
                     }
                 });
         queue.add(request);
+    }
+
+    private void showItemAddError() {
+        Toast.makeText(MainActivity.this,
+                R.string.add_item_error, Toast.LENGTH_SHORT).show();
     }
 
     private SharedPreferences getPreferences() {
