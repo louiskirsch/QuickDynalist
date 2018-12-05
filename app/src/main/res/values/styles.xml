@@ -5,4 +5,8 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style parent="android:style/Theme.Material.Light.Dialog" name="Theme.NoTitleBar.Dialog">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
 </resources>
