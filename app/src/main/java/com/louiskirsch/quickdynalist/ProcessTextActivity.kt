@@ -8,7 +8,8 @@ class ProcessTextActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val text = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT).toString()
+        val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
+                ?: intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT).toString()
         val dynalist = Dynalist(this)
 
         val addItemAndFinish = {
