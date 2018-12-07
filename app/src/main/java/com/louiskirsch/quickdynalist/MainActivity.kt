@@ -58,7 +58,7 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         updateSubmitEnabled()
-        if (!dynalist!!.isAuthenticated && dynalist!!.authDialog == null) {
+        if (!dynalist!!.isAuthenticated && !dynalist!!.isAuthenticating) {
             dynalist!!.authenticate()
         } else {
             itemContents!!.requestFocus()
