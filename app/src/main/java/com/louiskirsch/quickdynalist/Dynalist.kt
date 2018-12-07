@@ -2,16 +2,15 @@ package com.louiskirsch.quickdynalist
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.view.LayoutInflater
 import android.widget.EditText
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.browse
 import org.jetbrains.anko.toast
 import org.json.JSONException
 import org.json.JSONObject
@@ -28,6 +27,9 @@ class Dynalist(private val context: Context) {
 
     val isAuthenticated: Boolean
         get() = this.preferences.contains("TOKEN")
+
+    val isAuthenticating: Boolean
+        get() = authDialog != null
 
     fun addItem(contents: String, parent: String = "", showToastOnSuccess: Boolean = false) {
         // TODO addd item not to inbox but to `parent`
@@ -127,15 +129,13 @@ class Dynalist(private val context: Context) {
     }
 
     fun authenticate(onDone: () -> Unit = {}) {
-        val builder = AlertDialog.Builder(context)
-        builder.setMessage(R.string.auth_instructions)
-                .setCancelable(false)
-                .setPositiveButton(R.string.auth_start) { _, _ ->
-                    showTokenDialog(onDone)
-                    openTokenGenerationBrowser()
-                }
-
-        builder.create().show()
+        context.alert(R.string.auth_instructions) {
+            isCancelable = false
+            positiveButton(R.string.auth_start) {
+                showTokenDialog(onDone)
+                openTokenGenerationBrowser()
+            }
+        }
     }
 
     private fun showTokenDialog(onDone: () -> Unit) {
@@ -158,8 +158,6 @@ class Dynalist(private val context: Context) {
     }
 
     private fun openTokenGenerationBrowser() {
-        val url = "https://dynalist.io/developer"
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        context.startActivity(browserIntent)
+        context.browse("https://dynalist.io/developer")
     }
 }
