@@ -135,7 +135,7 @@ class Dynalist(private val context: Context) {
                 showTokenDialog(onDone)
                 openTokenGenerationBrowser()
             }
-        }
+        }.show()
     }
 
     private fun showTokenDialog(onDone: () -> Unit) {
