@@ -7,7 +7,9 @@ import android.content.SharedPreferences
 import android.util.EventLog
 import android.view.LayoutInflater
 import android.widget.EditText
+import com.google.gson.Gson
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
+import com.louiskirsch.quickdynalist.jobs.Bookmark
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -19,8 +21,10 @@ import org.jetbrains.anko.custom.ankoView
 import org.jetbrains.anko.toast
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.*
 
 class Dynalist(private val context: Context) {
+    val gson: Gson = Gson()
     var authDialog: AlertDialog? = null
 
     private val preferences: SharedPreferences
@@ -35,6 +39,18 @@ class Dynalist(private val context: Context) {
 
     val isAuthenticating: Boolean
         get() = authDialog != null
+
+    var bookmarks: Array<Bookmark>
+        get() = gson.fromJson(preferences.getString("BOOKMARKS", "[]"), Array<Bookmark>::class.java)
+        set(x) {
+            val editor = preferences.edit()
+            editor.putString("BOOKMARKS", gson.toJson(x))
+            editor.putLong("BOOKMARK_UPDATE", Date().time)
+            editor.apply()
+        }
+
+    val lastBookmarkQuery: Date
+        get() = Date(preferences.getLong("BOOKMARK_UPDATE", 0))
 
     fun subscribe() {
         EventBus.getDefault().register(this)
@@ -52,9 +68,9 @@ class Dynalist(private val context: Context) {
         }
     }
 
-    fun addItem(contents: String, parent: String = "") {
+    fun addItem(contents: String, parent: Bookmark) {
         val jobManager = DynalistApp.instance.jobManager
-        val job = AddItemJob(contents)
+        val job = AddItemJob(contents, parent)
         jobManager.addJobInBackground(job)
     }
 

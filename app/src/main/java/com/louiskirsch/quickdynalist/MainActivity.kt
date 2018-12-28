@@ -7,15 +7,19 @@ import android.text.InputType
 import android.text.TextWatcher
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
+import com.louiskirsch.quickdynalist.jobs.Bookmark
+import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.contentView
 import org.jetbrains.anko.toast
+import java.util.*
 
 class MainActivity : Activity() {
     private val dynalist: Dynalist = Dynalist(this)
+    private lateinit var adapter: ArrayAdapter<Bookmark>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,14 +29,22 @@ class MainActivity : Activity() {
 
         submitButton!!.setOnClickListener {
             dynalist!!.addItem(itemContents!!.text.toString(),
-                    itemLocation!!.selectedItem.toString())
+                    itemLocation!!.selectedItem as Bookmark)
             itemContents!!.text.clear()
         }
 
-        val adapter = ArrayAdapter.createFromResource(this,
-                R.array.item_locations, android.R.layout.simple_spinner_item)
+        val bookmarks = arrayOf(Bookmark.newInbox()) + dynalist.bookmarks
+        adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, bookmarks.toMutableList())
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         itemLocation!!.adapter = adapter
+
+        val bookmarksOutdated = dynalist.lastBookmarkQuery.time <
+                Date().time - 3 * 24 * 60 * 60 * 1000L
+        if (savedInstanceState == null && bookmarksOutdated) {
+            val jobManager = DynalistApp.instance.jobManager
+            jobManager.addJobInBackground(BookmarksJob())
+        }
     }
 
     override fun onStart() {
@@ -87,6 +99,13 @@ class MainActivity : Activity() {
     private fun updateSubmitEnabled() {
         val enabled = dynalist!!.isAuthenticated && !itemContents!!.text.toString().isEmpty()
         submitButton!!.isEnabled = enabled
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onBookmarksUpdated(event: BookmarksUpdatedEvent) {
+        val bookmarks = arrayOf(Bookmark.newInbox()) + event.newBookmarks
+        adapter.clear()
+        adapter.addAll(bookmarks.toList())
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

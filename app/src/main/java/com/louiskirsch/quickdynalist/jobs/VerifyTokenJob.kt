@@ -36,9 +36,7 @@ class VerifyTokenJob(private val token: String)
         EventBus.getDefault().post(AuthenticatedEvent(false))
     }
 
-    override fun getRetryLimit(): Int {
-        return 0
-    }
+    override fun getRetryLimit() = 0
 
     override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int,
                                         maxRunCount: Int): RetryConstraint {

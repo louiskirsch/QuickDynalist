@@ -11,7 +11,4 @@
     <string name="add_item_success">Item successfully added</string>
     <string name="add_item_error">Failed to add item</string>
     <string name="process_text_action_name">Add To Inbox</string>
-    <string-array name="item_locations">
-        <item>Inbox</item>
-    </string-array>
 </resources>
