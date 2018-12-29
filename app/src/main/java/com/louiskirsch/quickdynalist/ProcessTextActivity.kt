@@ -3,6 +3,7 @@ package com.louiskirsch.quickdynalist
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.webkit.URLUtil
 import com.louiskirsch.quickdynalist.jobs.Bookmark
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -18,6 +19,10 @@ class ProcessTextActivity : Activity() {
 
         text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
                     ?: intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT).toString()
+
+        val subject = intent.getCharSequenceExtra(Intent.EXTRA_SUBJECT)
+        if (subject != null && URLUtil.isNetworkUrl(text))
+            text = "[$subject]($text)"
     }
 
     override fun onStart() {
