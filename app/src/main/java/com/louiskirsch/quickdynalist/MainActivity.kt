@@ -28,7 +28,7 @@ class MainActivity : Activity() {
         setupItemContentsTextField()
 
         submitButton!!.setOnClickListener {
-            dynalist!!.addItem(itemContents!!.text.toString(),
+            dynalist.addItem(itemContents!!.text.toString(),
                     itemLocation!!.selectedItem as Bookmark)
             itemContents!!.text.clear()
         }
@@ -40,7 +40,7 @@ class MainActivity : Activity() {
         itemLocation!!.adapter = adapter
 
         val bookmarksOutdated = dynalist.lastBookmarkQuery.time <
-                Date().time - 3 * 24 * 60 * 60 * 1000L
+                Date().time - 60 * 60 * 1000L
         if (savedInstanceState == null && bookmarksOutdated) {
             val jobManager = DynalistApp.instance.jobManager
             jobManager.addJobInBackground(BookmarksJob())
@@ -70,7 +70,7 @@ class MainActivity : Activity() {
                     updateSubmitEnabled()
                 }
             })
-            setOnEditorActionListener { textView, actionId, keyEvent ->
+            setOnEditorActionListener { _, actionId, _ ->
                 val isDone = actionId == EditorInfo.IME_ACTION_DONE
                 if (isDone) {
                     submitButton!!.performClick()
@@ -83,8 +83,8 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         updateSubmitEnabled()
-        if (!dynalist!!.isAuthenticated && !dynalist!!.isAuthenticating) {
-            dynalist!!.authenticate()
+        if (!dynalist.isAuthenticated && !dynalist.isAuthenticating) {
+            dynalist.authenticate()
         } else {
             itemContents!!.requestFocus()
         }
@@ -97,7 +97,7 @@ class MainActivity : Activity() {
     }
 
     private fun updateSubmitEnabled() {
-        val enabled = dynalist!!.isAuthenticated && !itemContents!!.text.toString().isEmpty()
+        val enabled = dynalist.isAuthenticated && !itemContents!!.text.toString().isEmpty()
         submitButton!!.isEnabled = enabled
     }
 
