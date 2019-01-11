@@ -32,7 +32,7 @@ class BookmarksJob(val largest_k: Int = 9)
         }
         val candidates = documents.zip(contents).flatMap {
             (doc, content) -> content.map { x ->
-                Bookmark(doc.id!!, x.id, x.content, x.children?.size ?: 0) }
+                Bookmark(doc.id!!, x.id, x.content, x.note, x.children?.size ?: 0) }
         }
         val markedItems = candidates.filter { x -> x.markedAsBookmark }
         val bookmarks = if (markedItems.isEmpty()) {
@@ -56,7 +56,7 @@ class BookmarksJob(val largest_k: Int = 9)
 }
 
 class Bookmark(val file_id: String, val id: String,
-               val name: String, val elem_count: Int) : Serializable {
+               val name: String, val note: String, val elem_count: Int) : Serializable {
 
     override fun toString(): String {
         val label = strippedMarkersName
@@ -73,14 +73,15 @@ class Bookmark(val file_id: String, val id: String,
         get() = name.toLowerCase() == "inbox"
 
     val markedAsBookmark: Boolean
-        get() = markers.any { x -> name.contains(x, true) }
+        get() = markers.any { x -> name.contains(x, true)
+                                || note.contains(x, true) }
 
     private val strippedMarkersName: String
         get() = markers.fold(name) { acc, marker ->
             acc.replace(marker, "", true)} .replace("# ", "")
 
     companion object {
-        fun newInbox() = Bookmark("none", "Inbox", "Inbox", -1)
+        fun newInbox() = Bookmark("none", "Inbox", "Inbox", "", -1)
         private val markers = listOf("#quickdynalist", "#inbox",
                 "📒", "📓", "📔", "📕", "📖", "📗", "📘", "📙")
     }
