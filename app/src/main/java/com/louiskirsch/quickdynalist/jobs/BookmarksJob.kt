@@ -30,14 +30,21 @@ class BookmarksJob(val largest_k: Int = 9)
         val contents = documents.map {
             x -> service.readDocument(ReadDocumentRequest(x.id!!, token)).execute().body()!!.nodes!!
         }
-        val bookmarks = documents.zip(contents).flatMap {
+        val candidates = documents.zip(contents).flatMap {
             (doc, content) -> content.map { x ->
                 Bookmark(doc.id!!, x.id, x.content, x.children?.size ?: 0) }
-        }.filter { x -> x.elem_count > 10 && !x.mightBeInbox }
-        val sortedBookmarks = bookmarks.sortedByDescending { x -> x.elem_count }
-        val newBookmarks = sortedBookmarks.take(largest_k).toTypedArray()
-        dynalist.bookmarks = newBookmarks
-        EventBus.getDefault().post(BookmarksUpdatedEvent(newBookmarks))
+        }
+        val markedItems = candidates.filter { x -> x.markedAsBookmark }
+        val bookmarks = if (markedItems.isEmpty()) {
+            candidates.filter { x -> x.elem_count > 10 && !x.mightBeInbox }
+                    .sortedByDescending { x -> x.elem_count }
+                    .take(largest_k)
+                    .toTypedArray()
+        } else {
+            markedItems.toTypedArray()
+        }
+        dynalist.bookmarks = bookmarks
+        EventBus.getDefault().post(BookmarksUpdatedEvent(bookmarks))
     }
 
     override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {}
@@ -50,12 +57,13 @@ class BookmarksJob(val largest_k: Int = 9)
 
 class Bookmark(val file_id: String, val id: String,
                val name: String, val elem_count: Int) : Serializable {
+
     override fun toString(): String {
-        val displayName = if (name.length > 30)
-            "${name.take(27)}..."
+        val label = strippedMarkersName
+        return if (label.length > 30)
+            "${label.take(27)}..."
         else
-            name
-        return if (isInbox) displayName else "$displayName ($elem_count)"
+            label
     }
 
     val isInbox: Boolean
@@ -64,7 +72,16 @@ class Bookmark(val file_id: String, val id: String,
     val mightBeInbox: Boolean
         get() = name.toLowerCase() == "inbox"
 
+    val markedAsBookmark: Boolean
+        get() = markers.any { x -> name.contains(x, true) }
+
+    private val strippedMarkersName: String
+        get() = markers.fold(name) { acc, marker ->
+            acc.replace(marker, "", true)} .replace("# ", "")
+
     companion object {
         fun newInbox() = Bookmark("none", "Inbox", "Inbox", -1)
+        private val markers = listOf("#quickdynalist", "#inbox",
+                "📒", "📓", "📔", "📕", "📖", "📗", "📘", "📙")
     }
 }

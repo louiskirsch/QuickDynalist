@@ -93,7 +93,7 @@ class Dynalist(private val context: Context) {
         builder.setMessage(R.string.auth_copy_instructions)
                 .setCancelable(false)
                 .setView(view)
-                .setPositiveButton(R.string.auth_accept_token) { dialogInterface, i ->
+                .setPositiveButton(R.string.auth_accept_token) { _, _ ->
                     val tokenField = view.findViewById<EditText>(R.id.auth_token)
                     val token = tokenField.text.toString()
                     val jobManager = DynalistApp.instance.jobManager
