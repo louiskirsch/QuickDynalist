@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/send_item"
+        android:icon="@drawable/ic_action_send_item"
+        android:title="@string/send_item"
+        android:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/discard_item"
+        android:title="@string/discard_item"
+        android:showAsAction="never"/>
+
+</menu>

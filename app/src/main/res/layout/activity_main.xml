@@ -8,6 +8,7 @@
 
     <Toolbar
         android:id="@+id/toolbar"
+        android:transitionName="toolbar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -22,6 +23,7 @@
 
     <Spinner
         android:id="@+id/itemLocation"
+        android:transitionName="itemLocation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -33,6 +35,7 @@
 
     <EditText
         android:id="@+id/itemContents"
+        android:transitionName="itemContents"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"

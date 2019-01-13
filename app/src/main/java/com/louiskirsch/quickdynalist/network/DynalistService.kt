@@ -20,18 +20,18 @@ interface DynalistService {
 }
 
 class AuthenticatedRequest(val token: String)
-class InboxRequest(val content: String, val token: String)
+class InboxRequest(val content: String, val note: String, val token: String)
 class ReadDocumentRequest(val file_id: String, val token: String)
 
 class InsertItemRequest(val file_id: String, parent_id: String,
-                        content: String, val token: String) {
+                        content: String, note: String, val token: String) {
 
-    class InsertSpec(val parent_id: String, val content: String) {
+    class InsertSpec(val parent_id: String, val content: String, val note: String) {
         val action: String = "insert"
         val index: Int = -1
     }
 
-    val changes = arrayOf(InsertSpec(parent_id, content))
+    val changes = arrayOf(InsertSpec(parent_id, content, note))
 }
 
 open class DynalistResponse {

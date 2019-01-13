@@ -6,11 +6,19 @@
     <string name="token_hint">Token</string>
     <string name="auth_accept_token">Use token</string>
     <string name="token_invalid">Token was invalid. Try again.</string>
-    <string name="content_hint">Content</string>
+    <string name="content_hint">Item text</string>
     <string name="btn_add_item">Add item</string>
     <string name="add_item_success">Item successfully added</string>
     <string name="add_item_error">Failed to add item</string>
     <string name="process_text_action_name">Add To Inbox</string>
     <string name="bookmark_hint">Add the tag #quickdynalist, #inbox, or 📕 to items that should appear in this list. Updates might take a moment to take effect and require WIFI.</string>
     <string name="open_large">Open in large window</string>
+    <string name="item_date_hint">Date</string>
+    <string name="item_time_hint">Time</string>
+    <string name="item_notes_hint">Notes</string>
+    <string name="discard_item">Discard</string>
+    <string name="send_item">Send</string>
+    <string name="item_contents_required">Item text is required</string>
+    <string name="item_date_required">A date is required if time is specified</string>
+    <string name="unset">Delete</string>
 </resources>

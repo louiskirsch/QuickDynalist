@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable
 import retrofit2.Response
 
 
-class AddItemJob(val text: String, val parent: Bookmark)
+class AddItemJob(val text: String, val note: String, val parent: Bookmark)
     : Job(Params(1).requireNetwork().persist().groupBy("add_item")) {
 
     override fun onAdded() {
@@ -28,9 +28,9 @@ class AddItemJob(val text: String, val parent: Bookmark)
         val service = DynalistApp.instance.dynalistService
 
         return if (parent.isInbox) {
-            service.addToInbox(InboxRequest(text, token!!)).execute()
+            service.addToInbox(InboxRequest(text, note, token!!)).execute()
         } else {
-            val request = InsertItemRequest(parent.file_id, parent.id, text, token!!)
+            val request = InsertItemRequest(parent.file_id, parent.id, text, note, token!!)
             val call = service.addToDocument(request)
             call.execute()
         }

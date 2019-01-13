@@ -1,13 +1,16 @@
 package com.louiskirsch.quickdynalist
 
 import android.app.Activity
+import android.app.ActivityOptions
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.view.MotionEvent
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import com.louiskirsch.quickdynalist.jobs.Bookmark
@@ -18,6 +21,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.*
 import java.util.*
+import android.util.Pair as UtilPair
 
 class MainActivity : Activity() {
     private val dynalist: Dynalist = Dynalist(this)
@@ -33,6 +37,23 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        toolbar.inflateMenu(R.menu.quick_dialog_menu)
+
+        toolbar.setOnMenuItemClickListener {
+            if (it.itemId == R.id.open_large) {
+                val intent = Intent(this, AdvancedItemActivity::class.java)
+                intent.putExtra(Intent.EXTRA_SUBJECT, itemLocation.selectedItemPosition)
+                intent.putExtra(Intent.EXTRA_TEXT, itemContents.text)
+                val transition = ActivityOptions.makeSceneTransitionAnimation(this,
+                        UtilPair.create(toolbar as View, "toolbar"),
+                        UtilPair.create(itemLocation as View, "itemLocation"),
+                        UtilPair.create(itemContents as View, "itemContents"))
+                startActivity(intent, transition.toBundle())
+                itemContents.text.clear()
+                return@setOnMenuItemClickListener true
+            }
+            false
+        }
 
         setupItemContentsTextField()
 

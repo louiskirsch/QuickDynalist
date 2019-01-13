@@ -6,23 +6,24 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
+        android:name=".DynalistApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:name=".DynalistApp"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <service android:name=".jobs.JobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />`
-
+        <service
+            android:name=".jobs.JobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        `
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="stateVisible"
-            android:theme="@style/DialogAppTheme">
+            android:theme="@style/DialogAppTheme"
+            android:windowSoftInputMode="stateVisible">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -32,25 +33,34 @@
             android:theme="@style/InvisibleTheme">
             <intent-filter>
                 <action android:name="android.intent.action.PROCESS_TEXT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="com.google.android.voicesearch.SELF_NOTE" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.google.android.gms.actions.CREATE_NOTE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+        <activity android:name=".AdvancedItemActivity"></activity>
     </application>
 
 </manifest>

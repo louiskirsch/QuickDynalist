@@ -68,9 +68,9 @@ class Dynalist(private val context: Context) {
         }
     }
 
-    fun addItem(contents: String, parent: Bookmark) {
+    fun addItem(contents: String, parent: Bookmark, note: String = "") {
         val jobManager = DynalistApp.instance.jobManager
-        val job = AddItemJob(contents, parent)
+        val job = AddItemJob(contents, note, parent)
         jobManager.addJobInBackground(job)
     }
 
