@@ -20,7 +20,7 @@
         <activity
             android:name=".MainActivity"
             android:windowSoftInputMode="stateVisible"
-            android:theme="@android:style/Theme.Material.Light.Dialog">
+            android:theme="@style/DialogAppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -29,7 +29,7 @@
         <activity
             android:name=".ProcessTextActivity"
             android:label="@string/process_text_action_name"
-            android:theme="@style/Theme.NoTitleBar.Dialog">
+            android:theme="@style/InvisibleTheme">
             <intent-filter>
                 <action android:name="android.intent.action.PROCESS_TEXT" />
                 <category android:name="android.intent.category.DEFAULT" />

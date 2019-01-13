@@ -7,11 +7,9 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import com.louiskirsch.quickdynalist.jobs.Bookmark
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import kotlinx.android.synthetic.main.activity_main.*
