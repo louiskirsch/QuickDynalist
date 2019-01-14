@@ -5,7 +5,7 @@
     <string name="auth_copy_instructions">Please copy the token you generated into the text box below.</string>
     <string name="token_hint">Token</string>
     <string name="auth_accept_token">Use token</string>
-    <string name="token_invalid">Token was invalid. Try again.</string>
+    <string name="token_invalid">Error: Token was invalid</string>
     <string name="content_hint">Item text</string>
     <string name="btn_add_item">Add item</string>
     <string name="add_item_success">Item successfully added</string>
@@ -21,4 +21,6 @@
     <string name="item_contents_required">Item text is required</string>
     <string name="item_date_required">A date is required if time is specified</string>
     <string name="unset">Delete</string>
+    <string name="no_inbox_configured">There is no inbox configured. Please visit your Dynalist and select \"Set as inbox\" in the menu of an item. No panic, we will try to add this item again later.</string>
+    <string name="dialog_title_error">Error</string>
 </resources>

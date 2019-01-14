@@ -5,10 +5,7 @@ import org.greenrobot.eventbus.EventBus
 import com.birbit.android.jobqueue.CancelReason
 import com.birbit.android.jobqueue.Job
 import com.birbit.android.jobqueue.Params
-import com.louiskirsch.quickdynalist.AuthenticatedEvent
-import com.louiskirsch.quickdynalist.Dynalist
-import com.louiskirsch.quickdynalist.DynalistApp
-import com.louiskirsch.quickdynalist.ItemEvent
+import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.DynalistResponse
 import com.louiskirsch.quickdynalist.network.InboxRequest
 import com.louiskirsch.quickdynalist.network.InsertItemRequest
@@ -42,6 +39,11 @@ class AddItemJob(val text: String, val note: String, val parent: Bookmark)
 
         if (response.body()!!.isInvalidToken)
             EventBus.getDefault().post(AuthenticatedEvent(false))
+        else if (response.body()!!.isInboxNotConfigured) {
+            EventBus.getDefault().post(NoInboxEvent())
+            throw NoInboxException()
+        }
+
         if (!response.body()!!.isOK)
             throw BackendException()
     }
@@ -52,6 +54,11 @@ class AddItemJob(val text: String, val note: String, val parent: Bookmark)
 
     override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int,
                                         maxRunCount: Int): RetryConstraint {
+        if (throwable is NoInboxException) {
+            val constraint = RetryConstraint(true)
+            constraint.newDelayInMs = 60 * 1000
+            return constraint
+        }
         return RetryConstraint.createExponentialBackoff(runCount, 10 * 1000)
     }
 }

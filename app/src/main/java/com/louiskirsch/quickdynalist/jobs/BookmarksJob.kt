@@ -78,7 +78,9 @@ class Bookmark(val file_id: String, val id: String,
 
     private val strippedMarkersName: String
         get() = markers.fold(name) { acc, marker ->
-            acc.replace(marker, "", true)} .replace("# ", "")
+            acc.replace(marker, "", true) }
+                .replace("# ", "")
+                .trim()
 
     companion object {
         fun newInbox() = Bookmark("none", "Inbox", "Inbox", "", -1)

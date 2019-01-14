@@ -14,11 +14,8 @@ import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.browse
-import org.jetbrains.anko.contentView
+import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
-import org.jetbrains.anko.toast
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
@@ -26,6 +23,7 @@ import java.util.*
 class Dynalist(private val context: Context) {
     val gson: Gson = Gson()
     var authDialog: AlertDialog? = null
+    var errorDialogShown: Boolean = false
 
     private val preferences: SharedPreferences
         get() = context.getSharedPreferences("PREFERENCES", Context.MODE_PRIVATE)
@@ -66,6 +64,24 @@ class Dynalist(private val context: Context) {
             context.toast(R.string.token_invalid)
             authenticate()
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onNoInboxEvent(event: NoInboxEvent) {
+        if (errorDialogShown)
+            return
+
+        errorDialogShown = true
+        context.alert {
+            messageResource = R.string.no_inbox_configured
+            titleResource = R.string.dialog_title_error
+            onCancelled {
+                errorDialogShown = false
+            }
+            positiveButton(android.R.string.ok) {
+                errorDialogShown = false
+            }
+        }.show()
     }
 
     fun addItem(contents: String, parent: Bookmark, note: String = "") {

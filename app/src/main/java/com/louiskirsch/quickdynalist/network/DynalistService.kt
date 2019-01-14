@@ -40,6 +40,9 @@ open class DynalistResponse {
     val isInvalidToken: Boolean
         get() = _code == "InvalidToken"
 
+    val isInboxNotConfigured: Boolean
+        get() = _code == "NoInbox"
+
     val isOK: Boolean
         get() = _code == "Ok"
 }

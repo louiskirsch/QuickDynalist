@@ -79,7 +79,7 @@ class MainActivity : Activity() {
         itemLocation!!.adapter = adapter
 
         val bookmarksOutdated = dynalist.lastBookmarkQuery.time <
-                Date().time - 60 * 1000L
+                Date().time - 5 * 60 * 1000L
         if (savedInstanceState == null && dynalist.isAuthenticated && bookmarksOutdated) {
             val jobManager = DynalistApp.instance.jobManager
             jobManager.addJobInBackground(BookmarksJob())
