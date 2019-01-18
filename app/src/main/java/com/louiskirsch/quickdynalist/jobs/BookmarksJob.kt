@@ -73,8 +73,12 @@ class Bookmark(val file_id: String, val id: String,
         get() = name.toLowerCase() == "inbox"
 
     val markedAsBookmark: Boolean
-        get() = markers.any { x -> name.contains(x, true)
-                                || note.contains(x, true) }
+        get() = emojiMarkers.any { name.contains(it, true)
+                                || note.contains(it, true) } ||
+                tagMarkers.any   { name.contains(" $it", true)
+                                || name.startsWith(it, true)
+                                || note.contains(" $it", true)
+                                || note.startsWith(it, true) }
 
     private val strippedMarkersName: String
         get() = markers.fold(name) { acc, marker ->
@@ -83,8 +87,9 @@ class Bookmark(val file_id: String, val id: String,
                 .trim()
 
     companion object {
-        fun newInbox() = Bookmark("none", "Inbox", "Inbox", "", -1)
-        private val markers = listOf("#quickdynalist", "#inbox",
-                "📒", "📓", "📔", "📕", "📖", "📗", "📘", "📙")
+        fun newInbox() = Bookmark("none", "Inbox", "\uD83D\uDCE5 Inbox", "", -1)
+        private val tagMarkers = listOf("#quickdynalist", "#inbox")
+        private val emojiMarkers = listOf("📒", "📓", "📔", "📕", "📖", "📗", "📘", "📙")
+        private val markers = tagMarkers + emojiMarkers
     }
 }
