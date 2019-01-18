@@ -4,8 +4,8 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.BaseTransientBottomBar
-import android.support.design.widget.Snackbar
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import android.webkit.URLUtil
 import com.louiskirsch.quickdynalist.jobs.Bookmark
 import org.greenrobot.eventbus.EventBus
