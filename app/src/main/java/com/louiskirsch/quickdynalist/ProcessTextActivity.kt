@@ -1,13 +1,18 @@
 package com.louiskirsch.quickdynalist
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.BaseTransientBottomBar
+import android.support.design.widget.Snackbar
 import android.webkit.URLUtil
 import com.louiskirsch.quickdynalist.jobs.Bookmark
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.contentView
 import org.jetbrains.anko.toast
 
 class ProcessTextActivity : Activity() {
@@ -33,7 +38,7 @@ class ProcessTextActivity : Activity() {
         if (!dynalist.isAuthenticated) {
             dynalist.authenticate()
         } else {
-            dynalist.addItem(text, Bookmark.newInbox())
+            addItem()
         }
     }
 
@@ -46,7 +51,30 @@ class ProcessTextActivity : Activity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onAuthenticationEvent(event: AuthenticatedEvent) {
         if (event.success) {
-            dynalist.addItem(text, Bookmark.newInbox())
+            addItem()
+        }
+    }
+
+    private fun addItem() {
+        Snackbar.make(contentView!!, R.string.add_item_success, Snackbar.LENGTH_LONG).apply {
+            setAction(R.string.item_change_target_location) {
+                val bookmarks = listOf(Bookmark.newInbox()) + dynalist.bookmarks
+                alert {
+                    items(bookmarks) { _: DialogInterface, selectedLocation: Bookmark, _: Int ->
+                        dynalist.addItem(text, selectedLocation)
+                    }
+                    onCancelled {
+                        dynalist.addItem(text, Bookmark.newInbox())
+                    }
+                }
+            }
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION)
+                        dynalist.addItem(text, Bookmark.newInbox())
+                }
+            })
+            show()
         }
     }
 
