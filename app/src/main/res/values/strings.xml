@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">Quick Dynalist</string>
     <string name="auth_start">Next</string>
-    <string name="auth_instructions">Quick Dynalist requires an api token to access your dynalist account. Please generate a token in the following step and copy it into the app. The token will only be locally stored on this device.</string>
+    <string name="auth_instructions">Quick Dynalist requires an api token to access your Dynalist account. Please generate a token in the following step and copy it into the app. The token will only be locally stored on this device.</string>
     <string name="auth_copy_instructions">Please copy the token you generated into the text box below.</string>
     <string name="token_hint">Token</string>
     <string name="auth_accept_token">Use token</string>
     <string name="token_invalid">Error: Token was invalid</string>
     <string name="content_hint">Item text</string>
     <string name="btn_add_item">Add item</string>
-    <string name="add_item_success">Item successfully added</string>
+    <string name="add_item_success">Item added to inbox</string>
     <string name="add_item_error">Failed to add item</string>
     <string name="process_text_action_name">Add To Inbox</string>
     <string name="bookmark_hint">Add the tag #quickdynalist, #inbox, or 📕 to items that should appear in this list. Updates might take a moment to take effect and require WIFI.</string>
