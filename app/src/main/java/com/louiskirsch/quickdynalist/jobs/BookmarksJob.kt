@@ -117,29 +117,27 @@ class Bookmark(val file_id: String?, var parent: String?, val id: String?, val n
         val dateFormat = DateFormat.getDateFormat(context)
         val timeFormat = DateFormat.getTimeFormat(context)
         val highlightPositions = ArrayList<IntRange>()
+        var offset = 0
         val newText = dateTimeRegex.replace(text) {
-            val start = it.range.start
+            val start = it.range.start + offset
             val date = dateReader.parse(it.groupValues[1])
             val replaceText = if (it.groupValues[2].isEmpty()) {
-                "📅  ${dateFormat.format(date)}"
+                "\uD83D\uDCC5 ${dateFormat.format(date)}"
             } else {
                 val time = timeReader.parse(it.groupValues[2])
-                "📅  ${dateFormat.format(date)} ${timeFormat.format(time)}"
+                "\uD83D\uDCC5 ${dateFormat.format(date)} ${timeFormat.format(time)}"
             }
-            val end = start + replaceText.length
+            val end = start + replaceText.length - 1
             // offsetting the bookmark
             highlightPositions.add(IntRange(start + 3, end))
+            offset += replaceText.length - it.range.size
             replaceText
         }
-        tagRegex.findAll(newText).forEach {
-            highlightPositions.add(it.groups[2]!!.range.let { range ->
-                IntRange(range.start, range.endInclusive + 1)
-            })
-        }
+        highlightPositions.addAll(tagRegex.findAll(newText).map { it.groups[2]!!.range })
         val spannable = SpannableString(newText)
         highlightPositions.forEach {
             val bg = BackgroundColorSpan(context.getColor(R.color.spanHighlight))
-            spannable.setSpan(bg, it.start, it.endInclusive, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+            spannable.setSpan(bg, it.start, it.endInclusive + 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         }
         return spannable
     }
@@ -191,6 +189,6 @@ class Bookmark(val file_id: String?, var parent: String?, val id: String?, val n
         private val dateReader = SimpleDateFormat("yyyy-MM-dd")
         private val timeReader = SimpleDateFormat("HH:mm")
         private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?\)""")
-        private val tagRegex = Regex("""(^| )(#[\d\w]+)($| )""")
+        private val tagRegex = Regex("""(^| )(#[\d\w_-]+)""")
     }
 }

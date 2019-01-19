@@ -22,3 +22,5 @@ fun Activity.fixedFinishAfterTransition() {
     }
     finishAfterTransition()
 }
+
+val IntRange.size: Int get() = endInclusive - start + 1
