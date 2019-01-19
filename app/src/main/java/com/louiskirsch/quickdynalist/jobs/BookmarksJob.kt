@@ -4,6 +4,7 @@ import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.CancelReason
 import com.birbit.android.jobqueue.Job
 import com.birbit.android.jobqueue.Params
+import com.louiskirsch.quickdynalist.BookmarkContentsUpdatedEvent
 import com.louiskirsch.quickdynalist.BookmarksUpdatedEvent
 import com.louiskirsch.quickdynalist.Dynalist
 import com.louiskirsch.quickdynalist.DynalistApp
@@ -12,6 +13,7 @@ import com.louiskirsch.quickdynalist.network.ReadDocumentRequest
 import org.greenrobot.eventbus.EventBus
 import org.jetbrains.annotations.Nullable
 import java.io.Serializable
+import java.util.*
 
 
 class BookmarksJob(val largest_k: Int = 9)
@@ -35,21 +37,28 @@ class BookmarksJob(val largest_k: Int = 9)
             (doc, content) -> content.map { Bookmark(doc.id, it.parent, it.id, it.content, it.note,
                 it.children ?: emptyList()) }
         }
-        val itemMap = candidates.associateBy { it.id!! }
+        val itemMap = candidates.associateBy { it.absoluteId!! }
         val itemByNameMap = candidates.groupBy { it.name }
+
+        // TEMPORARY FIX - MISTAKE IN API SPEC
+        candidates.forEach { it.fixParents(itemMap) }
 
         val previousInbox = dynalist.bookmarks.first { it.isInbox }
         val guessedParents = previousInbox.children.filter { it.id == null }
-                .flatMap { itemByNameMap[it.name]?.mapNotNull { match -> itemMap[match.parent] }
-                            ?: emptyList() }
+                .flatMap {
+                    itemByNameMap[it.name]?.mapNotNull { match ->
+                        itemMap[Pair(match.file_id, match.parent)]
+                    }
+                    ?: emptyList()
+                }
         val newInbox = guessedParents
                 .groupingBy { it }
                 .eachCount()
                 .maxBy { it.value } ?.key ?: previousInbox
-                .apply {
-                    isInbox = true
-                    populateChildren(itemMap)
-                }
+        newInbox.apply {
+            isInbox = true
+            populateChildren(itemMap)
+        }
 
 
         val markedItems = candidates.filter { it.markedAsBookmark }
@@ -64,7 +73,11 @@ class BookmarksJob(val largest_k: Int = 9)
 
         val bookmarksInclInbox = (listOf(newInbox) + bookmarks).toTypedArray()
         dynalist.bookmarks = bookmarksInclInbox
-        EventBus.getDefault().post(BookmarksUpdatedEvent(bookmarksInclInbox))
+        EventBus.getDefault().also {
+            it.post(BookmarksUpdatedEvent(bookmarksInclInbox))
+            bookmarksInclInbox.map { b -> it.post(BookmarkContentsUpdatedEvent(b)) }
+        }
+
     }
 
     override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {}
@@ -75,13 +88,16 @@ class BookmarksJob(val largest_k: Int = 9)
     }
 }
 
-class Bookmark(val file_id: String?, val parent: String?, val id: String?, val name: String,
+class Bookmark(val file_id: String?, var parent: String?, val id: String?, val name: String,
                val note: String, private val childrenIds: List<String>,
                var isInbox: Boolean = false) : Serializable {
 
+    val clientId = random.nextLong()
     var children: MutableList<Bookmark> = ArrayList()
 
-    override fun toString(): String {
+    override fun toString() = shortenedName
+
+    val shortenedName: String get() {
         val label = strippedMarkersName
         return if (label.length > 30)
             "${label.take(27)}..."
@@ -89,10 +105,21 @@ class Bookmark(val file_id: String?, val parent: String?, val id: String?, val n
             label
     }
 
-    fun populateChildren(itemMap: Map<String, Bookmark>, maxDepth: Int = 1) {
-        children = childrenIds.map { itemMap[it]!! } .toMutableList()
+    val absoluteId: Pair<String, String>? get() {
+        if (file_id == null || id == null)
+            return null
+        return Pair(file_id, id)
+    }
+
+    fun populateChildren(itemMap: Map<Pair<String, String>, Bookmark>, maxDepth: Int = 1) {
+        children = childrenIds.map { itemMap[Pair(file_id, it)]!! } .toMutableList()
         if (maxDepth > 1)
             children.forEach { it.populateChildren(itemMap, maxDepth - 1) }
+    }
+
+    fun fixParents(itemMap: Map<Pair<String, String>, Bookmark>) {
+        // TODO Currently the API does not send the parent according to the spec
+        childrenIds.forEach { itemMap[Pair(file_id, it)]!!.parent = id }
     }
 
     val childrenCount: Int
@@ -121,5 +148,6 @@ class Bookmark(val file_id: String?, val parent: String?, val id: String?, val n
         private val tagMarkers = listOf("#quickdynalist", "#inbox")
         private val emojiMarkers = listOf("📒", "📓", "📔", "📕", "📖", "📗", "📘", "📙")
         private val markers = tagMarkers + emojiMarkers
+        private val random = Random()
     }
 }

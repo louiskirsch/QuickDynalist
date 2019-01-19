@@ -24,4 +24,5 @@
     <string name="no_inbox_configured">There is no inbox configured. Please visit your Dynalist and select \"Set as inbox\" in the menu of an item. No panic, we will try to add this item again later.</string>
     <string name="dialog_title_error">Error</string>
     <string name="item_change_target_location">Change location</string>
+    <string name="open_item_list">Open item list</string>
 </resources>

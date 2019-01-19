@@ -70,7 +70,7 @@ class AdvancedItemActivity : Activity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item!!.itemId) {
             R.id.send_item -> sendItem()
-            R.id.discard_item -> cleanFinish()
+            R.id.discard_item -> fixedFinishAfterTransition()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -149,15 +149,7 @@ class AdvancedItemActivity : Activity() {
         }
         val contents = itemContents.text.toString() + dateString
         dynalist.addItem(contents, itemLocation.selectedItem as Bookmark, itemNotes.text.toString())
-        cleanFinish()
-    }
-
-    private fun cleanFinish() {
-        if (currentFocus != null) {
-            val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
-        }
-        finishAfterTransition()
+        fixedFinishAfterTransition()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

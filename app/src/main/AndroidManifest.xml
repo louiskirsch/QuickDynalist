@@ -60,7 +60,9 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <activity android:name=".AdvancedItemActivity"></activity>
+        <activity android:name=".AdvancedItemActivity" />
+        <activity android:name=".ItemListActivity"
+            android:parentActivityName=".MainActivity"></activity>
     </application>
 
 </manifest>

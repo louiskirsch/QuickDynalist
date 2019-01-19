@@ -13,6 +13,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import com.louiskirsch.quickdynalist.jobs.Bookmark
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import kotlinx.android.synthetic.main.activity_main.*
@@ -40,19 +41,32 @@ class MainActivity : Activity() {
         toolbar.inflateMenu(R.menu.quick_dialog_menu)
 
         toolbar.setOnMenuItemClickListener {
-            if (it.itemId == R.id.open_large) {
-                val intent = Intent(this, AdvancedItemActivity::class.java)
-                intent.putExtra(Intent.EXTRA_SUBJECT, itemLocation.selectedItemPosition)
-                intent.putExtra(Intent.EXTRA_TEXT, itemContents.text)
-                val transition = ActivityOptions.makeSceneTransitionAnimation(this,
-                        UtilPair.create(toolbar as View, "toolbar"),
-                        UtilPair.create(itemLocation as View, "itemLocation"),
-                        UtilPair.create(itemContents as View, "itemContents"))
-                startActivity(intent, transition.toBundle())
-                itemContents.text.clear()
-                return@setOnMenuItemClickListener true
+            when (it.itemId) {
+                R.id.open_item_list -> {
+                    val intent = Intent(this, ItemListActivity::class.java)
+                    val selectedBookmark = itemLocation.selectedItem as Bookmark
+                    intent.putExtra(ItemListActivity.EXTRA_BOOKMARK, selectedBookmark)
+                    intent.putExtra(Intent.EXTRA_TEXT, itemContents.text)
+                    val transition = ActivityOptions.makeSceneTransitionAnimation(this,
+                            UtilPair.create(toolbar as View, "toolbar"),
+                            UtilPair.create(itemContents as View, "itemContents"))
+                    startActivity(intent, transition.toBundle())
+                    itemContents.text.clear()
+                }
+                R.id.open_large -> {
+                    val intent = Intent(this, AdvancedItemActivity::class.java)
+                    intent.putExtra(Intent.EXTRA_SUBJECT, itemLocation.selectedItemPosition)
+                    intent.putExtra(Intent.EXTRA_TEXT, itemContents.text)
+                    val transition = ActivityOptions.makeSceneTransitionAnimation(this,
+                            UtilPair.create(toolbar as View, "toolbar"),
+                            UtilPair.create(itemLocation as View, "itemLocation"),
+                            UtilPair.create(itemContents as View, "itemContents"))
+                    startActivity(intent, transition.toBundle())
+                    itemContents.text.clear()
+                }
+                else -> return@setOnMenuItemClickListener false
             }
-            false
+            return@setOnMenuItemClickListener true
         }
 
         setupItemContentsTextField()
@@ -78,7 +92,7 @@ class MainActivity : Activity() {
         itemLocation!!.adapter = adapter
 
         val bookmarksOutdated = dynalist.lastBookmarkQuery.time <
-                Date().time - 5 * 60 * 1000L
+                Date().time - 60 * 1000L
         if (savedInstanceState == null && dynalist.isAuthenticated && bookmarksOutdated) {
             val jobManager = DynalistApp.instance.jobManager
             jobManager.addJobInBackground(BookmarksJob())
@@ -93,12 +107,7 @@ class MainActivity : Activity() {
 
     private fun setupItemContentsTextField() {
         with(itemContents!!) {
-            // These properties must be set programmatically because order of execution matters
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            setSingleLine(true)
-            maxLines = 5
-            setHorizontallyScrolling(false)
-            imeOptions = EditorInfo.IME_ACTION_DONE
+            setupGrowingMultiline(5)
             addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
 
@@ -110,7 +119,7 @@ class MainActivity : Activity() {
             })
             setOnEditorActionListener { _, actionId, _ ->
                 val isDone = actionId == EditorInfo.IME_ACTION_DONE
-                if (isDone) {
+                if (isDone && submitButton.isEnabled) {
                     submitButton!!.performClick()
                 }
                 isDone
