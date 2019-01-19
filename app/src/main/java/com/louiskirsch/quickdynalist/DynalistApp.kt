@@ -4,7 +4,10 @@ import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService
 import com.birbit.android.jobqueue.config.Configuration
 import android.app.Application
+import com.birbit.android.jobqueue.TagConstraint
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService.*
+import com.louiskirsch.quickdynalist.jobs.Bookmark
+import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.jobs.JobService
 import com.louiskirsch.quickdynalist.network.DynalistService
 import retrofit2.Retrofit
@@ -33,6 +36,17 @@ class DynalistApp : Application() {
                 .build()
 
         dynalistService = retrofit.create<DynalistService>(DynalistService::class.java)
+        upgrade()
+    }
+
+    private fun upgrade() {
+        val dynalist = Dynalist(applicationContext)
+        if (dynalist.preferencesVersion < 9) {
+            jobManager.cancelJobsInBackground({}, TagConstraint.ALL, emptyArray())
+            dynalist.bookmarks = arrayOf(Bookmark.newInbox())
+            jobManager.addJobInBackground(BookmarksJob())
+            dynalist.preferencesVersion = BuildConfig.VERSION_CODE
+        }
     }
 
     private fun createJobManager(): JobManager {

@@ -79,9 +79,8 @@ class ProcessTextActivity : AppCompatActivity() {
     private fun addItem() {
         Snackbar.make(window.decorView, R.string.add_item_success, Snackbar.LENGTH_SHORT).apply {
             setAction(R.string.item_change_target_location) {
-                val bookmarks = listOf(Bookmark.newInbox()) + dynalist.bookmarks
                 alert {
-                    items(bookmarks) { _: DialogInterface, selectedLocation: Bookmark, _: Int ->
+                    items(dynalist.bookmarks.toList()) { _, selectedLocation: Bookmark, _ ->
                         dynalist.addItem(text, selectedLocation)
                     }
                     onCancelled {

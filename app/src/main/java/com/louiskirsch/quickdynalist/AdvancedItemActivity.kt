@@ -35,9 +35,8 @@ class AdvancedItemActivity : Activity() {
 
         itemContents.setText(intent.getCharSequenceExtra(Intent.EXTRA_TEXT))
 
-        val bookmarks = arrayOf(Bookmark.newInbox()) + dynalist.bookmarks
         adapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, bookmarks.toMutableList())
+                android.R.layout.simple_spinner_item, dynalist.bookmarks.toMutableList())
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         itemLocation.adapter = adapter
         itemLocation.setSelection(intent.getIntExtra(Intent.EXTRA_SUBJECT, 0))
@@ -163,9 +162,8 @@ class AdvancedItemActivity : Activity() {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onBookmarksUpdated(event: BookmarksUpdatedEvent) {
-        val bookmarks = arrayOf(Bookmark.newInbox()) + event.newBookmarks
         adapter.clear()
-        adapter.addAll(bookmarks.toList())
+        adapter.addAll(event.newBookmarks.toList())
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

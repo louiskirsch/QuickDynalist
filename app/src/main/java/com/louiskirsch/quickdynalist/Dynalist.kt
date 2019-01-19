@@ -38,8 +38,16 @@ class Dynalist(private val context: Context) {
     val isAuthenticating: Boolean
         get() = authDialog != null
 
+    var preferencesVersion: Int
+        get() = preferences.getInt("PREFS_VERSION", 1)
+        set(version) = preferences.edit().putInt("PREFS_VERSION", version).apply()
+
     var bookmarks: Array<Bookmark>
-        get() = gson.fromJson(preferences.getString("BOOKMARKS", "[]"), Array<Bookmark>::class.java)
+        get() {
+            return preferences.getString("BOOKMARKS", null)?.let {
+                gson.fromJson(it, Array<Bookmark>::class.java)
+            } ?: arrayOf(Bookmark.newInbox())
+        }
         set(x) {
             val editor = preferences.edit()
             editor.putString("BOOKMARKS", gson.toJson(x))
