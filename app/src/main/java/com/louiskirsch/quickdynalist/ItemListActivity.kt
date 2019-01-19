@@ -34,7 +34,7 @@ class ItemListActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item_list)
-        actionBar.setDisplayHomeAsUpEnabled(true)
+        actionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
@@ -52,8 +52,6 @@ class ItemListActivity : Activity() {
         submitButton.isEnabled = itemContents.text.isNotEmpty()
 
         itemList.layoutManager = LinearLayoutManager(this)
-        val dividerItemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
-        itemList.addItemDecoration(dividerItemDecoration)
         adapter = ItemListAdapter(parent.children)
         itemList.adapter = adapter
     }

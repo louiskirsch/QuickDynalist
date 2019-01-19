@@ -1,18 +1,21 @@
 package com.louiskirsch.quickdynalist.jobs
 
+import android.content.Context
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.format.DateFormat
+import android.text.style.BackgroundColorSpan
 import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.CancelReason
 import com.birbit.android.jobqueue.Job
 import com.birbit.android.jobqueue.Params
-import com.louiskirsch.quickdynalist.BookmarkContentsUpdatedEvent
-import com.louiskirsch.quickdynalist.BookmarksUpdatedEvent
-import com.louiskirsch.quickdynalist.Dynalist
-import com.louiskirsch.quickdynalist.DynalistApp
+import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.AuthenticatedRequest
 import com.louiskirsch.quickdynalist.network.ReadDocumentRequest
 import org.greenrobot.eventbus.EventBus
 import org.jetbrains.annotations.Nullable
 import java.io.Serializable
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -54,7 +57,9 @@ class BookmarksJob(val largest_k: Int = 9)
         val newInbox = guessedParents
                 .groupingBy { it }
                 .eachCount()
-                .maxBy { it.value } ?.key ?: previousInbox
+                .maxBy { it.value } ?.key
+                    ?: previousInbox.absoluteId?.let { itemMap[it] }
+                    ?: previousInbox
         newInbox.apply {
             isInbox = true
             populateChildren(itemMap)
@@ -105,6 +110,40 @@ class Bookmark(val file_id: String?, var parent: String?, val id: String?, val n
             label
     }
 
+    fun getSpannableText(context: Context) = parseText(name, context)
+    fun getSpannableNotes(context: Context) = parseText(note, context)
+
+    private fun parseText(text: String, context: Context): SpannableString {
+        val dateFormat = DateFormat.getDateFormat(context)
+        val timeFormat = DateFormat.getTimeFormat(context)
+        val highlightPositions = ArrayList<IntRange>()
+        val newText = dateTimeRegex.replace(text) {
+            val start = it.range.start
+            val date = dateReader.parse(it.groupValues[1])
+            val replaceText = if (it.groupValues[2].isEmpty()) {
+                "📅  ${dateFormat.format(date)}"
+            } else {
+                val time = timeReader.parse(it.groupValues[2])
+                "📅  ${dateFormat.format(date)} ${timeFormat.format(time)}"
+            }
+            val end = start + replaceText.length
+            // offsetting the bookmark
+            highlightPositions.add(IntRange(start + 3, end))
+            replaceText
+        }
+        tagRegex.findAll(newText).forEach {
+            highlightPositions.add(it.groups[2]!!.range.let { range ->
+                IntRange(range.start, range.endInclusive + 1)
+            })
+        }
+        val spannable = SpannableString(newText)
+        highlightPositions.forEach {
+            val bg = BackgroundColorSpan(context.getColor(R.color.spanHighlight))
+            spannable.setSpan(bg, it.start, it.endInclusive, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        }
+        return spannable
+    }
+
     val absoluteId: Pair<String, String>? get() {
         if (file_id == null || id == null)
             return null
@@ -149,5 +188,9 @@ class Bookmark(val file_id: String?, var parent: String?, val id: String?, val n
         private val emojiMarkers = listOf("📒", "📓", "📔", "📕", "📖", "📗", "📘", "📙")
         private val markers = tagMarkers + emojiMarkers
         private val random = Random()
+        private val dateReader = SimpleDateFormat("yyyy-MM-dd")
+        private val timeReader = SimpleDateFormat("HH:mm")
+        private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?\)""")
+        private val tagRegex = Regex("""(^| )(#[\d\w]+)($| )""")
     }
 }

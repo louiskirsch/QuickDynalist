@@ -9,12 +9,13 @@ import com.louiskirsch.quickdynalist.jobs.Bookmark
 import kotlinx.android.synthetic.main.item_list_item.view.*
 
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-    val itemText = itemView.itemText
+    val itemText = itemView.itemText!!
+    val itemNotes = itemView.itemNotes!!
 }
 
 class ItemListAdapter(items: List<Bookmark>): RecyclerView.Adapter<ItemListViewHolder>() {
 
-    private val items = items.toMutableList()
+    private val items = items.filter { it.name.trim().isNotEmpty() }.toMutableList()
 
     init {
         setHasStableIds(true)
@@ -22,7 +23,7 @@ class ItemListAdapter(items: List<Bookmark>): RecyclerView.Adapter<ItemListViewH
 
     fun updateItems(newItems: List<Bookmark>) {
         items.clear()
-        items.addAll(newItems)
+        items.addAll(newItems.filter { it.name.trim().isNotEmpty() })
         notifyDataSetChanged()
     }
 
@@ -39,6 +40,10 @@ class ItemListAdapter(items: List<Bookmark>): RecyclerView.Adapter<ItemListViewH
     }
 
     override fun onBindViewHolder(holder: ItemListViewHolder, position: Int) {
-        holder.itemText.text = items[position].name
+        val text = items[position].getSpannableText(holder.itemText.context)
+        holder.itemText.text = text
+        val note = items[position].getSpannableNotes(holder.itemNotes.context)
+        holder.itemNotes.visibility = if (note.isEmpty()) View.GONE else View.VISIBLE
+        holder.itemNotes.text = note
     }
 }

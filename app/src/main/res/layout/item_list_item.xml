@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="8dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     
     <TextView
         android:id="@+id/itemText"
-        android:textSize="15sp"
-        android:padding="12dp"
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:autoLink="all"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/itemNotes"
+        android:textSize="12sp"
+        android:justificationMode="inter_word"
+        android:textColor="?android:attr/textColorSecondary"
+        android:autoLink="all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:targetApi="o" />
 
 </LinearLayout>
