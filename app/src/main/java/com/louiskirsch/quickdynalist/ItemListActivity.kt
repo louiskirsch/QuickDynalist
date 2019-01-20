@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
 import org.jetbrains.anko.alert
+import org.jetbrains.anko.browse
 import org.jetbrains.anko.okButton
 
 
@@ -99,13 +100,15 @@ class ItemListActivity : Activity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        if (parent.file_id != null && parent.id != null)
+            menuInflater.inflate(R.menu.item_list_activity_menu, menu)
         if (parent.isInbox && !parent.markedAsPrimaryInbox)
             menuInflater.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item!!.itemId) {
+        return when (item!!.itemId) {
             android.R.id.home -> {
                 // TODO actually I should use NavUtils here,
                 // but they don't have the transition magic
@@ -113,8 +116,14 @@ class ItemListActivity : Activity() {
                 return true
             }
             R.id.inbox_help -> showInboxHelp()
+            R.id.open_in_dynalist -> openInDynalist()
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
+    }
+
+    private fun openInDynalist(): Boolean {
+        browse("https://dynalist.io/d/${parent.file_id}#z=${parent.id}")
+        return true
     }
 
     private fun showInboxHelp(): Boolean {
