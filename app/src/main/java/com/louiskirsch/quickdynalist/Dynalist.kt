@@ -10,6 +10,7 @@ import android.widget.EditText
 import com.google.gson.Gson
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
 import com.louiskirsch.quickdynalist.jobs.Bookmark
+import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -55,11 +56,17 @@ class Dynalist(private val context: Context) {
             editor.apply()
         }
 
-    val lastBookmarkQuery: Date
+    private val lastBookmarkQuery: Date
         get() = Date(preferences.getLong("BOOKMARK_UPDATE", 0))
 
     fun subscribe() {
         EventBus.getDefault().register(this)
+
+        val bookmarksOutdated = lastBookmarkQuery.time < Date().time - 60 * 1000L
+        if (isAuthenticated && bookmarksOutdated) {
+            val jobManager = DynalistApp.instance.jobManager
+            jobManager.addJobInBackground(BookmarksJob())
+        }
     }
 
     fun unsubscribe() {

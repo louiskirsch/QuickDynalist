@@ -90,13 +90,6 @@ class MainActivity : Activity() {
                 android.R.layout.simple_spinner_item, dynalist.bookmarks.toMutableList())
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         itemLocation!!.adapter = adapter
-
-        val bookmarksOutdated = dynalist.lastBookmarkQuery.time <
-                Date().time - 60 * 1000L
-        if (savedInstanceState == null && dynalist.isAuthenticated && bookmarksOutdated) {
-            val jobManager = DynalistApp.instance.jobManager
-            jobManager.addJobInBackground(BookmarksJob())
-        }
     }
 
     override fun onStart() {
