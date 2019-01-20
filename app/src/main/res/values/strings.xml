@@ -25,4 +25,6 @@
     <string name="dialog_title_error">Error</string>
     <string name="item_change_target_location">Change location</string>
     <string name="open_item_list">Open item list</string>
+    <string name="inbox_help">About your primary inbox</string>
+    <string name="inbox_help_text">We are trying to detect your primary inbox automatically. If this does not work properly, please add the tags #primary #inbox to your inbox item.</string>
 </resources>

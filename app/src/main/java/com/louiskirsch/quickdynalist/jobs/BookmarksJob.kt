@@ -42,37 +42,40 @@ class BookmarksJob(val largest_k: Int = 9)
         }
         val itemMap = candidates.associateBy { it.absoluteId!! }
         val itemByNameMap = candidates.groupBy { it.name }
+        val markedItems = candidates.filter { it.markedAsBookmark }
 
         // TEMPORARY FIX - MISTAKE IN API SPEC
         candidates.forEach { it.fixParents(itemMap) }
 
-        val previousInbox = dynalist.bookmarks.first { it.isInbox }
-        val guessedParents = previousInbox.children.filter { it.id == null }
-                .flatMap {
-                    itemByNameMap[it.name]?.mapNotNull { match ->
-                        itemMap[Pair(match.file_id, match.parent)]
+        val newInbox: Bookmark = markedItems.firstOrNull { it.markedAsPrimaryInbox } ?: run {
+            val previousInbox = dynalist.bookmarks.first { it.isInbox }
+            val guessedParents = previousInbox.children.filter { it.id == null }
+                    .flatMap {
+                        itemByNameMap[it.name]?.mapNotNull { match ->
+                            itemMap[Pair(match.file_id, match.parent)]
+                        }
+                                ?: emptyList()
                     }
-                    ?: emptyList()
-                }
-        val newInbox = guessedParents
-                .groupingBy { it }
-                .eachCount()
-                .maxBy { it.value } ?.key
+            val guessedParentCounts = guessedParents.groupingBy { it }.eachCount()
+            val inbox = guessedParentCounts.maxBy { it.value }?.key
                     ?: previousInbox.absoluteId?.let { itemMap[it] }
                     ?: previousInbox
+            inbox.run {
+                Bookmark(file_id, parent, id, "\uD83D\uDCE5 Inbox", "",
+                        childrenIds, true)
+            }
+        }
         newInbox.apply {
             isInbox = true
             populateChildren(itemMap)
         }
 
-
-        val markedItems = candidates.filter { it.markedAsBookmark }
         val bookmarks = if (markedItems.isEmpty()) {
             candidates.filter { it.childrenCount > 10 && !it.mightBeInbox }
                     .sortedByDescending { it.childrenCount }
                     .take(largest_k)
         } else {
-            markedItems
+            markedItems.filter { !it.markedAsPrimaryInbox }
         }
         bookmarks.forEach { it.populateChildren(itemMap) }
 
@@ -94,7 +97,7 @@ class BookmarksJob(val largest_k: Int = 9)
 }
 
 class Bookmark(val file_id: String?, var parent: String?, val id: String?, val name: String,
-               val note: String, private val childrenIds: List<String>,
+               val note: String, val childrenIds: List<String>,
                var isInbox: Boolean = false) : Serializable {
 
     val clientId = random.nextLong()
@@ -164,6 +167,15 @@ class Bookmark(val file_id: String?, var parent: String?, val id: String?, val n
 
     val mightBeInbox: Boolean
         get() = name.toLowerCase() == "inbox"
+
+    private val tags: List<String> get() {
+        return listOf(name, note).flatMap {
+            tagRegex.findAll(it).map { m -> m.groupValues[2] } .toList()
+        }
+    }
+
+    val markedAsPrimaryInbox: Boolean
+        get() = markedAsBookmark && "#primary" in tags
 
     val markedAsBookmark: Boolean
         get() = emojiMarkers.any { name.contains(it, true)

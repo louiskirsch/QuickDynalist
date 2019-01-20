@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -19,6 +20,8 @@ import org.jetbrains.anko.toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.okButton
 
 
 class ItemListActivity : Activity() {
@@ -95,6 +98,12 @@ class ItemListActivity : Activity() {
         dynalist.unsubscribe()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        if (parent.isInbox && !parent.markedAsPrimaryInbox)
+            menuInflater.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item!!.itemId) {
             android.R.id.home -> {
@@ -103,8 +112,19 @@ class ItemListActivity : Activity() {
                 fixedFinishAfterTransition()
                 return true
             }
+            R.id.inbox_help -> showInboxHelp()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showInboxHelp(): Boolean {
+        alert {
+            titleResource = R.string.inbox_help
+            messageResource = R.string.inbox_help_text
+            okButton {}
+            show()
+        }
+        return true
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
