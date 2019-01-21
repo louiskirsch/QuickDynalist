@@ -1,7 +1,6 @@
 package com.louiskirsch.quickdynalist
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.DialogInterface
@@ -11,20 +10,22 @@ import android.text.format.DateFormat
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
-import com.louiskirsch.quickdynalist.jobs.Bookmark
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_advanced_item.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import org.jetbrains.anko.find
 import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AdvancedItemActivity : Activity() {
+class AdvancedItemActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
-    private lateinit var adapter: ArrayAdapter<Bookmark>
+    private lateinit var adapter: ArrayAdapter<DynalistItem>
     private val calendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,18 +37,19 @@ class AdvancedItemActivity : Activity() {
         itemContents.setText(intent.getCharSequenceExtra(Intent.EXTRA_TEXT))
 
         adapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, dynalist.bookmarks.toMutableList())
+                android.R.layout.simple_spinner_item, ArrayList())
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         itemLocation.adapter = adapter
         itemLocation.setSelection(intent.getIntExtra(Intent.EXTRA_SUBJECT, 0))
 
+        val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+        model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
+            adapter.clear()
+            adapter.addAll(it)
+        })
+
         setupDatePicker()
         setupTimePicker()
-    }
-
-    private val actionBarView: View get() {
-        val resId = resources.getIdentifier("action_bar_container", "id", "android")
-        return window.decorView.findViewById(resId) as View
     }
 
     override fun onStart() {
@@ -148,14 +150,8 @@ class AdvancedItemActivity : Activity() {
             ""
         }
         val contents = itemContents.text.toString() + dateString
-        dynalist.addItem(contents, itemLocation.selectedItem as Bookmark, itemNotes.text.toString())
+        dynalist.addItem(contents, itemLocation.selectedItem as DynalistItem, itemNotes.text.toString())
         fixedFinishAfterTransition()
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onBookmarksUpdated(event: BookmarksUpdatedEvent) {
-        adapter.clear()
-        adapter.addAll(event.newBookmarks.toList())
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

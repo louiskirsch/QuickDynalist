@@ -1,10 +1,10 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
 
         <!-- enable window content transitions -->
         <item name="android:windowActivityTransitions">true</item>
@@ -18,11 +18,11 @@
         <item name="android:windowSharedElementExitTransition">@transition/change_view_bounds</item>
     </style>
 
-    <style parent="android:style/Theme.Material.Light.Dialog.MinWidth" name="DialogAppTheme">
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
-        <item name="android:windowNoTitle">true</item>
+    <style parent="Theme.AppCompat.Light.Dialog.MinWidth" name="DialogAppTheme">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowNoTitle">true</item>
 
         <!-- enable window content transitions -->
         <item name="android:windowActivityTransitions">true</item>
@@ -37,7 +37,7 @@
     </style>
 
     <style parent="Theme.AppCompat.Light.NoActionBar" name="InvisibleTheme">
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsTranslucent">true</item>

@@ -1,28 +1,21 @@
 package com.louiskirsch.quickdynalist
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.EventLog
 import android.view.LayoutInflater
 import android.widget.EditText
 import com.google.gson.Gson
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
-import com.louiskirsch.quickdynalist.jobs.Bookmark
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.*
-import org.jetbrains.anko.custom.ankoView
-import org.json.JSONException
-import org.json.JSONObject
 import java.util.*
 
 class Dynalist(private val context: Context) {
-    val gson: Gson = Gson()
     var authDialog: AlertDialog? = null
     var errorDialogShown: Boolean = false
 
@@ -43,21 +36,9 @@ class Dynalist(private val context: Context) {
         get() = preferences.getInt("PREFS_VERSION", 1)
         set(version) = preferences.edit().putInt("PREFS_VERSION", version).apply()
 
-    var bookmarks: Array<Bookmark>
-        get() {
-            return preferences.getString("BOOKMARKS", null)?.let {
-                gson.fromJson(it, Array<Bookmark>::class.java)
-            } ?: arrayOf(Bookmark.newInbox())
-        }
-        set(x) {
-            val editor = preferences.edit()
-            editor.putString("BOOKMARKS", gson.toJson(x))
-            editor.putLong("BOOKMARK_UPDATE", Date().time)
-            editor.apply()
-        }
-
-    private val lastBookmarkQuery: Date
+    var lastBookmarkQuery: Date
         get() = Date(preferences.getLong("BOOKMARK_UPDATE", 0))
+        set(lastQuery) = preferences.edit().putLong("BOOKMARK_UPDATE", lastQuery.time).apply()
 
     fun subscribe() {
         EventBus.getDefault().register(this)
@@ -99,7 +80,7 @@ class Dynalist(private val context: Context) {
         }.show()
     }
 
-    fun addItem(contents: String, parent: Bookmark, note: String = "") {
+    fun addItem(contents: String, parent: DynalistItem, note: String = "") {
         val jobManager = DynalistApp.instance.jobManager
         val job = AddItemJob(contents, note, parent)
         jobManager.addJobInBackground(job)

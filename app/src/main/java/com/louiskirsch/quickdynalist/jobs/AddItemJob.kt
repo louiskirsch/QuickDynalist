@@ -9,24 +9,26 @@ import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.DynalistResponse
 import com.louiskirsch.quickdynalist.network.InboxRequest
 import com.louiskirsch.quickdynalist.network.InsertItemRequest
+import io.objectbox.Box
+import io.objectbox.kotlin.boxFor
+import org.jetbrains.anko.doAsync
 import org.jetbrains.annotations.Nullable
 import retrofit2.Response
 
 
-class AddItemJob(text: String, note: String, val parent: Bookmark)
+class AddItemJob(text: String, note: String, val parent: DynalistItem)
     : Job(Params(1).requireNetwork().persist().groupBy("add_item")) {
 
-    private val newItem = Bookmark(parent.file_id, parent.id, null, text, note, emptyList())
+    private val newItem = DynalistItem(parent.serverFileId, parent.serverItemId,
+            null, text, note)
 
     override fun onAdded() {
-        val dynalist = Dynalist(applicationContext)
-        val bookmarks = dynalist.bookmarks
-        val parent = bookmarks.first { it.id == parent.id }
-        parent.children.add(newItem)
-        dynalist.bookmarks = bookmarks
-
+        doAsync {
+            val box: Box<DynalistItem> = DynalistApp.instance.boxStore.boxFor()
+            newItem.parent.target = parent
+            box.put(newItem)
+        }
         EventBus.getDefault().post(ItemEvent(true))
-        EventBus.getDefault().post(BookmarkContentsUpdatedEvent(parent))
     }
 
     private fun insertAPIRequest(): Response<DynalistResponse> {
@@ -36,7 +38,7 @@ class AddItemJob(text: String, note: String, val parent: Bookmark)
         return if (parent.isInbox) {
             service.addToInbox(InboxRequest(newItem.name, newItem.note, token!!)).execute()
         } else {
-            val request = InsertItemRequest(parent.file_id!!, parent.id!!, newItem.name,
+            val request = InsertItemRequest(parent.serverFileId!!, parent.serverItemId!!, newItem.name,
                                             newItem.note, token!!)
             val call = service.addToDocument(request)
             call.execute()

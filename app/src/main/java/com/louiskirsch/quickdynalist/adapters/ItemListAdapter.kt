@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
-import com.louiskirsch.quickdynalist.jobs.Bookmark
+import com.louiskirsch.quickdynalist.DynalistItem
 import kotlinx.android.synthetic.main.item_list_item.view.*
 
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -13,7 +13,7 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemNotes = itemView.itemNotes!!
 }
 
-class ItemListAdapter(items: List<Bookmark>): RecyclerView.Adapter<ItemListViewHolder>() {
+class ItemListAdapter(items: List<DynalistItem>): RecyclerView.Adapter<ItemListViewHolder>() {
 
     private val items = items.filter { it.name.trim().isNotEmpty() }.toMutableList()
 
@@ -21,10 +21,18 @@ class ItemListAdapter(items: List<Bookmark>): RecyclerView.Adapter<ItemListViewH
         setHasStableIds(true)
     }
 
-    fun updateItems(newItems: List<Bookmark>) {
-        items.clear()
-        items.addAll(newItems.filter { it.name.trim().isNotEmpty() })
-        notifyDataSetChanged()
+    fun updateItems(newItems: List<DynalistItem>) {
+        val oldSize = items.size
+        val filtered = newItems.filter { it.name.trim().isNotEmpty() }
+        if (filtered.take(oldSize).map { getItemId(it) } == items.map { getItemId(it) } ) {
+            val newCount = filtered.size - items.size
+            items.addAll(filtered.takeLast(newCount))
+            notifyItemRangeInserted(oldSize, newCount)
+        } else {
+            items.clear()
+            items.addAll(filtered)
+            notifyDataSetChanged()
+        }
     }
 
     override fun getItemCount(): Int = items.size
@@ -34,10 +42,11 @@ class ItemListAdapter(items: List<Bookmark>): RecyclerView.Adapter<ItemListViewH
         return ItemListViewHolder(inflater.inflate(R.layout.item_list_item, parent, false))
     }
 
-    override fun getItemId(position: Int): Long {
-        val item = items[position]
-        return item.id?.hashCode()?.toLong() ?: item.clientId
+    private fun getItemId(item: DynalistItem): Long {
+        return item.serverItemId?.hashCode()?.toLong() ?: item.clientId
     }
+
+    override fun getItemId(position: Int): Long = getItemId(items[position])
 
     override fun onBindViewHolder(holder: ItemListViewHolder, position: Int) {
         val text = items[position].getSpannableText(holder.itemText.context)

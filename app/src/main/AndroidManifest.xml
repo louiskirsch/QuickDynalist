@@ -16,7 +16,7 @@
         <service
             android:name=".jobs.JobService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        `
+
         <activity
             android:name=".MainActivity"
             android:theme="@style/DialogAppTheme"

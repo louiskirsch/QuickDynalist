@@ -1,0 +1,64 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:1068626277769387505",
+      "lastPropertyId": "9:4447078028805895463",
+      "name": "DynalistItem",
+      "properties": [
+        {
+          "id": "1:1823682919193310959",
+          "name": "clientId"
+        },
+        {
+          "id": "2:7891431997655942839",
+          "name": "serverFileId"
+        },
+        {
+          "id": "3:4804587294240104775",
+          "indexId": "2:3343546374775209800",
+          "name": "serverParentId"
+        },
+        {
+          "id": "4:2764160025147172571",
+          "name": "serverItemId"
+        },
+        {
+          "id": "5:7146737104766950179",
+          "name": "name"
+        },
+        {
+          "id": "6:8887104954461481127",
+          "name": "note"
+        },
+        {
+          "id": "7:3400637193653813728",
+          "name": "isInbox"
+        },
+        {
+          "id": "8:5862936270318446234",
+          "indexId": "1:9141593498166772183",
+          "name": "parentId"
+        },
+        {
+          "id": "9:4447078028805895463",
+          "name": "isBookmark"
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:1068626277769387505",
+  "lastIndexId": "2:3343546374775209800",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 4,
+  "modelVersionParserMinimum": 4,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

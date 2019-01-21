@@ -6,20 +6,20 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:transitionName="toolbar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:title="@string/app_name"
+        app:title="@string/app_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/colorPrimary"
-        android:titleTextColor="?android:attr/textColorPrimaryInverse"
+        app:titleTextColor="?android:attr/textColorPrimaryInverse"
         android:minHeight="?android:attr/actionBarSize"
-        android:theme="@style/AppTheme"
-        android:popupTheme="@style/DialogAppTheme" />
+        app:theme="@style/AppTheme"
+        app:popupTheme="@style/DialogAppTheme" />
 
     <Spinner
         android:id="@+id/itemLocation"

@@ -7,26 +7,28 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
-import android.text.InputType
 import android.text.TextWatcher
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
-import android.widget.EditText
-import com.louiskirsch.quickdynalist.jobs.Bookmark
-import com.louiskirsch.quickdynalist.jobs.BookmarksJob
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.*
-import java.util.*
+import java.io.ByteArrayOutputStream
+import java.io.ObjectOutputStream
 import android.util.Pair as UtilPair
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
-    private lateinit var adapter: ArrayAdapter<Bookmark>
+    private lateinit var adapter: ArrayAdapter<DynalistItem>
 
     private val preferences: SharedPreferences
         get() = getSharedPreferences("MAIN_ACTIVITY", Context.MODE_PRIVATE)
@@ -43,10 +45,13 @@ class MainActivity : Activity() {
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.open_item_list -> {
+                    val bundle = Bundle()
+                    val selectedBookmark = itemLocation.selectedItem as DynalistItem
+                    bundle.putParcelable(ItemListActivity.EXTRA_BOOKMARK, selectedBookmark)
+                    bundle.putString(Intent.EXTRA_TEXT, itemContents.text.toString())
+
                     val intent = Intent(this, ItemListActivity::class.java)
-                    val selectedBookmark = itemLocation.selectedItem as Bookmark
-                    intent.putExtra(ItemListActivity.EXTRA_BOOKMARK, selectedBookmark)
-                    intent.putExtra(Intent.EXTRA_TEXT, itemContents.text)
+                    intent.putExtras(bundle)
                     val transition = ActivityOptions.makeSceneTransitionAnimation(this,
                             UtilPair.create(toolbar as View, "toolbar"),
                             UtilPair.create(itemContents as View, "itemContents"))
@@ -73,7 +78,7 @@ class MainActivity : Activity() {
 
         submitButton!!.setOnClickListener {
             dynalist.addItem(itemContents!!.text.toString(),
-                    itemLocation!!.selectedItem as Bookmark)
+                    itemLocation!!.selectedItem as DynalistItem)
             itemContents!!.text.clear()
         }
 
@@ -87,9 +92,15 @@ class MainActivity : Activity() {
         }
 
         adapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, dynalist.bookmarks.toMutableList())
+                android.R.layout.simple_spinner_item, ArrayList())
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         itemLocation!!.adapter = adapter
+
+        val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+        model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
+            adapter.clear()
+            adapter.addAll(it)
+        })
     }
 
     override fun onStart() {
@@ -139,12 +150,6 @@ class MainActivity : Activity() {
     private fun updateSubmitEnabled() {
         val enabled = dynalist.isAuthenticated && !itemContents!!.text.toString().isEmpty()
         submitButton!!.isEnabled = enabled
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onBookmarksUpdated(event: BookmarksUpdatedEvent) {
-        adapter.clear()
-        adapter.addAll(event.newBookmarks.toList())
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

@@ -28,4 +28,5 @@
     <string name="inbox_help">About your primary inbox</string>
     <string name="inbox_help_text">We are trying to detect your primary inbox automatically. If this does not work properly, please add the tags #primary #inbox to your inbox item.</string>
     <string name="open_in_dynalist">Open in dynalist</string>
+    <string name="invalid_intent_error">Sorry. We can\'t add this item to your Dynalist.</string>
 </resources>

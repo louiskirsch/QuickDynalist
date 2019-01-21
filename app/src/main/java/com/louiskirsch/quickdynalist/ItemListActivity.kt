@@ -1,6 +1,5 @@
 package com.louiskirsch.quickdynalist
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -9,26 +8,25 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
-import androidx.core.app.NavUtils
-import com.louiskirsch.quickdynalist.jobs.Bookmark
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_item_list.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import org.jetbrains.anko.toast
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.browse
-import org.jetbrains.anko.okButton
+import io.objectbox.Box
+import io.objectbox.kotlin.boxFor
+import org.jetbrains.anko.*
 
 
-class ItemListActivity : Activity() {
+class ItemListActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
 
-    lateinit var parent: Bookmark
+    lateinit var parent: DynalistItem
     lateinit var adapter: ItemListAdapter
 
     companion object {
@@ -38,13 +36,13 @@ class ItemListActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item_list)
-        actionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
         itemContents.setText(intent.getCharSequenceExtra(Intent.EXTRA_TEXT))
-        parent = intent.getSerializableExtra(EXTRA_BOOKMARK) as Bookmark
-        parent = dynalist.bookmarks.first { it.id == parent.id }
+
+        parent = intent.getParcelableExtra(EXTRA_BOOKMARK) as DynalistItem
         title = parent.shortenedName
 
         setupItemContentsTextField()
@@ -56,8 +54,20 @@ class ItemListActivity : Activity() {
         submitButton.isEnabled = itemContents.text.isNotEmpty()
 
         itemList.layoutManager = LinearLayoutManager(this)
-        adapter = ItemListAdapter(parent.children)
+        adapter = ItemListAdapter(emptyList()).apply {
+            registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    if (itemCount == 1)
+                        itemList.scrollToPosition(positionStart)
+                }
+            })
+        }
         itemList.adapter = adapter
+
+        val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+        model.getItemsLiveData(parent).observe(this, Observer<List<DynalistItem>> {
+            adapter.updateItems(it)
+        })
     }
 
     private fun setupItemContentsTextField() {
@@ -82,11 +92,6 @@ class ItemListActivity : Activity() {
         }
     }
 
-    private val actionBarView: View get() {
-        val resId = resources.getIdentifier("action_bar_container", "id", "android")
-        return window.decorView.findViewById(resId) as View
-    }
-
     override fun onStart() {
         super.onStart()
         EventBus.getDefault().register(this)
@@ -100,7 +105,7 @@ class ItemListActivity : Activity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        if (parent.file_id != null && parent.id != null)
+        if (parent.serverFileId != null && parent.serverItemId != null)
             menuInflater.inflate(R.menu.item_list_activity_menu, menu)
         if (parent.isInbox && !parent.markedAsPrimaryInbox)
             menuInflater.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
@@ -122,7 +127,7 @@ class ItemListActivity : Activity() {
     }
 
     private fun openInDynalist(): Boolean {
-        browse("https://dynalist.io/d/${parent.file_id}#z=${parent.id}")
+        browse("https://dynalist.io/d/${parent.serverFileId}#z=${parent.serverItemId}")
         return true
     }
 
@@ -134,15 +139,6 @@ class ItemListActivity : Activity() {
             show()
         }
         return true
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onBookmarkContentsUpdatedEvent(event: BookmarkContentsUpdatedEvent) {
-        if (event.bookmark.id == parent.id) {
-            parent = event.bookmark
-            adapter.updateItems(parent.children)
-            itemList.smoothScrollToPosition(adapter.itemCount - 1)
-        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
