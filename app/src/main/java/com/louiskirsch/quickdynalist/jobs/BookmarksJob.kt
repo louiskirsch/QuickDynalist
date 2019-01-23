@@ -26,17 +26,36 @@ class BookmarksJob(private val largest_k: Int = 9)
         val service = DynalistApp.instance.dynalistService
         val box: Box<DynalistItem> = DynalistApp.instance.boxStore.boxFor()
 
+        // TODO sync all contents properly
+        // Query from server
         val files = service.listFiles(AuthenticatedRequest(token!!)).execute().body()!!.files!!
         val documents = files.filter { it.isDocument && it.isEditable }
         val contents = documents.map {
             service.readDocument(ReadDocumentRequest(it.id!!, token)).execute().body()!!.nodes!!
         }
 
+        // Query from local database
+        val clientItems = box.query{}.find()
+        val previousInbox = box.query { equal(DynalistItem_.isInbox, true) } .findUnique()!!
+        val clientItemsById = clientItems.associateBy { it.serverAbsoluteId }
+        val clientItemsByName = clientItems.associateBy { it.name }
+        val notAssociatedClientItems = clientItems.toMutableSet()
+        notAssociatedClientItems.remove(previousInbox)
+
+        // Transform server data
         val candidates = documents.zip(contents).flatMap {
             (doc, content) -> content.map {
-            DynalistItem(doc.id, it.parent, it.id, it.content, it.note,
-                    it.children ?: emptyList())
-        }
+                DynalistItem(doc.id, it.parent, it.id, it.content, it.note,
+                        it.children ?: emptyList()).apply {
+                    (clientItemsById[serverAbsoluteId] ?: clientItemsByName[name])?.let { clientItem ->
+                        if (clientItem in notAssociatedClientItems) {
+                            clientId = clientItem.clientId
+                            box.attach(this)
+                            notAssociatedClientItems.remove(clientItem)
+                        }
+                    }
+                }
+            }
         }
         val itemMap = candidates.associateBy { it.serverAbsoluteId!! }
         val itemByNameMap = candidates.groupBy { it.name }
@@ -45,9 +64,8 @@ class BookmarksJob(private val largest_k: Int = 9)
         // TEMPORARY FIX - MISTAKE IN API SPEC
         candidates.forEach { it.fixParents(itemMap) }
 
+        // Find old inbox
         val newInbox: DynalistItem = markedItems.firstOrNull { it.markedAsPrimaryInbox } ?: run {
-            val previousInbox = box.query { equal(DynalistItem_.isInbox, true) }
-                                    .findUnique()!!
             val guessedParents = previousInbox.children.filter { it.serverItemId == null }
                     .flatMap {
                         itemByNameMap[it.name]?.mapNotNull { match ->
@@ -62,15 +80,18 @@ class BookmarksJob(private val largest_k: Int = 9)
             inbox.run {
                 DynalistItem(serverFileId, serverParentId, serverItemId,
                         "\uD83D\uDCE5 Inbox", "",
-                        childrenIds ?: emptyList(), true)
+                        childrenIds ?: emptyList())
             }
         }
         newInbox.apply {
+            clientId = previousInbox.clientId
             isInbox = true
             isBookmark = true
+            box.attach(this)
             populateChildren(itemMap)
         }
 
+        // Define bookmarks
         val bookmarks = if (markedItems.isEmpty()) {
             candidates.filter { it.childrenCount > 10 && !it.mightBeInbox }
                     .sortedByDescending { it.childrenCount }
@@ -83,8 +104,10 @@ class BookmarksJob(private val largest_k: Int = 9)
             it.populateChildren(itemMap)
         }
 
+        // Store new items in database
         DynalistApp.instance.boxStore.runInTx {
-            box.removeAll()
+            box.remove(notAssociatedClientItems)
+            box.put(clientItems - notAssociatedClientItems)
             box.put(listOf(newInbox) + bookmarks)
         }
         dynalist.lastBookmarkQuery = Date()

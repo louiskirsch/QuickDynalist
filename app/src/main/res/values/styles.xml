@@ -14,11 +14,12 @@
         <item name="android:windowExitTransition">@android:transition/explode</item>
 
         <!-- specify shared element transitions -->
-        <item name="android:windowSharedElementEnterTransition">@transition/change_view_bounds</item>
+        <item name="android:windowSharedElementEnterTransition">@transition/change_view_bounds
+        </item>
         <item name="android:windowSharedElementExitTransition">@transition/change_view_bounds</item>
     </style>
 
-    <style parent="Theme.AppCompat.Light.Dialog.MinWidth" name="DialogAppTheme">
+    <style name="DialogAppTheme" parent="Theme.AppCompat.Light.Dialog.MinWidth">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -32,11 +33,12 @@
         <item name="android:windowExitTransition">@android:transition/explode</item>
 
         <!-- specify shared element transitions -->
-        <item name="android:windowSharedElementEnterTransition">@transition/change_view_bounds</item>
+        <item name="android:windowSharedElementEnterTransition">@transition/change_view_bounds
+        </item>
         <item name="android:windowSharedElementExitTransition">@transition/change_view_bounds</item>
     </style>
 
-    <style parent="Theme.AppCompat.Light.NoActionBar" name="InvisibleTheme">
+    <style name="InvisibleTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -46,5 +48,15 @@
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
+
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

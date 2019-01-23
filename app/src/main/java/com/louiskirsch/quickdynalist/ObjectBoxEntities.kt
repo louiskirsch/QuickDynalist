@@ -24,6 +24,7 @@ class DynalistItem(val serverFileId: String?, @Index var serverParentId: String?
     constructor() : this(null, null, null, "", "")
 
     @Id var clientId: Long = 0
+    var position: Int = 0
 
     val serverAbsoluteId: Pair<String, String>?
         get() = Pair(serverFileId, serverItemId).selfNotNull
@@ -76,7 +77,9 @@ class DynalistItem(val serverFileId: String?, @Index var serverParentId: String?
 
     fun populateChildren(itemMap: Map<Pair<String, String>, DynalistItem>, maxDepth: Int = 1) {
         children.clear()
-        children.addAll(childrenIds!!.map { itemMap[Pair(serverFileId, it)]!! })
+        children.addAll(childrenIds!!.mapIndexed { idx, childId ->
+            itemMap[Pair(serverFileId, childId)]!!.apply { position = idx }
+        })
         if (maxDepth > 1)
             children.forEach { it.populateChildren(itemMap, maxDepth - 1) }
     }
@@ -140,7 +143,10 @@ class DynalistItem(val serverFileId: String?, @Index var serverParentId: String?
                             childrenIds = ArrayList<String>().also { readStringList(it) },
                             isInbox = readInt() > 0,
                             isBookmark = readInt() > 0
-                    ).apply { clientId = readLong() }
+                    ).apply {
+                        clientId = readLong()
+                        position = readInt()
+                    }
                 }
             }
             override fun newArray(size: Int) = arrayOfNulls<DynalistItem>(size)
@@ -158,6 +164,7 @@ class DynalistItem(val serverFileId: String?, @Index var serverParentId: String?
             writeInt(isInbox.int)
             writeInt(isBookmark.int)
             writeLong(clientId)
+            writeInt(position)
         }
     }
 

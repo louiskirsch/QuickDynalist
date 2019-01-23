@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ItemListActivity">
+    tools:context=".ItemListFragment">
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -28,6 +28,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/itemList"
         app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageButton
+            android:id="@+id/advancedItemButton"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:text="@string/advanced_item"
+            android:src="@drawable/ic_action_advanced_item" />
 
         <EditText
             android:id="@+id/itemContents"

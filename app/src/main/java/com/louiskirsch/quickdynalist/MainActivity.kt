@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MotionEvent
@@ -22,8 +23,6 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.*
-import java.io.ByteArrayOutputStream
-import java.io.ObjectOutputStream
 import android.util.Pair as UtilPair
 
 class MainActivity : AppCompatActivity() {
@@ -47,10 +46,10 @@ class MainActivity : AppCompatActivity() {
                 R.id.open_item_list -> {
                     val bundle = Bundle()
                     val selectedBookmark = itemLocation.selectedItem as DynalistItem
-                    bundle.putParcelable(ItemListActivity.EXTRA_BOOKMARK, selectedBookmark)
-                    bundle.putString(Intent.EXTRA_TEXT, itemContents.text.toString())
+                    bundle.putParcelable(NavigationActivity.EXTRA_DISPLAY_ITEM, selectedBookmark)
+                    bundle.putString(NavigationActivity.EXTRA_ITEM_TEXT, itemContents.text.toString())
 
-                    val intent = Intent(this, ItemListActivity::class.java)
+                    val intent = Intent(this, NavigationActivity::class.java)
                     intent.putExtras(bundle)
                     val transition = ActivityOptions.makeSceneTransitionAnimation(this,
                             UtilPair.create(toolbar as View, "toolbar"),
@@ -60,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.open_large -> {
                     val intent = Intent(this, AdvancedItemActivity::class.java)
-                    intent.putExtra(Intent.EXTRA_SUBJECT, itemLocation.selectedItemPosition)
+                    intent.putExtra(Intent.EXTRA_SUBJECT, itemLocation.selectedItem as Parcelable)
                     intent.putExtra(Intent.EXTRA_TEXT, itemContents.text)
                     val transition = ActivityOptions.makeSceneTransitionAnimation(this,
                             UtilPair.create(toolbar as View, "toolbar"),

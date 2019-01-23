@@ -18,8 +18,7 @@ import kotlinx.android.synthetic.main.activity_advanced_item.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import org.jetbrains.anko.find
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,6 +30,7 @@ class AdvancedItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_advanced_item)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
@@ -40,12 +40,17 @@ class AdvancedItemActivity : AppCompatActivity() {
                 android.R.layout.simple_spinner_item, ArrayList())
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         itemLocation.adapter = adapter
-        itemLocation.setSelection(intent.getIntExtra(Intent.EXTRA_SUBJECT, 0))
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
+            val initializing = adapter.count == 0
             adapter.clear()
             adapter.addAll(it)
+            if (initializing) {
+                val location: DynalistItem = intent.getParcelableExtra(Intent.EXTRA_SUBJECT)
+                val index = it.indexOfFirst { item -> item.clientId == location.clientId }
+                itemLocation.setSelection(if (index >= 0) index else 0)
+            }
         })
 
         setupDatePicker()
@@ -70,11 +75,27 @@ class AdvancedItemActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item!!.itemId) {
+        return when (item!!.itemId) {
+            android.R.id.home -> if (itemContents.text.isNotEmpty()) askDiscard() else discard()
             R.id.send_item -> sendItem()
-            R.id.discard_item -> fixedFinishAfterTransition()
+            R.id.discard_item -> discard()
+            else -> return super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
+    }
+
+    private fun askDiscard(): Boolean {
+        alert {
+            messageResource = R.string.dialog_ask_discard
+            noButton { }
+            yesButton { discard() }
+            show()
+        }
+        return true
+    }
+
+    private fun discard(): Boolean {
+        fixedFinishAfterTransition()
+        return true
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -130,14 +151,14 @@ class AdvancedItemActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun sendItem() {
+    private fun sendItem(): Boolean {
         if (itemContents.text.isEmpty()) {
             itemContents.error = getString(R.string.item_contents_required)
-            return
+            return true
         }
         if (itemTime.text.isNotEmpty() && itemDate.text.isEmpty()) {
             itemDate.error = getText(R.string.item_date_required)
-            return
+            return true
         }
 
         val dateString = if (itemDate.text.isNotEmpty() && itemTime.text.isNotEmpty()) {
@@ -152,6 +173,7 @@ class AdvancedItemActivity : AppCompatActivity() {
         val contents = itemContents.text.toString() + dateString
         dynalist.addItem(contents, itemLocation.selectedItem as DynalistItem, itemNotes.text.toString())
         fixedFinishAfterTransition()
+        return true
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.objectbox.Box
 import io.objectbox.android.ObjectBoxLiveData
@@ -25,14 +26,14 @@ class DynalistItemViewModel: ViewModel() {
         if(this.parent != parent) {
             this.parent = parent
             itemsLiveData = ObjectBoxLiveData(box.query {
-                equal(DynalistItem_.serverParentId, parent.serverItemId!!)
-                and()
-                if (parent.serverFileId == null)
-                    isNull(DynalistItem_.serverFileId)
-                else
-                    equal(DynalistItem_.serverFileId, parent.serverFileId)
+                equal(DynalistItem_.parentId, parent.clientId)
+                order(DynalistItem_.position)
             })
         }
         return itemsLiveData
     }
+}
+
+class ItemListFragmentViewModel: ViewModel() {
+    val selectedBookmark = MutableLiveData<DynalistItem>()
 }

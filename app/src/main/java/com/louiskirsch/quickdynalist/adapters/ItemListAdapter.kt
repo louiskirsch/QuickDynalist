@@ -43,7 +43,7 @@ class ItemListAdapter(items: List<DynalistItem>): RecyclerView.Adapter<ItemListV
     }
 
     private fun getItemId(item: DynalistItem): Long {
-        return item.serverItemId?.hashCode()?.toLong() ?: item.clientId
+        return item.clientId
     }
 
     override fun getItemId(position: Int): Long = getItemId(items[position])

@@ -25,8 +25,13 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem)
     override fun onAdded() {
         doAsync {
             val box: Box<DynalistItem> = DynalistApp.instance.boxStore.boxFor()
-            newItem.parent.target = parent
-            box.put(newItem)
+            DynalistApp.instance.boxStore.runInTx {
+                box.get(parent.clientId)?.let { parent ->
+                    newItem.position = parent.children.size
+                    newItem.parent.target = parent
+                    box.put(newItem)
+                }
+            }
         }
         EventBus.getDefault().post(ItemEvent(true))
     }
