@@ -108,26 +108,16 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         get() = markedAsBookmark && "#primary" in tags
 
     val markedAsBookmark: Boolean
-        get() = emojiMarkers.any { name.contains(it, true)
-                                || note.contains(it, true) } ||
-                tagMarkers.any   { name.contains(" $it", true)
-                                || name.startsWith(it, true)
-                                || note.contains(" $it", true)
-                                || note.startsWith(it, true) }
+        get() = tagMarkers.any { it in tags }
 
     private val strippedMarkersName: String
-        get() = markers.fold(name) { acc, marker ->
-            acc.replace(marker, "", true) }
-                .replace("# ", "")
-                .trim()
+        get() = tagMarkers.fold(name) { acc, marker ->
+            acc.replace(marker, "", true) } .trim()
 
     companion object {
         fun newInbox() = DynalistItem(null, null, "inbox",
                 "\uD83D\uDCE5 Inbox", "", emptyList(), isInbox = true, isBookmark = true)
         private val tagMarkers = listOf("#quickdynalist", "#inbox")
-        private val emojiMarkers = listOf("📒", "📓", "📔", "📕", "📖", "📗", "📘", "📙")
-        private val markers = tagMarkers + emojiMarkers
-        private val random = Random()
         private val dateReader = SimpleDateFormat("yyyy-MM-dd")
         private val timeReader = SimpleDateFormat("HH:mm")
         private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?\)""")
