@@ -1,7 +1,6 @@
 package com.louiskirsch.quickdynalist
 
 
-import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
@@ -10,20 +9,17 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.browse
-import org.jetbrains.anko.okButton
+import org.jetbrains.anko.*
 import android.util.Pair as UtilPair
 
 
@@ -44,7 +40,7 @@ class ItemListFragment : Fragment() {
         }
         setHasOptionsMenu(true)
 
-        adapter = ItemListAdapter(emptyList()).apply {
+        adapter = ItemListAdapter().apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (itemCount == 1)
@@ -54,8 +50,14 @@ class ItemListFragment : Fragment() {
         }
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.getItemsLiveData(parent).observe(this, Observer<List<DynalistItem>> {
-            adapter.updateItems(it)
+        model.getItemsLiveData(parent).observe(this, Observer<List<DynalistItem>> { items ->
+            doAsync {
+                items.forEach { item -> item.children.sortBy { child -> child.position } }
+                val cachedItems = items.map { CachedDynalistItem(it, context!!) }
+                uiThread {
+                    adapter.updateItems(cachedItems)
+                }
+            }
         })
     }
 

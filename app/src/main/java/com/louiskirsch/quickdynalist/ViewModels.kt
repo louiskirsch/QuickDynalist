@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import io.objectbox.Box
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
-import io.objectbox.kotlin.inValues
 import io.objectbox.kotlin.query
 
 class DynalistItemViewModel: ViewModel() {
@@ -29,6 +28,8 @@ class DynalistItemViewModel: ViewModel() {
             this.parent = parent
             itemsLiveData = ObjectBoxLiveData(box.query {
                 equal(DynalistItem_.parentId, parent.clientId)
+                and()
+                notEqual(DynalistItem_.name, "")
                 order(DynalistItem_.position)
                 eager(20, DynalistItem_.children)
             })
