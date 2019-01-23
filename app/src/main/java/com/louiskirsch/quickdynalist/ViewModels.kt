@@ -30,6 +30,7 @@ class DynalistItemViewModel: ViewModel() {
             itemsLiveData = ObjectBoxLiveData(box.query {
                 equal(DynalistItem_.parentId, parent.clientId)
                 order(DynalistItem_.position)
+                eager(20, DynalistItem_.children)
             })
         }
         return itemsLiveData

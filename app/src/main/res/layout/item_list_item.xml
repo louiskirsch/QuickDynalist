@@ -17,11 +17,21 @@
     <TextView
         android:id="@+id/itemNotes"
         android:textSize="12sp"
-        android:justificationMode="inter_word"
         android:textColor="?android:attr/textColorSecondary"
         android:autoLink="all"
+        android:maxLines="2"
+        android:ellipsize="end"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:targetApi="o" />
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/itemChildren"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:autoLink="all"
+        android:maxLines="5"
+        android:ellipsize="end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

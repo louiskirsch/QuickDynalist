@@ -5,8 +5,10 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.TextUtils
 import android.text.format.DateFormat
 import android.text.style.BackgroundColorSpan
+import android.text.style.BulletSpan
 import io.objectbox.annotation.*
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
@@ -52,6 +54,15 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
 
     fun getSpannableText(context: Context) = parseText(name, context)
     fun getSpannableNotes(context: Context) = parseText(note, context)
+
+    fun getBulletedChildren(context: Context): CharSequence {
+        return TextUtils.concat(*children.sortedBy { it.position } .mapIndexed { idx, child ->
+            child.getSpannableText(context).run {
+                setSpan(BulletSpan(15), 0, length, 0)
+                if (idx == children.size - 1) this else TextUtils.concat(this, "\n")
+            }
+        }.toTypedArray())
+    }
 
     private fun parseText(text: String, context: Context): SpannableString {
         val dateFormat = DateFormat.getDateFormat(context)

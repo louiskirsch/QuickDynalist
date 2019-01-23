@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist.adapters
 
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import kotlinx.android.synthetic.main.item_list_item.view.*
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemText = itemView.itemText!!
     val itemNotes = itemView.itemNotes!!
+    val itemChildren = itemView.itemChildren!!
 }
 
 class ItemListAdapter(items: List<DynalistItem>): RecyclerView.Adapter<ItemListViewHolder>() {
@@ -49,10 +51,14 @@ class ItemListAdapter(items: List<DynalistItem>): RecyclerView.Adapter<ItemListV
     override fun getItemId(position: Int): Long = getItemId(items[position])
 
     override fun onBindViewHolder(holder: ItemListViewHolder, position: Int) {
-        val text = items[position].getSpannableText(holder.itemText.context)
+        val item = items[position]
+        val text = item.getSpannableText(holder.itemText.context)
         holder.itemText.text = text
-        val note = items[position].getSpannableNotes(holder.itemNotes.context)
+        val note = item.getSpannableNotes(holder.itemNotes.context)
         holder.itemNotes.visibility = if (note.isEmpty()) View.GONE else View.VISIBLE
         holder.itemNotes.text = note
+        val children = item.getBulletedChildren(holder.itemNotes.context)
+        holder.itemChildren.visibility = if (children.isEmpty()) View.GONE else View.VISIBLE
+        holder.itemChildren.text = children
     }
 }
