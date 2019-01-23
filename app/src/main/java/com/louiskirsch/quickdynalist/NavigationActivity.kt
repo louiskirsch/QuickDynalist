@@ -116,6 +116,8 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                     .commit()
             itemText.clear()
         }
+        if (item.itemId == R.id.open_quick_dialog)
+            fixedFinishAfterTransition()
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true

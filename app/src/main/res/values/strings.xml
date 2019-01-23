@@ -37,4 +37,5 @@
     <string name="advanced_item">Create advanced item</string>
     <string name="title_bookmark_list">Your inboxes</string>
     <string name="dialog_ask_discard">Are you sure you want to discard this item?</string>
+    <string name="open_quick_dialog">Quick Dialog</string>
 </resources>
