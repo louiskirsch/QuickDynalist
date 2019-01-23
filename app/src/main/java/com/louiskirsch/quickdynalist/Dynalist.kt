@@ -59,6 +59,8 @@ class Dynalist(private val context: Context) {
         if (!event.success) {
             context.toast(R.string.token_invalid)
             authenticate()
+        } else {
+            DynalistApp.instance.jobManager.addJobInBackground(BookmarksJob())
         }
     }
 
