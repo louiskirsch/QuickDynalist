@@ -11,7 +11,7 @@
     <string name="add_item_success">Item added to inbox</string>
     <string name="add_item_error">Failed to add item</string>
     <string name="process_text_action_name">Add To Inbox</string>
-    <string name="bookmark_hint">Add the tag #quickdynalist, #inbox, or 📕 to items that should appear in this list. Updates might take a moment to take effect and require WIFI.</string>
+    <string name="bookmark_hint">Add the tag #quickdynalist or #inbox to items that should appear in this list. Updates might take a moment to take effect and require WIFI.</string>
     <string name="open_large">Open in large window</string>
     <string name="item_date_hint">Date</string>
     <string name="item_time_hint">Time</string>
@@ -38,4 +38,5 @@
     <string name="title_bookmark_list">Your inboxes</string>
     <string name="dialog_ask_discard">Are you sure you want to discard this item?</string>
     <string name="open_quick_dialog">Quick Dialog</string>
+    <string name="add_inbox">Add inbox …</string>
 </resources>

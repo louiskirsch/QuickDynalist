@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 
-class BookmarksJob(private val largest_k: Int = 9)
+class BookmarksJob
     : Job(Params(-1).requireUnmeteredNetwork().singleInstanceBy("dynalistItems")) {
 
     override fun onAdded() {}
@@ -87,13 +87,7 @@ class BookmarksJob(private val largest_k: Int = 9)
         }
 
         // Define bookmarks
-        val bookmarks = if (markedItems.isEmpty()) {
-            serverItems.filter { it.childrenCount > 10 && !it.mightBeInbox }
-                    .sortedByDescending { it.childrenCount }
-                    .take(largest_k)
-        } else {
-            markedItems.filter { !it.markedAsPrimaryInbox }
-        }
+        val bookmarks = markedItems.filter { !it.markedAsPrimaryInbox }
         bookmarks.forEach { it.isBookmark = true }
 
         // Store new items in database

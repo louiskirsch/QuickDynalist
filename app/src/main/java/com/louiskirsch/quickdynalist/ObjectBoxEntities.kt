@@ -92,12 +92,6 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         }
     }
 
-    val childrenCount: Int
-        get() = childrenIds?.size ?: children.size
-
-    val mightBeInbox: Boolean
-        get() = name.toLowerCase() == "inbox"
-
     private val tags: List<String> get() {
         return listOf(name, note).flatMap {
             tagRegex.findAll(it).map { m -> m.groupValues[2] } .toList()

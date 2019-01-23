@@ -1,20 +1,27 @@
 package com.louiskirsch.quickdynalist
 
 import android.os.Bundle
+import android.os.Handler
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
+import androidx.core.view.MenuItemCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.okButton
 import org.jetbrains.anko.toast
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -48,12 +55,17 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu.run {
                 clear()
                 inboxes.forEachIndexed { i, item ->
-                     add(R.id.group_bookmarks_list, i, i, item.shortenedName).apply {
-                         isCheckable = true
-                     }
+                    add(R.id.group_bookmarks_list, i, i, item.shortenedName).apply {
+                        isCheckable = true
+                    }
                 }
                 fragmentModel.selectedBookmark.value?.let {
                     updateCheckedBookmark(this, it)
+                }
+                if (inboxes.size <= 1) {
+                    add(Menu.NONE, R.id.menu_item_bookmarks_hint, 1, R.string.add_inbox).apply {
+                        isCheckable = false
+                    }
                 }
             }
         })
@@ -116,9 +128,15 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                     .commit()
             itemText.clear()
         }
-        if (item.itemId == R.id.open_quick_dialog)
-            fixedFinishAfterTransition()
-
+        when(item.itemId) {
+            R.id.open_quick_dialog -> fixedFinishAfterTransition()
+            R.id.menu_item_bookmarks_hint -> alert {
+                messageResource = R.string.bookmark_hint
+                okButton { }
+                DynalistApp.instance.jobManager.addJobInBackground(BookmarksJob())
+                show()
+            }
+        }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
