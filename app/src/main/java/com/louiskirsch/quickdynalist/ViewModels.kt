@@ -16,6 +16,8 @@ class DynalistItemViewModel: ViewModel() {
     val bookmarksLiveData: ObjectBoxLiveData<DynalistItem> by lazy {
         ObjectBoxLiveData(box.query {
             equal(DynalistItem_.isBookmark, true)
+            orderDesc(DynalistItem_.isInbox)
+            order(DynalistItem_.name)
         })
     }
 

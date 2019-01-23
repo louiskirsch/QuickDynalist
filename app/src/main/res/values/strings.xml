@@ -26,7 +26,7 @@
     <string name="item_change_target_location">Change location</string>
     <string name="open_item_list">Open item list</string>
     <string name="inbox_help">About your primary inbox</string>
-    <string name="inbox_help_text">We are trying to detect your primary inbox automatically. If this does not work properly, please add the tags #primary #inbox to your inbox item.</string>
+    <string name="inbox_help_text">Your primary inbox will be out of date because we can not detect where your Dynalist inbox is located. To change this, please add the tags #primary #inbox to your inbox item.</string>
     <string name="open_in_dynalist">Open in dynalist</string>
     <string name="invalid_intent_error">Sorry. We can\'t add this item to your Dynalist.</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

@@ -15,9 +15,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Entity
-class DynalistItem(val serverFileId: String?, @Index var serverParentId: String?,
-                   val serverItemId: String?, val name: String, val note: String,
-                   @Transient val childrenIds: List<String>? = null,
+class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?,
+                   var serverItemId: String?, var name: String, var note: String,
+                   @Transient var childrenIds: List<String>? = null,
                    var isInbox: Boolean = false,
                    var isBookmark: Boolean = false) : Serializable, Parcelable {
 
@@ -26,14 +26,21 @@ class DynalistItem(val serverFileId: String?, @Index var serverParentId: String?
     @Id var clientId: Long = 0
     var position: Int = 0
 
-    val serverAbsoluteId: Pair<String, String>?
-        get() = Pair(serverFileId, serverItemId).selfNotNull
-
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
     lateinit var parent: ToOne<DynalistItem>
 
     override fun toString() = shortenedName
+    override fun hashCode(): Int = (clientId % Int.MAX_VALUE).toInt()
+    override fun equals(other: Any?): Boolean {
+        return if (clientId > 0)
+            return clientId == (other as? DynalistItem)?.clientId
+        else
+            false
+    }
+
+    val serverAbsoluteId: Pair<String, String>?
+        get() = Pair(serverFileId, serverItemId).selfNotNull
 
     val shortenedName: String get() {
         val label = strippedMarkersName
@@ -75,18 +82,14 @@ class DynalistItem(val serverFileId: String?, @Index var serverParentId: String?
         return spannable
     }
 
-    fun populateChildren(itemMap: Map<Pair<String, String>, DynalistItem>, maxDepth: Int = 1) {
-        children.clear()
-        children.addAll(childrenIds!!.mapIndexed { idx, childId ->
-            itemMap[Pair(serverFileId, childId)]!!.apply { position = idx }
-        })
-        if (maxDepth > 1)
-            children.forEach { it.populateChildren(itemMap, maxDepth - 1) }
-    }
-
-    fun fixParents(itemMap: Map<Pair<String, String>, DynalistItem>) {
-        // TODO Currently the API does not send the serverParentId according to the spec
-        childrenIds!!.forEach { itemMap[Pair(serverFileId, it)]!!.serverParentId = serverItemId }
+    fun populateChildren(itemMap: Map<Pair<String, String>, DynalistItem>) {
+        childrenIds!!.forEachIndexed { idx, childId ->
+            itemMap[Pair(serverFileId, childId)]!!.let { child ->
+                child.serverParentId = serverItemId
+                child.parent.target = this
+                child.position = idx
+            }
+        }
     }
 
     val childrenCount: Int
