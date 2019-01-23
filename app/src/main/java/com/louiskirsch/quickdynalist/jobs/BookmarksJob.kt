@@ -98,7 +98,7 @@ class BookmarksJob(private val largest_k: Int = 9)
 
         // Store new items in database
         DynalistApp.instance.boxStore.runInTx {
-            box.remove(notAssociatedClientItems - newInbox - newInbox.children)
+            box.remove(notAssociatedClientItems - newInbox)
             box.put(serverItems)
         }
         dynalist.lastBookmarkQuery = Date()
