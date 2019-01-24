@@ -55,7 +55,8 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
     fun getSpannableText(context: Context) = parseText(name, context)
     fun getSpannableNotes(context: Context) = parseText(note, context)
 
-    fun getSpannableChildren(context: Context): CharSequence {
+    fun getSpannableChildren(context: Context, maxItems: Int): CharSequence {
+        val children = children.take(maxItems)
         return TextUtils.concat(*children.mapIndexed { idx, child ->
             child.getSpannableText(context).run {
                 setSpan(BulletSpan(15), 0, length, 0)

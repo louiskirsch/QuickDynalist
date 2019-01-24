@@ -16,4 +16,13 @@
         </menu>
     </item>
 
+    <item
+        android:id="@+id/submenu_documents_list"
+        android:title="@string/title_documents_list">
+        <menu>
+            <group android:checkableBehavior="single" android:id="@+id/group_documents_list">
+            </group>
+        </menu>
+    </item>
+
 </menu>

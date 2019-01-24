@@ -10,12 +10,18 @@ import com.louiskirsch.quickdynalist.network.ReadDocumentRequest
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import org.greenrobot.eventbus.EventBus
 import org.jetbrains.annotations.Nullable
 import java.util.*
 
 
-class BookmarksJob
-    : Job(Params(-1).requireUnmeteredNetwork().singleInstanceBy("dynalistItems")) {
+class BookmarksJob(unmeteredNetwork: Boolean = true)
+    : Job(Params(-1).setRequiresUnmeteredNetwork(unmeteredNetwork)
+        .singleInstanceBy("dynalistItems").addTags(TAG)) {
+
+    companion object {
+        const val TAG = "syncJob"
+    }
 
     override fun onAdded() {}
 
@@ -96,6 +102,7 @@ class BookmarksJob
             box.put(serverItems)
         }
         dynalist.lastBookmarkQuery = Date()
+        EventBus.getDefault().post(SyncEvent(true, requiresUnmeteredNetwork()))
     }
 
     override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {}

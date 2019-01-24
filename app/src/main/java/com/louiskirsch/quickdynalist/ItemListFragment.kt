@@ -15,8 +15,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.birbit.android.jobqueue.TagConstraint
+import com.google.android.material.snackbar.Snackbar
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
+import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.jetbrains.anko.*
@@ -49,6 +52,14 @@ class ItemListFragment : Fragment() {
             })
         }
 
+        adapter.onClickListener = {
+            if (it.serverItemId != null) {
+                openDynalistItem(it)
+            } else {
+                alertRequireSync()
+            }
+        }
+
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.getItemsLiveData(parent).observe(this, Observer<List<DynalistItem>> { items ->
             doAsync {
@@ -59,6 +70,30 @@ class ItemListFragment : Fragment() {
                 }
             }
         })
+    }
+
+    private fun alertRequireSync() {
+        Snackbar.make(itemList, R.string.alert_sync_required, Snackbar.LENGTH_SHORT).apply {
+            setAction(R.string.action_sync) {
+                DynalistApp.instance.jobManager.run {
+                    cancelJobsInBackground({
+                        val job = BookmarksJob(false)
+                        addJobInBackground(job)
+                    }, TagConstraint.ALL, arrayOf(BookmarksJob.TAG))
+                }
+            }
+            show()
+        }
+    }
+
+    private fun openDynalistItem(item: DynalistItem): Boolean {
+        val fragment = newInstance(item, itemContents.text)
+        fragmentManager!!.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
+        itemContents.text.clear()
+        return true
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -107,8 +142,10 @@ class ItemListFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        if (parent.serverFileId != null && parent.serverItemId != null)
+        if (parent.serverFileId != null && parent.serverItemId != null) {
             inflater!!.inflate(R.menu.item_list_activity_menu, menu)
+            menu!!.findItem(R.id.goto_parent).isVisible = !parent.parent.isNull
+        }
         if (parent.isInbox && !parent.markedAsPrimaryInbox)
             inflater!!.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -140,6 +177,7 @@ class ItemListFragment : Fragment() {
         return when (item!!.itemId) {
             R.id.inbox_help -> showInboxHelp()
             R.id.open_in_dynalist -> openInDynalist()
+            R.id.goto_parent -> openDynalistItem(parent.parent.target)
             else -> super.onOptionsItemSelected(item)
         }
     }

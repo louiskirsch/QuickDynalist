@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="8dp"
     android:layout_width="match_parent"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="?android:attr/selectableItemBackground"
     android:layout_height="wrap_content">
     
     <TextView
@@ -29,8 +31,6 @@
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:autoLink="all"
-        android:maxLines="5"
-        android:ellipsize="end"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

@@ -46,12 +46,11 @@ class DynalistApp : Application() {
     private fun upgrade() {
         val dynalist = Dynalist(applicationContext)
         if (dynalist.preferencesVersion < 12) {
-            jobManager.cancelJobsInBackground({
-                jobManager.addJobInBackground(BookmarksJob())
-            }, TagConstraint.ALL, emptyArray())
             doAsync {
+                jobManager.clear()
                 val box: Box<DynalistItem> = boxStore.boxFor()
                 box.put(DynalistItem.newInbox())
+                jobManager.addJobInBackground(BookmarksJob())
             }
             dynalist.preferencesVersion = BuildConfig.VERSION_CODE
         }

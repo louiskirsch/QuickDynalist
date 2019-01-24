@@ -39,4 +39,9 @@
     <string name="dialog_ask_discard">Are you sure you want to discard this item?</string>
     <string name="open_quick_dialog">Quick Dialog</string>
     <string name="add_inbox">Add inbox …</string>
+    <string name="alert_sync_required">Sync is required to perform this action</string>
+    <string name="action_sync">Sync</string>
+    <string name="alert_sync_success">Sync successful</string>
+    <string name="goto_parent">Go to parent item</string>
+    <string name="title_documents_list">Your documents</string>
 </resources>

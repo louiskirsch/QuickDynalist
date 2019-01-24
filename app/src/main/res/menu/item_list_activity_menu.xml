@@ -3,9 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:id="@+id/goto_parent"
+        android:icon="@drawable/ic_action_goto_parent"
+        android:title="@string/goto_parent"
+        app:showAsAction="ifRoom" />
+
     <item android:id="@+id/open_in_dynalist"
         android:icon="@drawable/ic_action_open_in_browser"
         android:title="@string/open_in_dynalist"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
 </menu>

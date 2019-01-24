@@ -82,6 +82,13 @@ class Dynalist(private val context: Context) {
         }.show()
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onSyncEvent(event: SyncEvent) {
+        if (event.success && !event.requiredUnmeteredNetwork) {
+            context.toast(R.string.alert_sync_success)
+        }
+    }
+
     fun addItem(contents: String, parent: DynalistItem, note: String = "") {
         val jobManager = DynalistApp.instance.jobManager
         val job = AddItemJob(contents, note, parent)

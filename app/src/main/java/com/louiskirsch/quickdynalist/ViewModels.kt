@@ -20,6 +20,13 @@ class DynalistItemViewModel: ViewModel() {
         })
     }
 
+    val documentsLiveData: ObjectBoxLiveData<DynalistItem> by lazy {
+        ObjectBoxLiveData(box.query {
+            equal(DynalistItem_.serverItemId, "root")
+            order(DynalistItem_.name)
+        })
+    }
+
     private var parent: DynalistItem? = null
     private lateinit var itemsLiveData: ObjectBoxLiveData<DynalistItem>
 

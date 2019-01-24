@@ -18,12 +18,13 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 class CachedDynalistItem(val item: DynalistItem, context: Context) {
     val spannableText = item.getSpannableText(context)
     val spannableNotes = item.getSpannableNotes(context)
-    val spannableChildren = item.getSpannableChildren(context)
+    val spannableChildren = item.getSpannableChildren(context, 5)
 }
 
 class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
 
     private val items = ArrayList<CachedDynalistItem>()
+    var onClickListener: ((DynalistItem) -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -62,5 +63,6 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
         holder.itemNotes.text = item.spannableNotes
         holder.itemChildren.visibility = if (item.spannableChildren.isEmpty()) View.GONE else View.VISIBLE
         holder.itemChildren.text = item.spannableChildren
+        holder.itemView.setOnClickListener { onClickListener?.invoke(item.item) }
     }
 }
