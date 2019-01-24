@@ -92,7 +92,7 @@ class ProcessTextActivity : AppCompatActivity() {
                         dynalist.addItem(text, selectedLocation)
                     }
                     onCancelled {
-                        dynalist.addItem(text, DynalistItem.newInbox())
+                        dynalist.addItem(text, bookmarks.find { it.isInbox }!!)
                     }
                     show()
                 }
@@ -100,7 +100,7 @@ class ProcessTextActivity : AppCompatActivity() {
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION)
-                        dynalist.addItem(text, DynalistItem.newInbox())
+                        dynalist.addItem(text, bookmarks.find { it.isInbox }!!)
                 }
             })
             show()
