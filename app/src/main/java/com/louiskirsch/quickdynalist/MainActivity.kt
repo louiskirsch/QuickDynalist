@@ -75,10 +75,15 @@ class MainActivity : AppCompatActivity() {
 
         setupItemContentsTextField()
 
-        submitButton!!.setOnClickListener {
+        submitButton.setOnClickListener {
             dynalist.addItem(itemContents!!.text.toString(),
-                    itemLocation!!.selectedItem as DynalistItem)
-            itemContents!!.text.clear()
+                    itemLocation.selectedItem as DynalistItem)
+            itemContents.text.clear()
+        }
+        submitCloseButton.setOnClickListener {
+            dynalist.addItem(itemContents.text.toString(),
+                    itemLocation.selectedItem as DynalistItem)
+            finish()
         }
 
         itemLocation.setOnTouchListener { _, e ->
@@ -149,6 +154,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateSubmitEnabled() {
         val enabled = dynalist.isAuthenticated && !itemContents!!.text.toString().isEmpty()
         submitButton!!.isEnabled = enabled
+        submitCloseButton!!.isEnabled = enabled
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
