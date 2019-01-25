@@ -10,8 +10,8 @@
         <item name="android:windowActivityTransitions">true</item>
 
         <!-- specify enter and exit transitions -->
-        <item name="android:windowEnterTransition">@android:transition/explode</item>
-        <item name="android:windowExitTransition">@android:transition/explode</item>
+        <item name="android:windowEnterTransition">@transition/window_explode</item>
+        <item name="android:windowExitTransition">@transition/window_explode</item>
 
         <!-- specify shared element transitions -->
         <item name="android:windowSharedElementEnterTransition">@transition/change_view_bounds
@@ -29,8 +29,8 @@
         <item name="android:windowActivityTransitions">true</item>
 
         <!-- specify enter and exit transitions -->
-        <item name="android:windowEnterTransition">@android:transition/explode</item>
-        <item name="android:windowExitTransition">@android:transition/explode</item>
+        <item name="android:windowEnterTransition">@transition/window_explode</item>
+        <item name="android:windowExitTransition">@transition/window_explode</item>
 
         <!-- specify shared element transitions -->
         <item name="android:windowSharedElementEnterTransition">@transition/change_view_bounds
