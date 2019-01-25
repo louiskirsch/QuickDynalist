@@ -23,10 +23,10 @@ class CachedDynalistItem(val item: DynalistItem, context: Context) {
     val spannableChildren = item.getSpannableChildren(context, 5)
 
     override fun equals(other: Any?) = compareFields(other) {
-        compareField(CachedDynalistItem::spannableText)
-        compareField(CachedDynalistItem::spannableNotes)
-        compareField(CachedDynalistItem::spannableChildren)
-        compareField(CachedDynalistItem::item)
+        one.spannableText.toString() correspondsTo two.spannableText.toString()
+        one.spannableChildren.toString() correspondsTo two.spannableChildren.toString()
+        one.spannableNotes.toString() correspondsTo two.spannableNotes.toString()
+        one.item correspondsTo two.item
     }
 
     override fun hashCode() = hashKode(spannableText, spannableNotes, spannableChildren, item)
