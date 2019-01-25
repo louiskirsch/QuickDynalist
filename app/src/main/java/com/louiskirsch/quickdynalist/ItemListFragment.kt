@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
@@ -23,14 +24,12 @@ import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import io.objectbox.kotlin.boxFor
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.jetbrains.anko.*
+import org.jetbrains.anko.custom.async
 import android.util.Pair as UtilPair
-
-
-private const val ARG_LOCATION = "EXTRA_LOCATION"
-private const val ARG_ITEM_TEXT = "EXTRA_ITEM_TEXT"
 
 class ItemListFragment : Fragment() {
 
@@ -147,7 +146,6 @@ class ItemListFragment : Fragment() {
         }
         if (location.isInbox && !location.markedAsPrimaryInbox)
             inflater!!.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
     }
 
     private fun setupItemContentsTextField() {
@@ -177,8 +175,33 @@ class ItemListFragment : Fragment() {
             R.id.inbox_help -> showInboxHelp()
             R.id.open_in_dynalist -> openInDynalist()
             R.id.goto_parent -> openDynalistItem(location.parent.target)
+            R.id.share -> shareDynalistItem()
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun shareDynalistItem(): Boolean {
+        async {
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            val location = box.get(location.clientId)
+            val itemText = location.getSpannableText(context!!)
+            val itemNotes = location.getSpannableNotes(context!!)
+                    .prependIfNotBlank("\n\n")
+            val itemChildren = location.getPlainChildren(context!!, 1)
+                    .prependIfNotBlank("\n\n")
+            val text = TextUtils.concat(itemText, itemNotes, itemChildren)
+            val sendIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, text)
+                putExtra(Intent.EXTRA_SUBJECT, location.name)
+                type = "text/plain"
+            }
+            uiThread {
+                startActivity(Intent.createChooser(sendIntent,
+                        resources.getText(R.string.action_share)))
+            }
+        }
+        return true
     }
 
     private fun openInDynalist(): Boolean {
@@ -197,6 +220,9 @@ class ItemListFragment : Fragment() {
     }
 
     companion object {
+        private const val ARG_LOCATION = "EXTRA_LOCATION"
+        private const val ARG_ITEM_TEXT = "EXTRA_ITEM_TEXT"
+
         @JvmStatic
         fun newInstance(parent: DynalistItem, itemText: CharSequence) =
                 ItemListFragment().apply {

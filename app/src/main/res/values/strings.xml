@@ -45,4 +45,5 @@
     <string name="goto_parent">Go to parent item</string>
     <string name="title_documents_list">Your documents</string>
     <string name="btn_add_item_and_close"><![CDATA[Add & Close]]></string>
+    <string name="action_share">Share</string>
 </resources>

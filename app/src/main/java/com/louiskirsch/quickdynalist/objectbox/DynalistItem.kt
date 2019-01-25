@@ -5,6 +5,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.text.style.BackgroundColorSpan
@@ -67,6 +68,25 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
                 if (idx == children.size - 1) this else TextUtils.concat(this, "\n")
             }
         }.toTypedArray())
+    }
+
+    fun getPlainChildren(context: Context, maxDepth: Int = 0): CharSequence {
+        val sb = SpannableStringBuilder()
+        recursivePlainChildren(context, sb, maxDepth, 0)
+        return sb.dropLast(1)
+    }
+
+    private fun recursivePlainChildren(context: Context, sb: SpannableStringBuilder,
+                                       maxDepth: Int = 0, depth: Int = 0) {
+        if (depth > maxDepth)
+            return
+        children.sortedBy { it.position }.forEachIndexed { idx, child ->
+            repeat(depth) { sb.append("    ") }
+            sb.append("- ")
+            sb.append(child.getSpannableText(context))
+            sb.append("\n")
+            child.recursivePlainChildren(context, sb, maxDepth, depth + 1)
+        }
     }
 
     private fun parseText(text: String, context: Context): SpannableString {

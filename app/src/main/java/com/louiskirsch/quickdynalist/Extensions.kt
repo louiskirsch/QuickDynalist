@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist
 
 import android.app.Activity
 import android.text.InputType
+import android.text.TextUtils
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -39,3 +40,6 @@ val <A, B> Pair<A?, B?>.selfNotNull: Pair<A, B>? get() {
 }
 
 val Boolean.int: Int get() = if (this) 1 else 0
+
+fun CharSequence.prependIfNotBlank(text: CharSequence) =
+        if (isNotBlank()) TextUtils.concat(text, this) else this
