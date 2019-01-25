@@ -1,16 +1,13 @@
 package com.louiskirsch.quickdynalist
 
 import android.os.Bundle
-import android.os.Handler
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.TextView
-import androidx.core.view.MenuItemCompat
+import android.view.SubMenu
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
@@ -28,10 +25,12 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     private val dynalist: Dynalist = Dynalist(this)
 
     private var inboxes: List<DynalistItem>? = null
+    private var documents: List<DynalistItem>? = null
 
     companion object {
         const val EXTRA_DISPLAY_ITEM = "EXTRA_DISPLAY_ITEM"
         const val EXTRA_ITEM_TEXT = "EXTRA_ITEM_TEXT"
+        private const val MAX_SUBMENU_ITEMS = 1000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,15 +52,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         itemsModel.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> { inboxes ->
             this.inboxes = inboxes
             nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu.run {
-                clear()
-                inboxes.forEachIndexed { i, item ->
-                    add(R.id.group_bookmarks_list, i, i, item.shortenedName).apply {
-                        isCheckable = true
-                    }
-                }
-                fragmentModel.selectedBookmark.value?.let {
-                    updateCheckedBookmark(this, it)
-                }
+                fillMenuWithItems(inboxes, R.id.group_bookmarks_list, 0)
                 if (inboxes.size <= 1) {
                     add(Menu.NONE, R.id.menu_item_bookmarks_hint, 1, R.string.add_inbox).apply {
                         isCheckable = false
@@ -69,10 +60,20 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 }
             }
         })
-        fragmentModel.selectedBookmark.observe(this, Observer { item ->
+        itemsModel.documentsLiveData.observe(this, Observer<List<DynalistItem>> { docs ->
+            this.documents = docs
+            nav_view.menu.findItem(R.id.submenu_documents_list).subMenu.run {
+                fillMenuWithItems(docs, R.id.group_documents_list, 1)
+            }
+        })
+        fragmentModel.selectedDynalistItem.observe(this, Observer { item ->
             inboxes?.run {
                 val menu = nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu
-                updateCheckedBookmark(menu, item)
+                updateCheckedBookmark(menu, item, this)
+            }
+            documents?.run {
+                val menu = nav_view.menu.findItem(R.id.submenu_documents_list).subMenu
+                updateCheckedBookmark(menu, item, this)
             }
         })
 
@@ -85,8 +86,24 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
     }
 
-    private fun updateCheckedBookmark(menu: Menu, item: DynalistItem) {
-        val itemIndex = inboxes!!.indexOfFirst { it.clientId == item.clientId }
+    private fun SubMenu.fillMenuWithItems(items: List<DynalistItem>, groupId: Int, menuIndex: Int) {
+        clear()
+        items.forEachIndexed { i, item ->
+            val itemId = i + menuIndex * MAX_SUBMENU_ITEMS
+            add(groupId, itemId, i, item.shortenedName).apply {
+                isCheckable = true
+            }
+        }
+        ViewModelProviders.of(this@NavigationActivity)
+                .get(ItemListFragmentViewModel::class.java).let { fragmentModel ->
+                    fragmentModel.selectedDynalistItem.value?.let {
+                        updateCheckedBookmark(this, it, items)
+                    }
+                }
+    }
+
+    private fun updateCheckedBookmark(menu: Menu, item: DynalistItem, itemList: List<DynalistItem>) {
+        val itemIndex = itemList.indexOf(item)
         if (itemIndex >= 0)
             nav_view.setCheckedItem(menu.getItem(itemIndex))
     }
@@ -118,15 +135,9 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (item.groupId == R.id.group_bookmarks_list) {
-            val currentFragment = supportFragmentManager
-                    .findFragmentById(R.id.fragment_container) as ItemListFragment
-            val itemText = currentFragment.itemContents.text
-            val fragment = ItemListFragment.newInstance(inboxes!![item.itemId], itemText.toString())
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit()
-            itemText.clear()
+            openDynalistItem(inboxes!![item.itemId])
+        } else if (item.groupId == R.id.group_documents_list) {
+            openDynalistItem(documents!![item.itemId % MAX_SUBMENU_ITEMS])
         }
         when(item.itemId) {
             R.id.open_quick_dialog -> fixedFinishAfterTransition()
@@ -139,6 +150,18 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun openDynalistItem(itemToOpen: DynalistItem) {
+        val currentFragment = supportFragmentManager
+                .findFragmentById(R.id.fragment_container) as ItemListFragment
+        val itemText = currentFragment.itemContents.text
+        val fragment = ItemListFragment.newInstance(itemToOpen, itemText.toString())
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
+        itemText.clear()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

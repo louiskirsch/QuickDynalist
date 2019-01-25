@@ -46,5 +46,5 @@ class DynalistItemViewModel: ViewModel() {
 }
 
 class ItemListFragmentViewModel: ViewModel() {
-    val selectedBookmark = MutableLiveData<DynalistItem>()
+    val selectedDynalistItem = MutableLiveData<DynalistItem>()
 }

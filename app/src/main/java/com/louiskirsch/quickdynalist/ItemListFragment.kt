@@ -133,7 +133,7 @@ class ItemListFragment : Fragment() {
         super.onStart()
         activity!!.title = parent.shortenedName
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
-        model.selectedBookmark.value = parent
+        model.selectedDynalistItem.value = parent
         itemContents.requestFocus()
     }
 
