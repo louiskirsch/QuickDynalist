@@ -9,6 +9,7 @@ import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.DynalistResponse
 import com.louiskirsch.quickdynalist.network.InboxRequest
 import com.louiskirsch.quickdynalist.network.InsertItemRequest
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
 import org.jetbrains.anko.doAsync

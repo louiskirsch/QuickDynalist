@@ -1,4 +1,4 @@
-package com.louiskirsch.quickdynalist
+package com.louiskirsch.quickdynalist.objectbox
 
 import android.content.Context
 import android.os.Parcel
@@ -9,6 +9,10 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.text.style.BackgroundColorSpan
 import android.text.style.BulletSpan
+import com.louiskirsch.quickdynalist.R
+import com.louiskirsch.quickdynalist.int
+import com.louiskirsch.quickdynalist.selfNotNull
+import com.louiskirsch.quickdynalist.size
 import io.objectbox.annotation.*
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne

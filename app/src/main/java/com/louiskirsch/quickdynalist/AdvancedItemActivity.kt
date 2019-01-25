@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.Menu
@@ -14,6 +13,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.activity_advanced_item.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe

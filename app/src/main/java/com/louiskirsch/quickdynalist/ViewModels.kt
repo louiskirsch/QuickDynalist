@@ -2,6 +2,8 @@ package com.louiskirsch.quickdynalist
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.Box
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor

@@ -3,11 +3,12 @@ package com.louiskirsch.quickdynalist
 import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.config.Configuration
 import android.app.Application
-import com.birbit.android.jobqueue.TagConstraint
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService.*
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.jobs.JobService
 import com.louiskirsch.quickdynalist.network.DynalistService
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.MyObjectBox
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor

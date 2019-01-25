@@ -15,6 +15,7 @@ import android.view.Gravity
 import android.view.WindowManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import org.jetbrains.anko.okButton
 
 

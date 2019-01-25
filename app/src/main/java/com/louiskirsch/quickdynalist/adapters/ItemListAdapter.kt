@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
-import com.louiskirsch.quickdynalist.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.item_list_item.view.*
 import nl.pvdberg.hashkode.compareFields
 import nl.pvdberg.hashkode.hashKode

@@ -11,6 +11,7 @@ import android.view.SubMenu
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
