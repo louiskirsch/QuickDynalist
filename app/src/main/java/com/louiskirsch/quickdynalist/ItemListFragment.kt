@@ -64,14 +64,8 @@ class ItemListFragment : Fragment() {
         }
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.getItemsLiveData(location).observe(this, Observer<List<DynalistItem>> { items ->
-            doAsync {
-                items.forEach { item -> item.children.sortBy { child -> child.position } }
-                val cachedItems = items.map { CachedDynalistItem(it, context!!) }
-                uiThread {
-                    adapter.updateItems(cachedItems)
-                }
-            }
+        model.getItemsLiveData(location).observe(this, Observer<List<CachedDynalistItem>> {
+            adapter.updateItems(it)
         })
     }
 
