@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.DynalistItem
 import kotlinx.android.synthetic.main.item_list_item.view.*
+import nl.pvdberg.hashkode.compareFields
+import nl.pvdberg.hashkode.hashKode
 
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemText = itemView.itemText!!
@@ -19,6 +21,15 @@ class CachedDynalistItem(val item: DynalistItem, context: Context) {
     val spannableText = item.getSpannableText(context)
     val spannableNotes = item.getSpannableNotes(context)
     val spannableChildren = item.getSpannableChildren(context, 5)
+
+    override fun equals(other: Any?) = compareFields(other) {
+        compareField(CachedDynalistItem::spannableText)
+        compareField(CachedDynalistItem::spannableNotes)
+        compareField(CachedDynalistItem::spannableChildren)
+        compareField(CachedDynalistItem::item)
+    }
+
+    override fun hashCode() = hashKode(spannableText, spannableNotes, spannableChildren, item)
 }
 
 class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
@@ -31,14 +42,18 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
     }
 
     fun updateItems(newItems: List<CachedDynalistItem>) {
-        val oldSize = items.size
-        if (newItems.take(oldSize).map { getItemId(it) } == items.map { getItemId(it) } ) {
-            val newCount = newItems.size - items.size
-            items.addAll(newItems.takeLast(newCount))
-            notifyItemRangeInserted(oldSize, newCount)
-        } else {
+        val update = {
             items.clear()
             items.addAll(newItems)
+            Unit
+        }
+        val oldSize = items.size
+        if (newItems.take(oldSize) == items) {
+            val newCount = newItems.size - oldSize
+            update()
+            notifyItemRangeInserted(oldSize, newCount)
+        } else {
+            update()
             notifyDataSetChanged()
         }
     }
@@ -50,10 +65,7 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
         return ItemListViewHolder(inflater.inflate(R.layout.item_list_item, parent, false))
     }
 
-    private fun getItemId(item: CachedDynalistItem): Long {
-        return item.item.clientId
-    }
-
+    private fun getItemId(item: CachedDynalistItem): Long = item.item.clientId
     override fun getItemId(position: Int): Long = getItemId(items[position])
 
     override fun onBindViewHolder(holder: ItemListViewHolder, position: Int) {
@@ -63,6 +75,6 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
         holder.itemNotes.text = item.spannableNotes
         holder.itemChildren.visibility = if (item.spannableChildren.isEmpty()) View.GONE else View.VISIBLE
         holder.itemChildren.text = item.spannableChildren
-        holder.itemView.setOnClickListener { onClickListener?.invoke(item.item) }
+        holder.itemView.setOnClickListener { onClickListener?.invoke(items[position].item) }
     }
 }
