@@ -6,8 +6,4 @@
         android:title="@string/send_item"
         app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/discard_item"
-        android:title="@string/discard_item"
-        app:showAsAction="never" />
-
 </menu>

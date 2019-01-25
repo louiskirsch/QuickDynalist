@@ -21,37 +21,54 @@ import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.max
 
 class AdvancedItemActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
+
     private lateinit var adapter: ArrayAdapter<DynalistItem>
+    private var location: DynalistItem? = null
     private val calendar = Calendar.getInstance()
+
+    companion object {
+        const val EXTRA_LOCATION = "EXTRA_LOCATION"
+        const val EXTRA_ITEM_TEXT = "EXTRA_ITEM_TEXT"
+        const val EXTRA_SELECT_BOOKMARK = "EXTRA_SELECT_BOOKMARK"
+        private const val MAX_SUBMENU_ITEMS = 1000
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_advanced_item)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_action_discard)
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
-        itemContents.setText(intent.getCharSequenceExtra(Intent.EXTRA_TEXT))
+        location = intent.getParcelableExtra(EXTRA_LOCATION)
+        itemContents.setText(intent.getCharSequenceExtra(EXTRA_ITEM_TEXT))
 
-        adapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, ArrayList())
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        itemLocation.adapter = adapter
+        val selectBookmark = intent.getBooleanExtra(EXTRA_SELECT_BOOKMARK, false)
+        if (location!!.isBookmark && selectBookmark) {
+            adapter = ArrayAdapter(this,
+                    android.R.layout.simple_spinner_item, ArrayList())
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            itemLocation.adapter = adapter
 
-        val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
-            val initializing = adapter.count == 0
-            adapter.clear()
-            adapter.addAll(it)
-            if (initializing) {
-                val location: DynalistItem = intent.getParcelableExtra(Intent.EXTRA_SUBJECT)
-                val index = it.indexOfFirst { item -> item.clientId == location.clientId }
-                itemLocation.setSelection(if (index >= 0) index else 0)
-            }
-        })
+            val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+            model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
+                val initializing = adapter.count == 0
+                adapter.clear()
+                adapter.addAll(it)
+                if (initializing) {
+                    val index = it.indexOf(location!!)
+                    itemLocation.setSelection(max(index, 0))
+                }
+            })
+        } else {
+            itemLocation.visibility = View.GONE
+            title = location!!.shortenedName
+        }
 
         setupDatePicker()
         setupTimePicker()
@@ -76,21 +93,10 @@ class AdvancedItemActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item!!.itemId) {
-            android.R.id.home -> if (itemContents.text.isNotEmpty()) askDiscard() else discard()
+            android.R.id.home -> discard()
             R.id.send_item -> sendItem()
-            R.id.discard_item -> discard()
             else -> return super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun askDiscard(): Boolean {
-        alert {
-            messageResource = R.string.dialog_ask_discard
-            noButton { }
-            yesButton { discard() }
-            show()
-        }
-        return true
     }
 
     private fun discard(): Boolean {
@@ -171,7 +177,11 @@ class AdvancedItemActivity : AppCompatActivity() {
             ""
         }
         val contents = itemContents.text.toString() + dateString
-        dynalist.addItem(contents, itemLocation.selectedItem as DynalistItem, itemNotes.text.toString())
+        val targetLocation = if (itemLocation.visibility == View.VISIBLE)
+            itemLocation.selectedItem as DynalistItem
+        else
+            location!!
+        dynalist.addItem(contents, targetLocation, itemNotes.text.toString())
         fixedFinishAfterTransition()
         return true
     }

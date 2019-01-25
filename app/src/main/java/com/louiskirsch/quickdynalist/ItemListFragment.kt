@@ -12,7 +12,6 @@ import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -29,20 +28,20 @@ import org.jetbrains.anko.*
 import android.util.Pair as UtilPair
 
 
-private const val ARG_BOOKMARK = "EXTRA_BOOKMARK"
+private const val ARG_LOCATION = "EXTRA_LOCATION"
 private const val ARG_ITEM_TEXT = "EXTRA_ITEM_TEXT"
 
 class ItemListFragment : Fragment() {
 
     private lateinit var dynalist: Dynalist
-    private lateinit var parent: DynalistItem
+    private lateinit var location: DynalistItem
     private lateinit var adapter: ItemListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dynalist = Dynalist(context!!)
         arguments?.let {
-            parent = it.getParcelable(ARG_BOOKMARK)!!
+            location = it.getParcelable(ARG_LOCATION)!!
         }
         setHasOptionsMenu(true)
 
@@ -64,7 +63,7 @@ class ItemListFragment : Fragment() {
         }
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.getItemsLiveData(parent).observe(this, Observer<List<DynalistItem>> { items ->
+        model.getItemsLiveData(location).observe(this, Observer<List<DynalistItem>> { items ->
             doAsync {
                 items.forEach { item -> item.children.sortBy { child -> child.position } }
                 val cachedItems = items.map { CachedDynalistItem(it, context!!) }
@@ -111,15 +110,15 @@ class ItemListFragment : Fragment() {
         setupItemContentsTextField()
 
         submitButton.setOnClickListener {
-            dynalist.addItem(itemContents.text.toString(), parent)
+            dynalist.addItem(itemContents.text.toString(), location)
             itemContents.text.clear()
         }
         updateSubmitEnabled()
 
         advancedItemButton.setOnClickListener {
             val intent = Intent(context, AdvancedItemActivity::class.java)
-            intent.putExtra(Intent.EXTRA_SUBJECT, parent as Parcelable)
-            intent.putExtra(Intent.EXTRA_TEXT, itemContents.text)
+            intent.putExtra(AdvancedItemActivity.EXTRA_LOCATION, location as Parcelable)
+            intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
             val activity = activity as AppCompatActivity
             val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
                     UtilPair.create(activity.toolbar as View, "toolbar"),
@@ -134,9 +133,9 @@ class ItemListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        activity!!.title = parent.shortenedName
+        activity!!.title = location.shortenedName
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
-        model.selectedDynalistItem.value = parent
+        model.selectedDynalistItem.value = location
         val imm = context!!.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         if (imm.isActive)
             itemContents.requestFocus()
@@ -147,11 +146,11 @@ class ItemListFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        if (parent.serverFileId != null && parent.serverItemId != null) {
+        if (location.serverFileId != null && location.serverItemId != null) {
             inflater!!.inflate(R.menu.item_list_activity_menu, menu)
-            menu!!.findItem(R.id.goto_parent).isVisible = !parent.parent.isNull
+            menu!!.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
         }
-        if (parent.isInbox && !parent.markedAsPrimaryInbox)
+        if (location.isInbox && !location.markedAsPrimaryInbox)
             inflater!!.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -182,13 +181,13 @@ class ItemListFragment : Fragment() {
         return when (item!!.itemId) {
             R.id.inbox_help -> showInboxHelp()
             R.id.open_in_dynalist -> openInDynalist()
-            R.id.goto_parent -> openDynalistItem(parent.parent.target)
+            R.id.goto_parent -> openDynalistItem(location.parent.target)
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun openInDynalist(): Boolean {
-        context!!.browse("https://dynalist.io/d/${parent.serverFileId}#z=${parent.serverItemId}")
+        context!!.browse("https://dynalist.io/d/${location.serverFileId}#z=${location.serverItemId}")
         return true
     }
 
@@ -207,7 +206,7 @@ class ItemListFragment : Fragment() {
         fun newInstance(parent: DynalistItem, itemText: CharSequence) =
                 ItemListFragment().apply {
                     arguments = Bundle().apply {
-                        putParcelable(ARG_BOOKMARK, parent)
+                        putParcelable(ARG_LOCATION, parent)
                         putCharSequence(ARG_ITEM_TEXT, itemText)
                     }
                 }

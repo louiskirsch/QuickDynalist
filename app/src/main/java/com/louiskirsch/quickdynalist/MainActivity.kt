@@ -59,8 +59,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.open_large -> {
                     val intent = Intent(this, AdvancedItemActivity::class.java)
-                    intent.putExtra(Intent.EXTRA_SUBJECT, itemLocation.selectedItem as Parcelable)
-                    intent.putExtra(Intent.EXTRA_TEXT, itemContents.text)
+                    intent.putExtra(AdvancedItemActivity.EXTRA_LOCATION,
+                            itemLocation.selectedItem as Parcelable)
+                    intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
+                    intent.putExtra(AdvancedItemActivity.EXTRA_SELECT_BOOKMARK, true)
                     val transition = ActivityOptions.makeSceneTransitionAnimation(this,
                             UtilPair.create(toolbar as View, "toolbar"),
                             UtilPair.create(itemLocation as View, "itemLocation"),
