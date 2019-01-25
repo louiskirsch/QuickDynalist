@@ -63,11 +63,12 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
                     childrenIds = it.children ?: emptyList()
                     isInbox = false
                     isBookmark = false
+                    isChecked = it.checked
                     position = 0
                     parent.target = null
                     notAssociatedClientItems.remove(this)
                 } ?: DynalistItem(doc.id, it.parent, it.id, it.content, it.note,
-                        it.children ?: emptyList())
+                        it.children ?: emptyList(), isChecked = it.checked)
             }
         }
         val itemMap = serverItems.associateBy { it.serverAbsoluteId!! }

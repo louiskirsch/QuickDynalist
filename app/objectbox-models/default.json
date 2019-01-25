@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1068626277769387505",
-      "lastPropertyId": "10:6352045236723461776",
+      "lastPropertyId": "11:2944964967118606131",
       "name": "DynalistItem",
       "properties": [
         {
@@ -49,6 +49,10 @@
         {
           "id": "10:6352045236723461776",
           "name": "position"
+        },
+        {
+          "id": "11:2944964967118606131",
+          "name": "isChecked"
         }
       ],
       "relations": []

@@ -25,8 +25,8 @@ import java.util.*
 class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?,
                    var serverItemId: String?, var name: String, var note: String,
                    @Transient var childrenIds: List<String>? = null,
-                   var isInbox: Boolean = false,
-                   var isBookmark: Boolean = false) : Serializable, Parcelable {
+                   var isInbox: Boolean = false, var isBookmark: Boolean = false,
+                   var isChecked: Boolean = false) : Serializable, Parcelable {
 
     constructor() : this(null, null, null, "", "")
 

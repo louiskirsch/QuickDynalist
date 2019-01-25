@@ -45,6 +45,8 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 equal(DynalistItem_.parentId, parent.clientId)
                 and()
                 notEqual(DynalistItem_.name, "")
+                and()
+                equal(DynalistItem_.isChecked, false)
                 order(DynalistItem_.position)
                 eager(20, DynalistItem_.children)
             }) { items ->
