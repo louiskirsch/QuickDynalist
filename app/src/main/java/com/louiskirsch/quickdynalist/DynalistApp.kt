@@ -28,6 +28,8 @@ class DynalistApp : Application() {
 
     companion object {
         lateinit var instance: DynalistApp
+        const val EXTRA_DISPLAY_ITEM = "EXTRA_DISPLAY_ITEM"
+        const val EXTRA_DISPLAY_ITEM_ID = "EXTRA_DISPLAY_ITEM_ID"
     }
 
     override fun onCreate() {

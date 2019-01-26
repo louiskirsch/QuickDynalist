@@ -59,13 +59,16 @@
     }
   ],
   "lastEntityId": "1:1068626277769387505",
-  "lastIndexId": "2:3343546374775209800",
+  "lastIndexId": "4:4834341726663538161",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 4,
   "modelVersionParserMinimum": 4,
   "retiredEntityUids": [],
-  "retiredIndexUids": [],
+  "retiredIndexUids": [
+    4933562954106154540,
+    4834341726663538161
+  ],
   "retiredPropertyUids": [],
   "retiredRelationUids": [],
   "version": 1

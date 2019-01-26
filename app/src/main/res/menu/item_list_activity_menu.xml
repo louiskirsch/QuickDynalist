@@ -16,6 +16,11 @@
     <item android:id="@+id/open_in_dynalist"
         android:icon="@drawable/ic_action_open_in_browser"
         android:title="@string/open_in_dynalist"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
+
+    <item android:id="@+id/create_shortcut"
+        android:icon="@drawable/ic_action_create_shortcut"
+        android:title="@string/create_shortcut"
+        app:showAsAction="never" />
 
 </menu>

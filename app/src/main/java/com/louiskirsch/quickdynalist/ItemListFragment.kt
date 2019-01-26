@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist
 
 
 import android.app.ActivityOptions
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -11,6 +12,8 @@ import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -109,7 +112,7 @@ class ItemListFragment : Fragment() {
 
         advancedItemButton.setOnClickListener {
             val intent = Intent(context, AdvancedItemActivity::class.java)
-            intent.putExtra(AdvancedItemActivity.EXTRA_LOCATION, location as Parcelable)
+            intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, location as Parcelable)
             intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
             val activity = activity as AppCompatActivity
             val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
@@ -174,8 +177,20 @@ class ItemListFragment : Fragment() {
             R.id.open_in_dynalist -> openInDynalist()
             R.id.goto_parent -> openDynalistItem(location.parent.target)
             R.id.share -> shareDynalistItem()
+            R.id.create_shortcut -> createShortcut()
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun createShortcut(): Boolean {
+        if (!ShortcutManagerCompat.isRequestPinShortcutSupported(context!!))
+            return true
+        val intent = Intent(context!!, ShortcutActivity::class.java)
+        intent.putExtra(ShortcutActivity.EXTRA_LOCATION, location as Parcelable)
+        val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
+                UtilPair.create(activity!!.toolbar as View, "toolbar"))
+        startActivity(intent, transition.toBundle())
+        return true
     }
 
     private fun shareDynalistItem(): Boolean {

@@ -34,7 +34,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
     lateinit var children: ToMany<DynalistItem>
     lateinit var parent: ToOne<DynalistItem>
 
-    override fun toString() = shortenedName
+    override fun toString() = shortenedName.toString()
     override fun hashCode(): Int = (clientId % Int.MAX_VALUE).toInt()
     override fun equals(other: Any?): Boolean {
         return if (clientId > 0)
@@ -46,13 +46,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
     val serverAbsoluteId: Pair<String, String>?
         get() = Pair(serverFileId, serverItemId).selfNotNull
 
-    val shortenedName: String get() {
-        val label = strippedMarkersName
-        return if (label.length > 30)
-            "${label.take(27)}..."
-        else
-            label
-    }
+    val shortenedName get() = strippedMarkersName.ellipsis(30)
 
     fun getSpannableText(context: Context) = parseText(name, context)
     fun getSpannableNotes(context: Context) = parseText(note, context)
@@ -140,7 +134,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
     val markedAsBookmark: Boolean
         get() = tagMarkers.any { it in tags }
 
-    private val strippedMarkersName: String
+    val strippedMarkersName: String
         get() = tagMarkers.fold(name) { acc, marker ->
             acc.replace(marker, "", true) } .trim()
 

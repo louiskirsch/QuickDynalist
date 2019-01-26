@@ -11,11 +11,13 @@ import android.text.TextWatcher
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import io.objectbox.kotlin.boxFor
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -26,6 +28,7 @@ import android.util.Pair as UtilPair
 class MainActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
     private lateinit var adapter: ArrayAdapter<DynalistItem>
+    private var location: DynalistItem? = null
 
     private val preferences: SharedPreferences
         get() = getSharedPreferences("MAIN_ACTIVITY", Context.MODE_PRIVATE)
@@ -39,12 +42,48 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         toolbar.inflateMenu(R.menu.quick_dialog_menu)
 
+        intent.extras?.let { dynalist.resolveItemInBundle(it) }?.let { location = it }
+
+        if (location != null) {
+            toolbar.title = location!!.strippedMarkersName
+            itemLocation.visibility = View.GONE
+        } else {
+            itemLocation.setOnTouchListener { _, e ->
+                if ((e.action == MotionEvent.ACTION_DOWN ||
+                                e.action == MotionEvent.ACTION_POINTER_DOWN) && bookmarkHintCounter < 5) {
+                    longToast(R.string.bookmark_hint)
+                    bookmarkHintCounter += 1
+                }
+                false
+            }
+
+            itemLocation.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    location = itemLocation.selectedItem as DynalistItem
+                }
+
+            }
+
+            adapter = ArrayAdapter(this,
+                    android.R.layout.simple_spinner_item, ArrayList())
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            itemLocation!!.adapter = adapter
+
+            val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+            model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
+                if (location == null)
+                    location = it[0]
+                adapter.clear()
+                adapter.addAll(it)
+            })
+        }
+
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.open_item_list -> {
                     val bundle = Bundle()
-                    val selectedBookmark = itemLocation.selectedItem as DynalistItem
-                    bundle.putParcelable(NavigationActivity.EXTRA_DISPLAY_ITEM, selectedBookmark)
+                    bundle.putParcelable(DynalistApp.EXTRA_DISPLAY_ITEM, location)
                     bundle.putString(NavigationActivity.EXTRA_ITEM_TEXT, itemContents.text.toString())
 
                     val intent = Intent(this, NavigationActivity::class.java)
@@ -57,14 +96,19 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.open_large -> {
                     val intent = Intent(this, AdvancedItemActivity::class.java)
-                    intent.putExtra(AdvancedItemActivity.EXTRA_LOCATION,
-                            itemLocation.selectedItem as Parcelable)
+                    intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, location as Parcelable)
                     intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
                     intent.putExtra(AdvancedItemActivity.EXTRA_SELECT_BOOKMARK, true)
-                    val transition = ActivityOptions.makeSceneTransitionAnimation(this,
-                            UtilPair.create(toolbar as View, "toolbar"),
-                            UtilPair.create(itemLocation as View, "itemLocation"),
-                            UtilPair.create(itemContents as View, "itemContents"))
+                    val transition = if (itemLocation.visibility == View.GONE) {
+                        ActivityOptions.makeSceneTransitionAnimation(this,
+                                UtilPair.create(toolbar as View, "toolbar"),
+                                UtilPair.create(itemContents as View, "itemContents"))
+                    } else {
+                        ActivityOptions.makeSceneTransitionAnimation(this,
+                                UtilPair.create(toolbar as View, "toolbar"),
+                                UtilPair.create(itemLocation as View, "itemLocation"),
+                                UtilPair.create(itemContents as View, "itemContents"))
+                    }
                     startActivity(intent, transition.toBundle())
                     itemContents.text.clear()
                 }
@@ -76,35 +120,14 @@ class MainActivity : AppCompatActivity() {
         setupItemContentsTextField()
 
         submitButton.setOnClickListener {
-            dynalist.addItem(itemContents!!.text.toString(),
-                    itemLocation.selectedItem as DynalistItem)
+            dynalist.addItem(itemContents!!.text.toString(), location!!)
             itemContents.text.clear()
         }
         submitCloseButton.setOnClickListener {
-            dynalist.addItem(itemContents.text.toString(),
-                    itemLocation.selectedItem as DynalistItem)
+            dynalist.addItem(itemContents.text.toString(), location!!)
             finish()
         }
 
-        itemLocation.setOnTouchListener { _, e ->
-            if ((e.action == MotionEvent.ACTION_DOWN ||
-                    e.action == MotionEvent.ACTION_POINTER_DOWN) && bookmarkHintCounter < 5) {
-                longToast(R.string.bookmark_hint)
-                bookmarkHintCounter += 1
-            }
-            false
-        }
-
-        adapter = ArrayAdapter(this,
-                android.R.layout.simple_spinner_item, ArrayList())
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        itemLocation!!.adapter = adapter
-
-        val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
-            adapter.clear()
-            adapter.addAll(it)
-        })
     }
 
     override fun onStart() {

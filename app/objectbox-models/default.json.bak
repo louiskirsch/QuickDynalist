@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1068626277769387505",
-      "lastPropertyId": "10:6352045236723461776",
+      "lastPropertyId": "11:2944964967118606131",
       "name": "DynalistItem",
       "properties": [
         {
@@ -14,6 +14,7 @@
         },
         {
           "id": "2:7891431997655942839",
+          "indexId": "3:4933562954106154540",
           "name": "serverFileId"
         },
         {
@@ -23,6 +24,7 @@
         },
         {
           "id": "4:2764160025147172571",
+          "indexId": "4:4834341726663538161",
           "name": "serverItemId"
         },
         {
@@ -49,13 +51,17 @@
         {
           "id": "10:6352045236723461776",
           "name": "position"
+        },
+        {
+          "id": "11:2944964967118606131",
+          "name": "isChecked"
         }
       ],
       "relations": []
     }
   ],
   "lastEntityId": "1:1068626277769387505",
-  "lastIndexId": "2:3343546374775209800",
+  "lastIndexId": "4:4834341726663538161",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 4,

@@ -31,7 +31,6 @@ class AdvancedItemActivity : AppCompatActivity() {
     private val calendar = Calendar.getInstance()
 
     companion object {
-        const val EXTRA_LOCATION = "EXTRA_LOCATION"
         const val EXTRA_ITEM_TEXT = "EXTRA_ITEM_TEXT"
         const val EXTRA_SELECT_BOOKMARK = "EXTRA_SELECT_BOOKMARK"
         private const val MAX_SUBMENU_ITEMS = 1000
@@ -45,7 +44,7 @@ class AdvancedItemActivity : AppCompatActivity() {
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
-        location = intent.getParcelableExtra(EXTRA_LOCATION)
+        location = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)
         itemContents.setText(intent.getCharSequenceExtra(EXTRA_ITEM_TEXT))
 
         val selectBookmark = intent.getBooleanExtra(EXTRA_SELECT_BOOKMARK, false)

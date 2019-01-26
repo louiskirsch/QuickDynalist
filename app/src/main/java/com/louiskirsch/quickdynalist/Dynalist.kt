@@ -3,12 +3,14 @@ package com.louiskirsch.quickdynalist
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.EditText
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import io.objectbox.kotlin.boxFor
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -131,5 +133,17 @@ class Dynalist(private val context: Context) {
 
     private fun openTokenGenerationBrowser() {
         context.browse("https://dynalist.io/developer")
+    }
+
+    fun resolveItemInBundle(bundle: Bundle): DynalistItem? {
+        if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_ITEM))
+            return bundle.getParcelable(DynalistApp.EXTRA_DISPLAY_ITEM) as DynalistItem
+        if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_ITEM_ID)) {
+            // TODO query this asynchronously
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            val clientId = bundle.getLong(DynalistApp.EXTRA_DISPLAY_ITEM_ID)
+            return box.get(clientId)
+        }
+        return null
     }
 }

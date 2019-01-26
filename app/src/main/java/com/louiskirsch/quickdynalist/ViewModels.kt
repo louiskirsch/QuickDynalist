@@ -27,6 +27,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         })
     }
 
+
     val documentsLiveData: ObjectBoxLiveData<DynalistItem> by lazy {
         ObjectBoxLiveData(box.query {
             equal(DynalistItem_.serverItemId, "root")

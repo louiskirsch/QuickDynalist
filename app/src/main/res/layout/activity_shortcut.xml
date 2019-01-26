@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    android:orientation="vertical"
+    tools:context=".ShortcutActivity">
+
+    <TextView
+        android:id="@+id/shortcutLocationHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/shortcut_location_hint"
+        style="?android:attr/listSeparatorTextViewStyle" />
+
+    <Spinner
+        android:id="@+id/shortcutLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/shortcut_name_hint"
+        style="?android:attr/listSeparatorTextViewStyle" />
+
+    <EditText
+        android:id="@+id/shortcutName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/shortcut_name_hint"
+        android:inputType="text"
+        android:maxLength="10"
+        android:importantForAutofill="no"
+        tools:targetApi="o" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/shortcut_type_hint"
+        style="?android:attr/listSeparatorTextViewStyle" />
+
+    <RadioGroup
+        android:id="@+id/shortcutType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/shortcutTypeQuickDialog"
+            android:text="@string/shortcut_type_quick_dialog"
+            android:drawableStart="@drawable/ic_shortcut_type_dialog"
+            android:layout_width="match_parent"
+            android:layout_marginEnd="16dp"
+            android:layout_height="wrap_content" />
+
+        <RadioButton
+            android:id="@+id/shortcutTypeQuickList"
+            android:text="@string/shortcut_type_quick_list"
+            android:drawableStart="@drawable/ic_shortcut_type_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/shortcut_icon_hint"
+        style="?android:attr/listSeparatorTextViewStyle" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/shortcutIconList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

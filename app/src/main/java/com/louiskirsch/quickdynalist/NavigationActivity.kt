@@ -31,7 +31,6 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     private var documents: List<DynalistItem>? = null
 
     companion object {
-        const val EXTRA_DISPLAY_ITEM = "EXTRA_DISPLAY_ITEM"
         const val EXTRA_ITEM_TEXT = "EXTRA_ITEM_TEXT"
         private const val MAX_SUBMENU_ITEMS = 1000
     }
@@ -89,8 +88,8 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         })
 
         if (savedInstanceState == null) {
-            val parent: DynalistItem = intent.getParcelableExtra(EXTRA_DISPLAY_ITEM)
-            val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT)
+            val parent = dynalist.resolveItemInBundle(intent.extras!!)!!
+            val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT) ?: ""
             val fragment = ItemListFragment.newInstance(parent, itemText)
             supportFragmentManager.beginTransaction()
                     .add(R.id.fragment_container, fragment).commit()
