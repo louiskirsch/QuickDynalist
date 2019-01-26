@@ -144,6 +144,8 @@ class ItemListFragment : Fragment() {
         if (location.serverFileId != null && location.serverItemId != null) {
             inflater!!.inflate(R.menu.item_list_activity_menu, menu)
             menu!!.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
+            val shortcutsSupported = ShortcutManagerCompat.isRequestPinShortcutSupported(context!!)
+            menu.findItem(R.id.create_shortcut).isVisible = shortcutsSupported
         }
         if (location.isInbox && !location.markedAsPrimaryInbox)
             inflater!!.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
