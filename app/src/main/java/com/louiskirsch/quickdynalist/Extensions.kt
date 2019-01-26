@@ -1,6 +1,7 @@
 package com.louiskirsch.quickdynalist
 
 import android.app.Activity
+import android.content.Context
 import android.text.InputType
 import android.text.Spannable
 import android.text.TextUtils
@@ -48,3 +49,6 @@ fun CharSequence.prependIfNotBlank(text: CharSequence) =
 
 fun Spannable.linkify(mask: Int = Linkify.ALL): Spannable
         = Linkify.addLinks(this, mask).let { this }
+
+val Context.inputMethodManager: InputMethodManager
+    get() = this.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager

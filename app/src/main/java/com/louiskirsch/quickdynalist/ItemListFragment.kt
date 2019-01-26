@@ -1,7 +1,6 @@
 package com.louiskirsch.quickdynalist
 
 
-import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -130,9 +128,9 @@ class ItemListFragment : Fragment() {
         activity!!.title = location.shortenedName
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
         model.selectedDynalistItem.value = location
-        val imm = context!!.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        if (imm.isActive)
-            itemContents.requestFocus()
+        itemContents.showSoftInputOnFocus = false
+        itemContents.requestFocus()
+        itemContents.showSoftInputOnFocus = true
     }
 
     private fun updateSubmitEnabled() {

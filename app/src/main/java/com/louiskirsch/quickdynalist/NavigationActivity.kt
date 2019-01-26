@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.SubMenu
+import android.view.View
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
@@ -43,6 +45,14 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
+        drawer_layout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerStateChanged(newState: Int) {}
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+            override fun onDrawerClosed(drawerView: View) {}
+            override fun onDrawerOpened(drawerView: View) {
+                inputMethodManager.hideSoftInputFromWindow(drawerView.windowToken, 0)
+            }
+        })
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
