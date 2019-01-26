@@ -1,15 +1,14 @@
 package com.louiskirsch.quickdynalist.objectbox
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Parcel
 import android.os.Parcelable
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
-import android.text.TextUtils
+import android.text.*
 import android.text.format.DateFormat
-import android.text.style.BackgroundColorSpan
-import android.text.style.BulletSpan
+import android.text.style.*
 import com.louiskirsch.quickdynalist.*
 import io.objectbox.annotation.*
 import io.objectbox.relation.ToMany
@@ -84,12 +83,14 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
     }
 
     private fun parseText(text: String, context: Context): Spannable {
+        val spannable = SpannableStringBuilder(text).linkify()
         val dateFormat = DateFormat.getDateFormat(context)
         val timeFormat = DateFormat.getTimeFormat(context)
-        val highlightPositions = ArrayList<IntRange>()
-        var offset = 0
-        val newText = dateTimeRegex.replace(text) {
-            val start = it.range.start + offset
+        val spanHighlight = context.getColor(R.color.spanHighlight)
+        val codeColor = context.getColor(R.color.codeColor)
+
+        spannable.replaceAll(imageRegex) { "" }
+        spannable.replaceAll(dateTimeRegex) {
             val date = dateReader.parse(it.groupValues[1])
             val replaceText = if (it.groupValues[2].isEmpty()) {
                 "\uD83D\uDCC5 ${dateFormat.format(date)}"
@@ -97,17 +98,44 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
                 val time = timeReader.parse(it.groupValues[2])
                 "\uD83D\uDCC5 ${dateFormat.format(date)} ${timeFormat.format(time)}"
             }
-            val end = start + replaceText.length - 1
-            // offsetting the dynalistItem
-            highlightPositions.add(IntRange(start + 3, end))
-            offset += replaceText.length - it.range.size
-            replaceText
+            SpannableString(replaceText).apply {
+                val bg = BackgroundColorSpan(spanHighlight)
+                setSpan(bg, 3, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            }
         }
-        highlightPositions.addAll(tagRegex.findAll(newText).map { it.groups[2]!!.range })
-        val spannable = SpannableString(newText).linkify()
-        highlightPositions.forEach {
-            val bg = BackgroundColorSpan(context.getColor(R.color.spanHighlight))
-            spannable.setSpan(bg, it.start, it.endInclusive + 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+
+        spannable.replaceAll(linkRegex) {
+            SpannableString(it.groupValues[1]).apply {
+                val span = URLSpan(it.groupValues[2])
+                setSpan(span, 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            }
+        }
+
+        val replace = { regex: Regex, createSpan: () -> Any ->
+            spannable.replaceAll(regex) {
+                SpannableString(it.groupValues[1]).apply {
+                    setSpan(createSpan(), 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                }
+            }
+        }
+        replace(boldRegex) { StyleSpan(Typeface.BOLD) }
+        replace(italicRegex) { StyleSpan(Typeface.ITALIC) }
+        replace(lineThroughRegex) { StrikethroughSpan() }
+
+        spannable.replaceAll(inlineCodeRegex) {
+            SpannableString(it.groupValues[1]).apply {
+                setSpan(BackgroundColorSpan(spanHighlight), 0, length,
+                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                setSpan(ForegroundColorSpan(codeColor), 0, length,
+                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            }
+        }
+
+        tagRegex.findAll(spannable).forEach {
+            val bg = BackgroundColorSpan(spanHighlight)
+            val range = it.groups[2]!!.range
+            spannable.setSpan(bg, range.start, range.endInclusive + 1,
+                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         }
         return spannable
     }
@@ -120,6 +148,11 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
                 child.position = idx
             }
         }
+    }
+
+    val image: String? get() {
+        return imageRegex.find(name)?.groupValues?.get(1)
+                ?: imageRegex.find(note)?.groupValues?.get(1)
     }
 
     private val tags: List<String> get() {
@@ -142,10 +175,18 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         fun newInbox() = DynalistItem(null, null, "inbox",
                 "\uD83D\uDCE5 Inbox", "", emptyList(), isInbox = true, isBookmark = true)
         private val tagMarkers = listOf("#quickdynalist", "#inbox")
+        @SuppressLint("SimpleDateFormat")
         private val dateReader = SimpleDateFormat("yyyy-MM-dd")
+        @SuppressLint("SimpleDateFormat")
         private val timeReader = SimpleDateFormat("HH:mm")
         private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?\)""")
-        private val tagRegex = Regex("""(^| )(#[\d\w_-]+)""")
+        private val tagRegex = Regex("""(^| )([#@][\d\w_-]+)""")
+        private val boldRegex = Regex("""\*\*(.*?)\*\*""")
+        private val italicRegex = Regex("""__(.*?)__""")
+        private val inlineCodeRegex = Regex("""`(.*?)`""")
+        private val lineThroughRegex = Regex("""~~(.*?)~~""")
+        private val linkRegex = Regex("""\[(.*?)]\((.*?)\)""")
+        private val imageRegex = Regex("""!\[.*?]\((.*?)\)""")
 
         @JvmField
         val CREATOR = object : Parcelable.Creator<DynalistItem> {

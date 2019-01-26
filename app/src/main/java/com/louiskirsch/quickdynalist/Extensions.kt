@@ -19,6 +19,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Paint.Align
 import android.graphics.Paint.ANTI_ALIAS_FLAG
+import android.text.SpannableStringBuilder
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.Box
@@ -60,7 +61,7 @@ val Boolean.int: Int get() = if (this) 1 else 0
 fun CharSequence.prependIfNotBlank(text: CharSequence) =
         if (isNotBlank()) TextUtils.concat(text, this) else this
 
-fun Spannable.linkify(mask: Int = Linkify.ALL): Spannable
+fun <T: Spannable> T.linkify(mask: Int = Linkify.ALL): T
         = Linkify.addLinks(this, mask).let { this }
 
 val Context.inputMethodManager: InputMethodManager
@@ -87,10 +88,16 @@ fun String.toBitmap(textSize: Float, textColor: Int): Bitmap {
     return image
 }
 
-fun Box<DynalistItem>.getByServerId(serverFileId: String, serverItemId: String): DynalistItem {
-    return query {
-        equal(DynalistItem_.serverFileId, serverFileId)
-        and()
-        equal(DynalistItem_.serverItemId, serverItemId)
-    }.findFirst()!!
+fun SpannableStringBuilder.replaceAll(regex: Regex, transform: (MatchResult) -> CharSequence): SpannableStringBuilder {
+    var match: MatchResult? = regex.find(this) ?: return this
+
+    var lastStart: Int
+    do {
+        val foundMatch = match!!
+        replace(foundMatch.range.start, foundMatch.range.endInclusive + 1,
+                transform(foundMatch))
+        lastStart = foundMatch.range.endInclusive + 1
+        match = foundMatch.next()
+    } while (lastStart < length && match != null)
+    return this
 }
