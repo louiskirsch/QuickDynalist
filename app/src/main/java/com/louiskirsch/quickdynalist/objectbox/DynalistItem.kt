@@ -10,10 +10,7 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.text.style.BackgroundColorSpan
 import android.text.style.BulletSpan
-import com.louiskirsch.quickdynalist.R
-import com.louiskirsch.quickdynalist.int
-import com.louiskirsch.quickdynalist.selfNotNull
-import com.louiskirsch.quickdynalist.size
+import com.louiskirsch.quickdynalist.*
 import io.objectbox.annotation.*
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
@@ -60,14 +57,17 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
     fun getSpannableText(context: Context) = parseText(name, context)
     fun getSpannableNotes(context: Context) = parseText(note, context)
 
-    fun getSpannableChildren(context: Context, maxItems: Int): CharSequence {
+    fun getSpannableChildren(context: Context, maxItems: Int): Spannable {
+        val sb = SpannableStringBuilder()
         val children = children.take(maxItems)
-        return TextUtils.concat(*children.mapIndexed { idx, child ->
+        children.mapIndexed { idx, child ->
             child.getSpannableText(context).run {
                 setSpan(BulletSpan(15), 0, length, 0)
-                if (idx == children.size - 1) this else TextUtils.concat(this, "\n")
+                sb.append(this)
             }
-        }.toTypedArray())
+            if (idx < children.size - 1) sb.append("\n")
+        }
+        return sb
     }
 
     fun getPlainChildren(context: Context, maxDepth: Int = 0): CharSequence {
@@ -89,7 +89,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         }
     }
 
-    private fun parseText(text: String, context: Context): SpannableString {
+    private fun parseText(text: String, context: Context): Spannable {
         val dateFormat = DateFormat.getDateFormat(context)
         val timeFormat = DateFormat.getTimeFormat(context)
         val highlightPositions = ArrayList<IntRange>()
@@ -110,7 +110,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
             replaceText
         }
         highlightPositions.addAll(tagRegex.findAll(newText).map { it.groups[2]!!.range })
-        val spannable = SpannableString(newText)
+        val spannable = SpannableString(newText).linkify()
         highlightPositions.forEach {
             val bg = BackgroundColorSpan(context.getColor(R.color.spanHighlight))
             spannable.setSpan(bg, it.start, it.endInclusive + 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)

@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist.objectbox
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import io.objectbox.query.Query
 import io.objectbox.reactive.DataObserver
@@ -15,7 +16,9 @@ class TransformedOBLiveData<T, TO>(private val query: Query<T>,
     override fun onActive() {
         // called when the LiveData object has an active observer
         if (subscription == null) {
-            subscription = query.subscribe().transform(transformer).observer(listener)
+            subscription = query.subscribe().transform(transformer).onError {
+                Log.e(javaClass.name, "Transform failed", it)
+            }.observer(listener)
         }
     }
 

@@ -12,7 +12,6 @@
         android:id="@+id/itemText"
         android:textSize="16sp"
         android:textColor="?android:attr/textColorPrimary"
-        android:autoLink="all"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -20,7 +19,6 @@
         android:id="@+id/itemNotes"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
-        android:autoLink="all"
         android:maxLines="2"
         android:ellipsize="end"
         android:layout_width="match_parent"
@@ -30,7 +28,6 @@
         android:id="@+id/itemChildren"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
-        android:autoLink="all"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

@@ -1,11 +1,16 @@
 package com.louiskirsch.quickdynalist.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
+import com.louiskirsch.quickdynalist.linkify
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.item_list_item.view.*
 import nl.pvdberg.hashkode.compareFields
@@ -60,9 +65,15 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
 
     override fun getItemCount(): Int = items.size
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemListViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ItemListViewHolder(inflater.inflate(R.layout.item_list_item, parent, false))
+        return ItemListViewHolder(inflater.inflate(R.layout.item_list_item,
+                parent, false)).apply {
+            itemText.setOnTouchListener(OnLinkTouchListener())
+            itemNotes.setOnTouchListener(OnLinkTouchListener())
+            itemChildren.setOnTouchListener(OnLinkTouchListener())
+        }
     }
 
     private fun getItemId(item: CachedDynalistItem): Long = item.item.clientId
