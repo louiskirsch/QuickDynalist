@@ -66,7 +66,7 @@ class AdvancedItemActivity : AppCompatActivity() {
             })
         } else {
             itemLocation.visibility = View.GONE
-            title = location!!.shortenedName
+            title = location!!.strippedMarkersName
         }
 
         setupDatePicker()

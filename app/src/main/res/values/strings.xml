@@ -54,4 +54,5 @@
     <string name="shortcut_type_hint">Shortcut type</string>
     <string name="shortcut_icon_hint">Pick your icon</string>
     <string name="shortcut_location_hint">Shortcut location</string>
+    <string name="placeholder_image">Image</string>
 </resources>

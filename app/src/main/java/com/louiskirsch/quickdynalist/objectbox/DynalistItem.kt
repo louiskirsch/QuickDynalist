@@ -89,7 +89,6 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         val spanHighlight = context.getColor(R.color.spanHighlight)
         val codeColor = context.getColor(R.color.codeColor)
 
-        spannable.replaceAll(imageRegex) { "" }
         spannable.replaceAll(dateTimeRegex) {
             val date = dateReader.parse(it.groupValues[1])
             val replaceText = if (it.groupValues[2].isEmpty()) {
@@ -101,6 +100,17 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
             SpannableString(replaceText).apply {
                 val bg = BackgroundColorSpan(spanHighlight)
                 setSpan(bg, 3, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            }
+        }
+
+        val imageDesc = context.getString(R.string.placeholder_image)
+        spannable.replaceAll(imageRegex) {
+            SpannableString("  $imageDesc").apply {
+                setSpan(BackgroundColorSpan(spanHighlight), 0, length,
+                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                setSpan(ImageSpan(context, R.drawable.ic_image_placeholder,
+                        ImageSpan.ALIGN_BASELINE), 0, 1,
+                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
             }
         }
 
@@ -151,8 +161,8 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
     }
 
     val image: String? get() {
-        return imageRegex.find(name)?.groupValues?.get(1)
-                ?: imageRegex.find(note)?.groupValues?.get(1)
+        return imageRegex.find(name)?.groupValues?.get(2)
+                ?: imageRegex.find(note)?.groupValues?.get(2)
     }
 
     private val tags: List<String> get() {
@@ -186,7 +196,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         private val inlineCodeRegex = Regex("""`(.*?)`""")
         private val lineThroughRegex = Regex("""~~(.*?)~~""")
         private val linkRegex = Regex("""\[(.*?)]\((.*?)\)""")
-        private val imageRegex = Regex("""!\[.*?]\((.*?)\)""")
+        private val imageRegex = Regex("""!\[(.*?)]\((.*?)\)""")
 
         @JvmField
         val CREATOR = object : Parcelable.Creator<DynalistItem> {
