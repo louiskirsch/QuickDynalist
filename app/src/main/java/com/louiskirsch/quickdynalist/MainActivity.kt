@@ -98,7 +98,8 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(this, AdvancedItemActivity::class.java)
                     intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, location as Parcelable)
                     intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
-                    intent.putExtra(AdvancedItemActivity.EXTRA_SELECT_BOOKMARK, true)
+                    intent.putExtra(AdvancedItemActivity.EXTRA_SELECT_BOOKMARK,
+                            itemLocation.visibility == View.VISIBLE)
                     val transition = if (itemLocation.visibility == View.GONE) {
                         ActivityOptions.makeSceneTransitionAnimation(this,
                                 UtilPair.create(toolbar as View, "toolbar"),
