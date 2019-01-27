@@ -22,7 +22,10 @@ class DetailsActivity : AppCompatActivity() {
         val displayItem: DynalistItem = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)
 
         itemText.text = displayItem.getSpannableText(this)
+        itemText.visibility = if (itemText.text.isBlank()) View.GONE else View.VISIBLE
         itemNotes.text = displayItem.getSpannableNotes(this)
+        itemNotes.visibility = if (itemNotes.text.isBlank()) View.GONE else View.VISIBLE
+
         itemImage.visibility = View.GONE
         displayItem.image?.let {
             Picasso.get().load(it).into(itemImage, object: Callback {

@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +27,12 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 }
 
 class CachedDynalistItem(val item: DynalistItem, context: Context) {
-    val spannableText = item.getSpannableText(context)
+    val spannableText = item.getSpannableText(context).run {
+        if (isBlank() && item.image != null)
+            SpannableString(context.getString(R.string.placeholder_image))
+        else
+            this
+    }
     val spannableNotes = item.getSpannableNotes(context)
     val spannableChildren = item.getSpannableChildren(context, 5)
 
