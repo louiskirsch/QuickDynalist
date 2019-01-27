@@ -49,7 +49,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 and()
                 equal(DynalistItem_.isChecked, false)
                 order(DynalistItem_.position)
-                eager(20, DynalistItem_.children)
+                eager(100, DynalistItem_.children)
             }) { items ->
                 items.forEach { item -> item.children.sortBy { child -> child.position } }
                 items.map { CachedDynalistItem(it, getApplication()) }

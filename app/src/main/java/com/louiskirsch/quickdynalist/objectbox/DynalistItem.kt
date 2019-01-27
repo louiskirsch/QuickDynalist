@@ -52,7 +52,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
 
     fun getSpannableChildren(context: Context, maxItems: Int): Spannable {
         val sb = SpannableStringBuilder()
-        val children = children.take(maxItems)
+        val children = children.filter { !it.isChecked } .take(maxItems)
         children.mapIndexed { idx, child ->
             child.getSpannableText(context).run {
                 setSpan(BulletSpan(15), 0, length, 0)
