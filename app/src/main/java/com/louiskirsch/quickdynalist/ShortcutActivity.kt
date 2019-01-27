@@ -1,6 +1,7 @@
 package com.louiskirsch.quickdynalist
 
 import android.app.Activity
+import android.app.TaskStackBuilder
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
@@ -87,14 +88,21 @@ class ShortcutActivity : AppCompatActivity() {
     }
 
     private fun createShortcut(): Boolean {
-        if (shortcutTypeQuickDialog.isChecked)
-            shortcutIntent.component = ComponentName(this, MainActivity::class.java)
-        else
-            shortcutIntent.component = ComponentName(this, NavigationActivity::class.java)
         shortcutIntent.apply {
             action = Intent.ACTION_VIEW
             putExtra(DynalistApp.EXTRA_DISPLAY_ITEM_ID, location!!.clientId)
             putExtra(DynalistApp.EXTRA_FROM_SHORTCUT, true)
+        }
+
+        val shortcutIntents = if (shortcutTypeQuickDialog.isChecked) {
+            shortcutIntent.component = ComponentName(this, MainActivity::class.java)
+            arrayOf(shortcutIntent)
+        } else {
+            shortcutIntent.component = ComponentName(this, NavigationActivity::class.java)
+            TaskStackBuilder.create(this).addNextIntentWithParentStack(shortcutIntent).intents
+        }
+
+        shortcutIntents[0].apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
@@ -103,7 +111,7 @@ class ShortcutActivity : AppCompatActivity() {
         val id = "shortcut-${location!!.clientId}-$shortcutType"
         val shortcutInfo = ShortcutInfoCompat.Builder(this, id).run {
             setAlwaysBadged()
-            setIntent(shortcutIntent)
+            setIntents(shortcutIntents)
             setShortLabel(shortcutName.text)
             setIcon(IconCompat.createWithBitmap(
                     emojiAdapter.selectedValue.toBitmap(192f, Color.BLACK)))
