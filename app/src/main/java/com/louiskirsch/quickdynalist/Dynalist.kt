@@ -10,7 +10,10 @@ import com.louiskirsch.quickdynalist.jobs.AddItemJob
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
+import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
+import io.objectbox.kotlin.query
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -41,6 +44,12 @@ class Dynalist(private val context: Context) {
     var lastBookmarkQuery: Date
         get() = Date(preferences.getLong("BOOKMARK_UPDATE", 0))
         set(lastQuery) = preferences.edit().putLong("BOOKMARK_UPDATE", lastQuery.time).apply()
+
+    private val itemBox: Box<DynalistItem>
+        get() = DynalistApp.instance.boxStore.boxFor()
+
+    val inbox: DynalistItem
+        get() = itemBox.query { equal(DynalistItem_.isInbox, true) } .findFirst()!!
 
     fun subscribe() {
         EventBus.getDefault().register(this)
@@ -140,9 +149,11 @@ class Dynalist(private val context: Context) {
             return bundle.getParcelable(DynalistApp.EXTRA_DISPLAY_ITEM) as DynalistItem
         if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_ITEM_ID)) {
             // TODO query this asynchronously
-            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
             val clientId = bundle.getLong(DynalistApp.EXTRA_DISPLAY_ITEM_ID)
-            return box.get(clientId)
+            val item = itemBox.get(clientId)
+            if (item == null && bundle.getBoolean(DynalistApp.EXTRA_FROM_SHORTCUT, false))
+                context.toast(R.string.error_invalid_shortcut)
+            return item
         }
         return null
     }

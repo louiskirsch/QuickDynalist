@@ -88,7 +88,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         })
 
         if (savedInstanceState == null) {
-            val parent = dynalist.resolveItemInBundle(intent.extras!!)!!
+            val parent = dynalist.resolveItemInBundle(intent.extras!!) ?: dynalist.inbox
             val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT) ?: ""
             val fragment = ItemListFragment.newInstance(parent, itemText)
             supportFragmentManager.beginTransaction()

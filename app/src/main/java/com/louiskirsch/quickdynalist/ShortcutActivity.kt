@@ -91,10 +91,13 @@ class ShortcutActivity : AppCompatActivity() {
             shortcutIntent.component = ComponentName(this, MainActivity::class.java)
         else
             shortcutIntent.component = ComponentName(this, NavigationActivity::class.java)
-        shortcutIntent.action = Intent.ACTION_VIEW
-        shortcutIntent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM_ID, location!!.clientId)
-        shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        shortcutIntent.apply {
+            action = Intent.ACTION_VIEW
+            putExtra(DynalistApp.EXTRA_DISPLAY_ITEM_ID, location!!.clientId)
+            putExtra(DynalistApp.EXTRA_FROM_SHORTCUT, true)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
 
         val shortcutType = if (shortcutTypeQuickDialog.isChecked) "dialog" else "list"
         val id = "shortcut-${location!!.clientId}-$shortcutType"
