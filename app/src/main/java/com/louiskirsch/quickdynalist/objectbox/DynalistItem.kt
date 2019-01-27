@@ -55,10 +55,12 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         val children = children.filter { !it.isChecked } .take(maxItems)
         children.mapIndexed { idx, child ->
             child.getSpannableText(context).run {
-                setSpan(BulletSpan(15), 0, length, 0)
-                sb.append(this)
+                if (isNotBlank()) {
+                    setSpan(BulletSpan(15), 0, length, 0)
+                    sb.append(this)
+                    if (idx < children.size - 1) sb.append("\n")
+                }
             }
-            if (idx < children.size - 1) sb.append("\n")
         }
         return sb
     }
