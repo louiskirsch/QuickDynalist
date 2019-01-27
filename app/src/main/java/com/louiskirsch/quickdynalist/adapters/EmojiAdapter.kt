@@ -39,13 +39,15 @@ class EmojiAdapter: RecyclerView.Adapter<EmojiViewHolder>() {
         if (selectedPosition == position) {
             selectedView = holder.textView
         }
-        holder.textView.isActivated = selectedPosition == position
-        holder.textView.text = String(Character.toChars(EMOJIS[position]))
-        holder.textView.setOnClickListener {
-            selectedView?.isActivated = false
-            selectedView = it
-            selectedPosition = position
-            it.isActivated = true
+        holder.textView.run {
+            isActivated = selectedPosition == position
+            text = String(Character.toChars(EMOJIS[position]))
+            setOnClickListener {
+                selectedView?.isActivated = false
+                selectedView = it
+                selectedPosition = position
+                it.isActivated = true
+            }
         }
     }
 
