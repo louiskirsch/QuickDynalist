@@ -2,24 +2,27 @@ package com.louiskirsch.quickdynalist.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.text.method.LinkMovementMethod
-import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
-import com.louiskirsch.quickdynalist.linkify
+import com.louiskirsch.quickdynalist.isEllipsized
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_list_item.view.*
 import nl.pvdberg.hashkode.compareFields
 import nl.pvdberg.hashkode.hashKode
+import java.lang.Exception
 
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemText = itemView.itemText!!
     val itemNotes = itemView.itemNotes!!
     val itemChildren = itemView.itemChildren!!
+    val itemImage = itemView.itemImage!!
+    val itemDetailsButton = itemView.itemDetailsButton!!
 }
 
 class CachedDynalistItem(val item: DynalistItem, context: Context) {
@@ -41,6 +44,7 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
 
     private val items = ArrayList<CachedDynalistItem>()
     var onClickListener: ((DynalistItem) -> Unit)? = null
+    var onDetailsClickListener: ((DynalistItem) -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -87,5 +91,36 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
         holder.itemChildren.visibility = if (item.spannableChildren.isEmpty()) View.GONE else View.VISIBLE
         holder.itemChildren.text = item.spannableChildren
         holder.itemView.setOnClickListener { onClickListener?.invoke(items[position].item) }
+
+        holder.itemDetailsButton.visibility = View.GONE
+        holder.itemDetailsButton.setOnClickListener {
+            onDetailsClickListener?.invoke(items[position].item)
+        }
+        holder.itemImage.visibility = View.GONE
+
+        val image = item.item.image
+        if (image != null) {
+            Picasso.get().load(image).into(holder.itemImage, object: Callback {
+                override fun onError(e: Exception?) {
+                    showDetailButtonIfEllipsized(holder)
+                }
+                override fun onSuccess() {
+                    holder.itemImage.visibility = View.VISIBLE
+                    holder.itemImage.setOnClickListener {
+                        onDetailsClickListener?.invoke(items[position].item)
+                    }
+                }
+            })
+        } else {
+            showDetailButtonIfEllipsized(holder)
+        }
+    }
+
+    private fun showDetailButtonIfEllipsized(holder: ItemListViewHolder) {
+        holder.itemNotes.isEllipsized { ellipsized ->
+            if (ellipsized) {
+                holder.itemDetailsButton.visibility = View.VISIBLE
+            }
+        }
     }
 }

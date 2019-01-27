@@ -54,13 +54,20 @@ class ItemListFragment : Fragment() {
                 }
             })
         }
-
         adapter.onClickListener = {
             if (it.serverItemId != null) {
                 openDynalistItem(it)
             } else {
                 alertRequireSync()
             }
+        }
+        adapter.onDetailsClickListener = {
+            val intent = Intent(context, DetailsActivity::class.java)
+            intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, it as Parcelable)
+            val activity = activity as AppCompatActivity
+            val transition = ActivityOptions.makeSceneTransitionAnimation(
+                    activity, activity.toolbar, "toolbar")
+            startActivity(intent, transition.toBundle())
         }
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)

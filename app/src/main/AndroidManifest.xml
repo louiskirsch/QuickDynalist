@@ -14,9 +14,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ShortcutActivity" android:label="@string/create_shortcut">
+        <activity
+            android:name=".DetailsActivity"
+            android:label="@string/activity_details"
+            android:parentActivityName=".NavigationActivity" />
+        <activity
+            android:name=".ShortcutActivity"
+            android:label="@string/create_shortcut">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -20,11 +20,17 @@ import android.graphics.Paint
 import android.graphics.Paint.Align
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.text.SpannableStringBuilder
+import android.util.Log
+import android.widget.TextView
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.Box
 import io.objectbox.kotlin.query
 import kotlin.math.roundToInt
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.view.ViewTreeObserver
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 
 fun EditText.setupGrowingMultiline(maxLines: Int) {
@@ -100,4 +106,23 @@ fun SpannableStringBuilder.replaceAll(regex: Regex, transform: (MatchResult) -> 
         match = foundMatch.next()
     } while (lastStart < length && match != null)
     return this
+}
+
+fun TextView.isEllipsized(callback: (isEllipsized: Boolean) -> Unit) {
+    if (layout != null) {
+        val lines = layout.lineCount
+        callback(lines > 0 && layout.getEllipsisCount(lines - 1) > 0)
+        return
+    }
+    viewTreeObserver.addOnGlobalLayoutListener(object: OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            var result = false
+            layout?.let {
+                val lines = it.lineCount
+                result = lines > 0 && it.getEllipsisCount(lines - 1) > 0
+            }
+            viewTreeObserver.removeOnGlobalLayoutListener(this)
+            callback(result)
+        }
+    })
 }

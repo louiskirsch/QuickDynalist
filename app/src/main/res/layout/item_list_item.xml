@@ -1,19 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="8dp"
     android:layout_width="match_parent"
     android:focusable="true"
     android:clickable="true"
     android:background="?android:attr/selectableItemBackground"
     android:layout_height="wrap_content">
-    
+
+    <com.louiskirsch.quickdynalist.views.SquareImageView
+        android:id="@+id/itemImage"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:focusable="true"
+        android:clickable="true"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <ImageButton
+        android:id="@+id/itemDetailsButton"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_show_details"
+        android:src="@drawable/ic_action_show_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/itemNotes"
+        app:layout_constraintBottom_toBottomOf="@id/itemNotes"
+        android:contentDescription="@string/action_show_details" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/itemRightAlignedViews"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="itemDetailsButton,itemImage"/>
+
     <TextView
         android:id="@+id/itemText"
         android:textSize="16sp"
         android:textColor="?android:attr/textColorPrimary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/itemImage" />
 
     <TextView
         android:id="@+id/itemNotes"
@@ -21,14 +57,21 @@
         android:textColor="?android:attr/textColorSecondary"
         android:maxLines="2"
         android:ellipsize="end"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/itemText"
+        app:layout_constraintEnd_toStartOf="@id/itemRightAlignedViews" />
 
     <TextView
         android:id="@+id/itemChildren"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/itemNotes"
+        app:layout_constraintEnd_toStartOf="@id/itemImage" />
 
-</LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

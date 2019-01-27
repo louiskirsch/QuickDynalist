@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DetailsActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/itemText"
+            android:padding="8dp"
+            android:textSize="18sp"
+            tools:text="The item's title text"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/itemNotes"
+            android:padding="8dp"
+            android:textSize="14sp"
+            tools:text=""
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/itemImage"
+            tools:src="@drawable/ic_image_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            tools:ignore="ContentDescription" />
+
+    </LinearLayout>
+
+</ScrollView>
