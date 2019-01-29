@@ -12,6 +12,7 @@ import com.louiskirsch.quickdynalist.objectbox.MyObjectBox
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
+import io.objectbox.kotlin.query
 import org.jetbrains.anko.doAsync
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -49,7 +50,8 @@ class DynalistApp : Application() {
 
     private fun upgrade() {
         val dynalist = Dynalist(applicationContext)
-        if (dynalist.preferencesVersion < 12) {
+        val version = dynalist.preferencesVersion
+        if (version < 12) {
             doAsync {
                 jobManager.clear()
                 val box: Box<DynalistItem> = boxStore.boxFor()

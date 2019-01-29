@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1068626277769387505",
-      "lastPropertyId": "11:2944964967118606131",
+      "lastPropertyId": "12:8027434694088666144",
       "name": "DynalistItem",
       "properties": [
         {
@@ -14,7 +14,6 @@
         },
         {
           "id": "2:7891431997655942839",
-          "indexId": "3:4933562954106154540",
           "name": "serverFileId"
         },
         {
@@ -24,7 +23,6 @@
         },
         {
           "id": "4:2764160025147172571",
-          "indexId": "4:4834341726663538161",
           "name": "serverItemId"
         },
         {
@@ -55,6 +53,10 @@
         {
           "id": "11:2944964967118606131",
           "name": "isChecked"
+        },
+        {
+          "id": "12:8027434694088666144",
+          "name": "isSynced"
         }
       ],
       "relations": []
@@ -67,7 +69,10 @@
   "modelVersion": 4,
   "modelVersionParserMinimum": 4,
   "retiredEntityUids": [],
-  "retiredIndexUids": [],
+  "retiredIndexUids": [
+    4933562954106154540,
+    4834341726663538161
+  ],
   "retiredPropertyUids": [],
   "retiredRelationUids": [],
   "version": 1

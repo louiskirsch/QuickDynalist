@@ -42,7 +42,7 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
         }
 
         // Query from local database
-        val clientItems = box.query{}.find()
+        val clientItems = box.query{ isNull(DynalistItem_.syncJob) }.find()
         val previousInbox = box.query { equal(DynalistItem_.isInbox, true) } .findUnique()!!
         val clientItemsById = clientItems.associateBy { it.serverAbsoluteId }
         val clientItemsByName = clientItems.associateBy { it.name }

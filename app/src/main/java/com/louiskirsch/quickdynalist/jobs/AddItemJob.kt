@@ -10,8 +10,10 @@ import com.louiskirsch.quickdynalist.network.DynalistResponse
 import com.louiskirsch.quickdynalist.network.InboxRequest
 import com.louiskirsch.quickdynalist.network.InsertItemRequest
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
+import io.objectbox.kotlin.query
 import org.jetbrains.anko.doAsync
 import org.jetbrains.annotations.Nullable
 import retrofit2.Response
@@ -28,6 +30,7 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem)
             val box: Box<DynalistItem> = DynalistApp.instance.boxStore.boxFor()
             DynalistApp.instance.boxStore.runInTx {
                 box.get(parent.clientId)?.let { parent ->
+                    newItem.syncJob = id
                     newItem.position = parent.children.size
                     newItem.parent.target = parent
                     box.put(newItem)
@@ -64,6 +67,14 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem)
 
         if (!response.body()!!.isOK)
             throw BackendException()
+
+        val box: Box<DynalistItem> = DynalistApp.instance.boxStore.boxFor()
+        DynalistApp.instance.boxStore.runInTx {
+            box.query { equal(DynalistItem_.syncJob, id) }.findFirst()!!.let { newItem ->
+                newItem.syncJob = null
+                box.put(newItem)
+            }
+        }
     }
 
     override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {

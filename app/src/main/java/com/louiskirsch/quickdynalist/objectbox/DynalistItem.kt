@@ -28,6 +28,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
 
     @Id var clientId: Long = 0
     var position: Int = 0
+    @Index var syncJob: String? = null
 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
@@ -190,6 +191,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         private val linkRegex = Regex("""\[(.*?)]\((.*?)\)""")
         private val imageRegex = Regex("""!\[(.*?)]\((.*?)\)""")
 
+        @Suppress("unused")
         @JvmField
         val CREATOR = object : Parcelable.Creator<DynalistItem> {
             override fun createFromParcel(parcel: Parcel): DynalistItem {
@@ -202,10 +204,13 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
                             note = readString()!!,
                             childrenIds = ArrayList<String>().also { readStringList(it) },
                             isInbox = readInt() > 0,
-                            isBookmark = readInt() > 0
+                            isBookmark = readInt() > 0,
+                            isChecked = readInt() > 0
                     ).apply {
                         clientId = readLong()
                         position = readInt()
+                        syncJob = readString()
+                        parent.targetId = readLong()
                     }
                 }
             }
@@ -223,8 +228,11 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
             writeStringList(childrenIds)
             writeInt(isInbox.int)
             writeInt(isBookmark.int)
+            writeInt(isChecked.int)
             writeLong(clientId)
             writeInt(position)
+            writeString(syncJob)
+            writeLong(parent.targetId)
         }
     }
 
