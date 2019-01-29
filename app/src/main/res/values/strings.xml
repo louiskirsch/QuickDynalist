@@ -58,4 +58,5 @@
     <string name="error_invalid_shortcut">Error: Shortcut is invalid</string>
     <string name="action_show_details">Show details</string>
     <string name="activity_details">Details</string>
+    <string name="error_disabled_shortcut">This shortcut is no longer valid. Please create a new one.</string>
 </resources>

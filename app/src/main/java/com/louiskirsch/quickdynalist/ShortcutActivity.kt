@@ -89,16 +89,15 @@ class ShortcutActivity : AppCompatActivity() {
 
     private fun createShortcut(): Boolean {
         shortcutIntent.apply {
-            action = Intent.ACTION_VIEW
             putExtra(DynalistApp.EXTRA_DISPLAY_ITEM_ID, location!!.clientId)
             putExtra(DynalistApp.EXTRA_FROM_SHORTCUT, true)
         }
 
         val shortcutIntents = if (shortcutTypeQuickDialog.isChecked) {
-            shortcutIntent.component = ComponentName(this, MainActivity::class.java)
+            shortcutIntent.action = "com.louiskirsch.quickdynalist.SHOW_DIALOG"
             arrayOf(shortcutIntent)
         } else {
-            shortcutIntent.component = ComponentName(this, NavigationActivity::class.java)
+            shortcutIntent.action = "com.louiskirsch.quickdynalist.SHOW_LIST"
             TaskStackBuilder.create(this).addNextIntentWithParentStack(shortcutIntent).intents
         }
 
@@ -115,6 +114,7 @@ class ShortcutActivity : AppCompatActivity() {
             setShortLabel(shortcutName.text)
             setIcon(IconCompat.createWithBitmap(
                     emojiAdapter.selectedValue.toBitmap(192f, Color.BLACK)))
+            setDisabledMessage(getString(R.string.error_disabled_shortcut))
             build()
         }
         if (intent.hasExtra(EXTRA_LOCATION)) {
