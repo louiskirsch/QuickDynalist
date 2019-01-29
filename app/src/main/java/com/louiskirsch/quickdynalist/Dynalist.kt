@@ -100,6 +100,11 @@ class Dynalist(private val context: Context) {
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onRateLimitDelay(event: RateLimitDelay) {
+        context.toast(R.string.alert_rate_limit_delay)
+    }
+
     fun addItem(contents: String, parent: DynalistItem, note: String = "") {
         val jobManager = DynalistApp.instance.jobManager
         val job = AddItemJob(contents, note, parent)

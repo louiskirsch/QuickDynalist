@@ -29,6 +29,9 @@ import io.objectbox.kotlin.query
 import kotlin.math.roundToInt
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver
+import com.louiskirsch.quickdynalist.network.DynalistResponse
+import retrofit2.Call
+import retrofit2.Response
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
@@ -125,4 +128,17 @@ fun TextView.isEllipsized(callback: (isEllipsized: Boolean) -> Unit) {
             callback(result)
         }
     })
+}
+
+fun <T: DynalistResponse>
+        Call<T>.execRespectRateLimit(delayCallback: ((Response<T>, Long) -> Unit)? = null,
+                                     delay: Long = 60 * 1000L): Response<T> {
+    val response = execute()
+    val body = response.body()!!
+    if (body.isRateLimitExceeded) {
+        delayCallback?.invoke(response, delay)
+        Thread.sleep(delay)
+        return clone().execute()
+    }
+    return response
 }

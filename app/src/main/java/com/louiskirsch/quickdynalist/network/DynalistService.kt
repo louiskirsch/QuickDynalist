@@ -37,6 +37,9 @@ class InsertItemRequest(val file_id: String, parent_id: String,
 open class DynalistResponse {
     val _code: String? = null
 
+    val isRateLimitExceeded: Boolean
+        get() = _code == "TooManyRequests"
+
     val isInvalidToken: Boolean
         get() = _code == "InvalidToken"
 

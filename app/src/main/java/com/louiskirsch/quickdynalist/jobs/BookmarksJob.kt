@@ -35,10 +35,15 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
         val box: Box<DynalistItem> = DynalistApp.instance.boxStore.boxFor()
 
         // Query from server
-        val files = service.listFiles(AuthenticatedRequest(token!!)).execute().body()!!.files!!
+        val delayCallback = { _: Any, delay: Long ->
+            EventBus.getDefault().post(RateLimitDelay(delay, TAG))
+        }
+        val files = service.listFiles(AuthenticatedRequest(token!!))
+                .execRespectRateLimit(delayCallback).body()!!.files!!
         val documents = files.filter { it.isDocument && it.isEditable }
         val contents = documents.map {
-            service.readDocument(ReadDocumentRequest(it.id!!, token)).execute().body()!!.nodes!!
+            service.readDocument(ReadDocumentRequest(it.id!!, token))
+                    .execRespectRateLimit(delayCallback).body()!!.nodes!!
         }
 
         // Query from local database
