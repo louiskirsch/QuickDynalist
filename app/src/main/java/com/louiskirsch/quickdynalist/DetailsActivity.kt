@@ -88,6 +88,7 @@ class DetailsActivity : AppCompatActivity() {
     private fun openInGallery(contentUri: Uri) {
         Intent().apply {
             action = Intent.ACTION_VIEW
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             setDataAndType(contentUri, "image/*")
             startActivity(this)
         }
