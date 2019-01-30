@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
             val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
             model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
-                if (location == null)
+                if (location == null && it.isNotEmpty())
                     location = it[0]
                 adapter.clear()
                 adapter.addAll(it)

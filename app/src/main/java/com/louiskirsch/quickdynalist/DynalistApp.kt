@@ -56,7 +56,8 @@ class DynalistApp : Application() {
                 jobManager.clear()
                 val box: Box<DynalistItem> = boxStore.boxFor()
                 box.put(DynalistItem.newInbox())
-                jobManager.addJobInBackground(BookmarksJob())
+                if (dynalist.isAuthenticated)
+                    jobManager.addJobInBackground(BookmarksJob())
             }
             dynalist.preferencesVersion = BuildConfig.VERSION_CODE
         }
