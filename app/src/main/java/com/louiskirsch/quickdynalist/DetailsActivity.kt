@@ -6,6 +6,8 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
+import android.text.method.MovementMethod
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.FileProvider
@@ -34,10 +36,16 @@ class DetailsActivity : AppCompatActivity() {
 
         val displayItem: DynalistItem = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)
 
-        itemText.text = displayItem.getSpannableText(this)
-        itemText.visibility = if (itemText.text.isBlank()) View.GONE else View.VISIBLE
-        itemNotes.text = displayItem.getSpannableNotes(this)
-        itemNotes.visibility = if (itemNotes.text.isBlank()) View.GONE else View.VISIBLE
+        itemText.apply {
+            text = displayItem.getSpannableText(context)
+            visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+            movementMethod = LinkMovementMethod()
+        }
+        itemNotes.apply {
+            text = displayItem.getSpannableNotes(context)
+            visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+            movementMethod = LinkMovementMethod()
+        }
 
         itemImage.visibility = View.GONE
         displayItem.image?.let {

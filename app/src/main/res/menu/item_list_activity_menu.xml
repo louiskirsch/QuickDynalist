@@ -13,6 +13,10 @@
         android:title="@string/action_share"
         app:showAsAction="ifRoom" />
 
+    <item android:id="@+id/action_show_details"
+        android:title="@string/action_show_details"
+        app:showAsAction="never" />
+
     <item android:id="@+id/open_in_dynalist"
         android:icon="@drawable/ic_action_open_in_browser"
         android:title="@string/open_in_dynalist"

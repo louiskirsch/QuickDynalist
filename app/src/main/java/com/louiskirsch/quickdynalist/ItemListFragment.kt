@@ -61,19 +61,22 @@ class ItemListFragment : Fragment() {
                 alertRequireSync()
             }
         }
-        adapter.onDetailsClickListener = {
-            val intent = Intent(context, DetailsActivity::class.java)
-            intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, it as Parcelable)
-            val activity = activity as AppCompatActivity
-            val transition = ActivityOptions.makeSceneTransitionAnimation(
-                    activity, activity.toolbar, "toolbar")
-            startActivity(intent, transition.toBundle())
-        }
+        adapter.onDetailsClickListener = { showItemDetails(it) }
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.getItemsLiveData(location).observe(this, Observer<List<CachedDynalistItem>> {
             adapter.updateItems(it)
         })
+    }
+
+    private fun showItemDetails(item: DynalistItem): Boolean {
+        val intent = Intent(context, DetailsActivity::class.java)
+        intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, item as Parcelable)
+        val activity = activity as AppCompatActivity
+        val transition = ActivityOptions.makeSceneTransitionAnimation(
+                activity, activity.toolbar, "toolbar")
+        startActivity(intent, transition.toBundle())
+        return true
     }
 
     private fun alertRequireSync() {
@@ -187,6 +190,7 @@ class ItemListFragment : Fragment() {
             R.id.goto_parent -> openDynalistItem(location.parent.target)
             R.id.share -> shareDynalistItem()
             R.id.create_shortcut -> createShortcut()
+            R.id.action_show_details -> showItemDetails(location)
             else -> super.onOptionsItemSelected(item)
         }
     }

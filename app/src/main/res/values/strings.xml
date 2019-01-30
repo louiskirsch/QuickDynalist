@@ -56,7 +56,7 @@
     <string name="shortcut_location_hint">Shortcut location</string>
     <string name="placeholder_image">Image</string>
     <string name="error_invalid_shortcut">Error: Shortcut is invalid</string>
-    <string name="action_show_details">Show details</string>
+    <string name="action_show_details">Show item details</string>
     <string name="activity_details">Details</string>
     <string name="error_disabled_shortcut">This shortcut is no longer valid. Please create a new one.</string>
     <string name="alert_rate_limit_delay">Syncing takes a bit longer than usual. Dynalist\'s API slowed us down.</string>
