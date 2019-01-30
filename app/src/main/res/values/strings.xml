@@ -46,7 +46,7 @@
     <string name="title_documents_list">Your documents</string>
     <string name="btn_add_item_and_close"><![CDATA[Add & Close]]></string>
     <string name="action_share">Share</string>
-    <string name="create_shortcut">Create shortcut</string>
+    <string name="create_shortcut">Quick Dynalist shortcut</string>
     <string name="discard">Discard</string>
     <string name="shortcut_name_hint">Shortcut name</string>
     <string name="shortcut_type_quick_dialog">Quick dialog</string>
