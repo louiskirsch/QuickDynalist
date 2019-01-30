@@ -179,4 +179,9 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         if (!event.success)
             toast(R.string.add_item_error)
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onDynalistLocateEvent(event: DynalistLocateEvent) {
+        openDynalistItem(event.item)
+    }
 }

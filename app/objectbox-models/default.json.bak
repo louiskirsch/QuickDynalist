@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1068626277769387505",
-      "lastPropertyId": "12:8027434694088666144",
+      "lastPropertyId": "13:1704676466088362766",
       "name": "DynalistItem",
       "properties": [
         {
@@ -55,15 +55,16 @@
           "name": "isChecked"
         },
         {
-          "id": "12:8027434694088666144",
-          "name": "isSynced"
+          "id": "13:1704676466088362766",
+          "indexId": "5:2178402680321130063",
+          "name": "syncJob"
         }
       ],
       "relations": []
     }
   ],
   "lastEntityId": "1:1068626277769387505",
-  "lastIndexId": "4:4834341726663538161",
+  "lastIndexId": "5:2178402680321130063",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 4,
@@ -73,7 +74,9 @@
     4933562954106154540,
     4834341726663538161
   ],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    8027434694088666144
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

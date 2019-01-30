@@ -9,8 +9,11 @@ import android.os.Parcelable
 import android.text.*
 import android.text.format.DateFormat
 import android.text.style.*
+import android.view.textclassifier.TextLinks
 import com.louiskirsch.quickdynalist.*
 import io.objectbox.annotation.*
+import io.objectbox.kotlin.boxFor
+import io.objectbox.kotlin.query
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 import java.io.Serializable
@@ -18,8 +21,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Entity
-class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?,
-                   var serverItemId: String?, var name: String, var note: String,
+class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: String?,
+                   @Index var serverItemId: String?, var name: String, var note: String,
                    @Transient var childrenIds: List<String>? = null,
                    var isInbox: Boolean = false, var isBookmark: Boolean = false,
                    var isChecked: Boolean = false) : Serializable, Parcelable {
@@ -107,6 +110,25 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
             }
         }
 
+        spannable.replaceAll(dynalistLinkRegex) {
+            SpannableString("∞ ${it.groupValues[1]}").apply {
+                val fileId = it.groupValues[2]
+                val itemId = it.groupValues[3]
+                val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+                val item = box.query {
+                    equal(DynalistItem_.serverFileId, fileId)
+                    and()
+                    equal(DynalistItem_.serverItemId, itemId)
+                }.findFirst()
+                item?.apply {
+                    val span = DynalistLinkSpan(this)
+                    setSpan(span, 2, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                }
+                val bg = BackgroundColorSpan(spanHighlight)
+                setSpan(bg, 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            }
+        }
+
         spannable.replaceAll(linkRegex) {
             SpannableString(it.groupValues[1]).apply {
                 val span = URLSpan(it.groupValues[2])
@@ -190,6 +212,7 @@ class DynalistItem(var serverFileId: String?, @Index var serverParentId: String?
         private val lineThroughRegex = Regex("""~~(.*?)~~""")
         private val linkRegex = Regex("""\[(.*?)]\((.*?)\)""")
         private val imageRegex = Regex("""!\[(.*?)]\((.*?)\)""")
+        private val dynalistLinkRegex = Regex("""\[(.*?)]\(https://dynalist\.io/d/(.*?)#z=(.*?)\)""")
 
         @Suppress("unused")
         @JvmField
