@@ -48,6 +48,7 @@ class EmojiAdapter: RecyclerView.Adapter<EmojiViewHolder>() {
                 selectedPosition = position
                 it.isActivated = true
             }
+            forceLayout()
         }
     }
 

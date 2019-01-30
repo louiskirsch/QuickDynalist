@@ -47,7 +47,7 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
         }
 
         // Query from local database
-        val clientItems = box.query{ isNull(DynalistItem_.syncJob) }.find()
+        val clientItems = box.all
         val previousInbox = box.query { equal(DynalistItem_.isInbox, true) } .findUnique()!!
         val clientItemsById = clientItems.associateBy { it.serverAbsoluteId }
         val clientItemsByName = clientItems.associateBy { it.name }
@@ -106,7 +106,7 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
 
         // Store new items in database
         DynalistApp.instance.boxStore.runInTx {
-            box.remove(notAssociatedClientItems - newInbox)
+            box.remove((notAssociatedClientItems - newInbox).filter { it.syncJob == null })
             box.put(serverItems)
         }
         dynalist.lastBookmarkQuery = Date()

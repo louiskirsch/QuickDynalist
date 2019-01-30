@@ -9,6 +9,9 @@ import com.louiskirsch.quickdynalist.jobs.JobService
 import com.louiskirsch.quickdynalist.network.DynalistService
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.MyObjectBox
+import com.squareup.picasso.LruCache
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
@@ -45,6 +48,13 @@ class DynalistApp : Application() {
 
         dynalistService = retrofit.create<DynalistService>(DynalistService::class.java)
         boxStore = MyObjectBox.builder().androidContext(this).build()
+
+        Picasso.Builder(this).apply {
+            val cacheSize = 200 * 1024 * 1024L // 200MB
+            downloader(OkHttp3Downloader(applicationContext, cacheSize))
+            Picasso.setSingletonInstance(build())
+        }
+
         upgrade()
     }
 
