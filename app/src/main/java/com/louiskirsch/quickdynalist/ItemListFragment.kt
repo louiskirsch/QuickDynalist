@@ -150,15 +150,15 @@ class ItemListFragment : Fragment() {
         submitButton.isEnabled = itemContents.text.isNotEmpty()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         if (location.serverFileId != null && location.serverItemId != null) {
-            inflater!!.inflate(R.menu.item_list_activity_menu, menu)
-            menu!!.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
+            inflater.inflate(R.menu.item_list_activity_menu, menu)
+            menu.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
             val shortcutsSupported = ShortcutManagerCompat.isRequestPinShortcutSupported(context!!)
             menu.findItem(R.id.create_shortcut).isVisible = shortcutsSupported
         }
         if (location.isInbox && !location.markedAsPrimaryInbox)
-            inflater!!.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
+            inflater.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
     }
 
     private fun setupItemContentsTextField() {
@@ -183,8 +183,8 @@ class ItemListFragment : Fragment() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item!!.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
             R.id.inbox_help -> showInboxHelp()
             R.id.open_in_dynalist -> openInDynalist()
             R.id.goto_parent -> openDynalistItem(location.parent.target)
@@ -207,7 +207,7 @@ class ItemListFragment : Fragment() {
     }
 
     private fun shareDynalistItem(): Boolean {
-        async {
+        doAsync {
             val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
             val location = box.get(location.clientId)
             val itemText = location.getSpannableText(context!!)

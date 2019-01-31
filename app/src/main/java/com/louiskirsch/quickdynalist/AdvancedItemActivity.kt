@@ -103,9 +103,9 @@ class AdvancedItemActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState!!.putSerializable("CALENDAR", calendar)
+        outState.putSerializable("CALENDAR", calendar)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
