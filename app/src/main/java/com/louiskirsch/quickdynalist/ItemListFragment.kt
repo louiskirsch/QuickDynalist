@@ -43,6 +43,7 @@ class ItemListFragment : Fragment() {
         dynalist = Dynalist(context!!)
         arguments?.let {
             location = it.getParcelable(ARG_LOCATION)!!
+            DynalistApp.instance.boxStore.boxFor<DynalistItem>().attach(location)
         }
         setHasOptionsMenu(true)
 
