@@ -59,7 +59,13 @@ class ItemListFragment : Fragment() {
             })
         }
         adapter.onClickListener = { openDynalistItem(it) }
-        adapter.onDetailsClickListener = { showItemDetails(it) }
+        adapter.onPopupItemClickListener = { item, menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_show_details -> showItemDetails(item)
+                R.id.action_edit -> editItem(item)
+            }
+            true
+        }
         adapter.onRowMovedIntoListener = { from, to ->
             DynalistApp.instance.jobManager.addJobInBackground(
                     MoveItemJob(from, to, -1)
@@ -93,6 +99,16 @@ class ItemListFragment : Fragment() {
         model.getItemsLiveData(location).observe(this, Observer<List<CachedDynalistItem>> {
             adapter.updateItems(it)
         })
+    }
+
+    private fun editItem(item: DynalistItem) {
+        val intent = Intent(context, AdvancedItemActivity::class.java)
+        intent.putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, item as Parcelable)
+        val activity = activity as AppCompatActivity
+        val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
+                UtilPair.create(activity.toolbar as View, "toolbar"),
+                UtilPair.create(itemContents as View, "itemContents"))
+        startActivity(intent, transition.toBundle())
     }
 
     private fun deleteItem(item: DynalistItem) {

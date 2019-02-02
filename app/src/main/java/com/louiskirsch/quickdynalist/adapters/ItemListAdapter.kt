@@ -4,13 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.text.SpannableString
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
-import com.louiskirsch.quickdynalist.isEllipsized
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
@@ -26,7 +27,16 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemNotes = itemView.itemNotes!!
     val itemChildren = itemView.itemChildren!!
     val itemImage = itemView.itemImage!!
-    val itemDetailsButton = itemView.itemDetailsButton!!
+    val itemMenu = itemView.itemMenu!!
+    val menuPopup = PopupMenu(itemMenu.context, itemMenu).apply {
+        inflate(R.menu.item_list_popup_menu)
+        itemMenu.setOnClickListener { show() }
+    }
+    val imagePopup = PopupMenu(itemImage.context, itemImage).apply {
+        inflate(R.menu.item_list_popup_menu)
+        inflate(R.menu.item_list_popup_image_extension)
+        itemImage.setOnClickListener { show() }
+    }
 }
 
 class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
@@ -59,7 +69,7 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
 
     var onClickListener: ((DynalistItem) -> Unit)? = null
     var onLongClickListener: ((DynalistItem) -> Boolean)? = null
-    var onDetailsClickListener: ((DynalistItem) -> Unit)? = null
+    var onPopupItemClickListener: ((DynalistItem, MenuItem) -> Boolean)? = null
     var onRowMovedListener: ((DynalistItem, Int) -> Unit)? = null
     var onRowMovedOnDropoff: ((DynalistItem, Int) -> Unit)? = null
     var onRowMovedIntoListener: ((DynalistItem, DynalistItem) -> Unit)? = null
@@ -163,35 +173,22 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
         holder.itemChildren.text = item.spannableChildren
         holder.itemView.setOnClickListener { onClickListener?.invoke(items[position].item) }
 
-        holder.itemDetailsButton.visibility = View.GONE
-        holder.itemDetailsButton.setOnClickListener {
-            onDetailsClickListener?.invoke(items[position].item)
+        val popupListener = { menuItem: MenuItem ->
+            onPopupItemClickListener?.invoke(items[position].item, menuItem) ?: false
         }
+        holder.menuPopup.setOnMenuItemClickListener(popupListener)
+        holder.imagePopup.setOnMenuItemClickListener(popupListener)
+        holder.itemMenu.visibility = View.VISIBLE
         holder.itemImage.visibility = View.GONE
 
-        val image = item.item.image
-        if (image != null) {
+        item.item.image?.let { image ->
             Picasso.get().load(image).into(holder.itemImage, object: Callback {
-                override fun onError(e: Exception?) {
-                    showDetailButtonIfEllipsized(holder)
-                }
+                override fun onError(e: Exception?) {}
                 override fun onSuccess() {
+                    holder.itemMenu.visibility = View.GONE
                     holder.itemImage.visibility = View.VISIBLE
-                    holder.itemImage.setOnClickListener {
-                        onDetailsClickListener?.invoke(items[position].item)
-                    }
                 }
             })
-        } else {
-            showDetailButtonIfEllipsized(holder)
-        }
-    }
-
-    private fun showDetailButtonIfEllipsized(holder: ItemListViewHolder) {
-        holder.itemNotes.isEllipsized { ellipsized ->
-            if (ellipsized) {
-                holder.itemDetailsButton.visibility = View.VISIBLE
-            }
         }
     }
 

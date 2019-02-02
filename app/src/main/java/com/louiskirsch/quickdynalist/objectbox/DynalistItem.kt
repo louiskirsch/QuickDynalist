@@ -199,6 +199,22 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         get() = tagMarkers.fold(name) { acc, marker ->
             acc.replace(marker, "", true) } .trim()
 
+    val date: Date?
+        get() = dateTimeRegex.find(name)?.groupValues?.get(1)?.let { date ->
+            dateReader.parse(date)
+        }
+
+    val time: Date?
+        get() = dateTimeRegex.find(name)?.groupValues?.get(2)?.let { time ->
+            return if (time.isNotBlank())
+                timeReader.parse(time)
+            else
+                null
+        }
+
+    val nameWithoutDate: String
+        get() = name.replace(dateTimeRegex, "").trim()
+
     companion object {
         fun newInbox() = DynalistItem(null, null, "inbox",
                 "\uD83D\uDCE5 Inbox", "", emptyList(), isInbox = true, isBookmark = true)
@@ -236,6 +252,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                         clientId = readLong()
                         position = readInt()
                         syncJob = readString()
+                        hidden = readInt() > 0
                         parent.targetId = readLong()
                     }
                 }
@@ -258,6 +275,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             writeLong(clientId)
             writeInt(position)
             writeString(syncJob)
+            writeInt(hidden.int)
             writeLong(parent.targetId)
         }
     }

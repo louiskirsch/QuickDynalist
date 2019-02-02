@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.activity_advanced_item.*
 import org.greenrobot.eventbus.EventBus
@@ -28,12 +29,16 @@ class AdvancedItemActivity : AppCompatActivity() {
 
     private lateinit var adapter: ArrayAdapter<DynalistItem>
     private var location: DynalistItem? = null
+    private var editingItem: DynalistItem? = null
     private val calendar = Calendar.getInstance()
 
+    private lateinit var dateFormat: java.text.DateFormat
+    private lateinit var timeFormat: java.text.DateFormat
+
     companion object {
+        const val EXTRA_EDIT_ITEM = "EXTRA_EDIT_ITEM"
         const val EXTRA_ITEM_TEXT = "EXTRA_ITEM_TEXT"
         const val EXTRA_SELECT_BOOKMARK = "EXTRA_SELECT_BOOKMARK"
-        private const val MAX_SUBMENU_ITEMS = 1000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,33 +49,62 @@ class AdvancedItemActivity : AppCompatActivity() {
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
+        dateFormat = DateFormat.getDateFormat(this)
+        timeFormat = DateFormat.getTimeFormat(this)
+
+        editingItem = intent.getParcelableExtra(EXTRA_EDIT_ITEM)
         location = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)
-        itemContents.setText(intent.getCharSequenceExtra(EXTRA_ITEM_TEXT))
+        intent.getCharSequenceExtra(EXTRA_ITEM_TEXT)?.let {
+            itemContents.setText(it)
+        }
 
-        val selectBookmark = intent.getBooleanExtra(EXTRA_SELECT_BOOKMARK, false)
-        if (location!!.isBookmark && selectBookmark) {
-            adapter = ArrayAdapter(this,
-                    android.R.layout.simple_spinner_item, ArrayList())
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            itemLocation.adapter = adapter
+        if (editingItem != null) {
+            itemContents.setText(editingItem!!.nameWithoutDate)
+            itemNotes.setText(editingItem!!.note)
 
-            val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-            model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
-                val initializing = adapter.count == 0
-                adapter.clear()
-                adapter.addAll(it)
-                if (initializing) {
-                    val index = it.indexOf(location!!)
-                    itemLocation.setSelection(max(index, 0))
-                }
-            })
-        } else {
+            editingItem!!.date?.let {
+                calendar.time = it
+                itemDate.setText(dateFormat.format(calendar.time))
+            }
+            editingItem!!.time?.let {
+                val time = Calendar.getInstance().apply { time = it }
+                calendar.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY))
+                calendar.set(Calendar.MINUTE, time.get(Calendar.MINUTE))
+                itemTime.setText(timeFormat.format(calendar.time))
+            }
+
             itemLocation.visibility = View.GONE
-            title = location!!.strippedMarkersName
+            title = getString(R.string.title_edit)
+        } else {
+            val selectBookmark = intent.getBooleanExtra(EXTRA_SELECT_BOOKMARK, false)
+            if (location!!.isBookmark && selectBookmark) {
+                setupBookmarkSpinner()
+            } else {
+                itemLocation.visibility = View.GONE
+                title = location!!.strippedMarkersName
+            }
         }
 
         setupDatePicker()
         setupTimePicker()
+    }
+
+    private fun setupBookmarkSpinner() {
+        adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, ArrayList())
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        itemLocation.adapter = adapter
+
+        val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+        model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
+            val initializing = adapter.count == 0
+            adapter.clear()
+            adapter.addAll(it)
+            if (initializing) {
+                val index = it.indexOf(location!!)
+                itemLocation.setSelection(max(index, 0))
+            }
+        })
     }
 
     override fun onStart() {
@@ -120,7 +154,6 @@ class AdvancedItemActivity : AppCompatActivity() {
                 calendar.set(Calendar.YEAR, year)
                 calendar.set(Calendar.MONTH, month)
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                val dateFormat = android.text.format.DateFormat.getDateFormat(this)
                 itemDate.setText(dateFormat.format(calendar.time))
             }, calendar.get(Calendar.YEAR),
                     calendar.get(Calendar.MONTH),
@@ -140,7 +173,6 @@ class AdvancedItemActivity : AppCompatActivity() {
             val dialog = TimePickerDialog(this, { _, hourOfDay, minute ->
                 calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
                 calendar.set(Calendar.MINUTE, minute)
-                val timeFormat = android.text.format.DateFormat.getTimeFormat(this)
                 itemTime.setText(timeFormat.format(calendar.time))
             }, calendar.get(Calendar.HOUR_OF_DAY),
                     calendar.get(Calendar.MINUTE),
@@ -176,11 +208,20 @@ class AdvancedItemActivity : AppCompatActivity() {
             ""
         }
         val contents = itemContents.text.toString() + dateString
-        val targetLocation = if (itemLocation.visibility == View.VISIBLE)
-            itemLocation.selectedItem as DynalistItem
-        else
-            location!!
-        dynalist.addItem(contents, targetLocation, itemNotes.text.toString())
+        val note = itemNotes.text.toString()
+
+        if (editingItem == null) {
+            val targetLocation = if (itemLocation.visibility == View.VISIBLE)
+                itemLocation.selectedItem as DynalistItem
+            else
+                location!!
+            dynalist.addItem(contents, targetLocation, note)
+        } else {
+            editingItem!!.name = contents
+            editingItem!!.note = note
+            DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(editingItem!!))
+        }
+
         fixedFinishAfterTransition()
         return true
     }

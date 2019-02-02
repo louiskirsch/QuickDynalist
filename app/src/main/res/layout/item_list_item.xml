@@ -24,15 +24,14 @@
         tools:ignore="ContentDescription" />
 
     <ImageButton
-        android:id="@+id/itemDetailsButton"
+        android:id="@+id/itemMenu"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/action_show_details"
-        android:src="@drawable/ic_action_show_text"
+        android:text="@string/action_menu"
+        android:src="@drawable/ic_action_more"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/itemNotes"
-        app:layout_constraintBottom_toBottomOf="@id/itemNotes"
+        app:layout_constraintTop_toTopOf="parent"
         android:contentDescription="@string/action_show_details" />
 
     <androidx.constraintlayout.widget.Barrier
@@ -40,7 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="start"
-        app:constraint_referenced_ids="itemDetailsButton,itemImage"/>
+        app:constraint_referenced_ids="itemMenu,itemImage"/>
 
     <TextView
         android:id="@+id/itemText"

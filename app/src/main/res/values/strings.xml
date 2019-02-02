@@ -67,4 +67,8 @@
     <string name="delete_item_success">Item deleted</string>
     <string name="undo">Undo</string>
     <string name="error_not_implemented_duplicate">Cloning items is not yet supported</string>
+    <string name="action_menu">Menu</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_show_image">Show image</string>
+    <string name="title_edit">Edit item</string>
 </resources>
