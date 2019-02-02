@@ -26,7 +26,10 @@ abstract class ItemJob: Job(Params(1)
         get() = DynalistApp.instance.jobManager
 
     protected fun requireItemId(item: DynalistItem) {
-        item.serverItemId = box.get(item.clientId)?.serverItemId ?: item.serverItemId
+        val updatedItem = box.get(item.clientId)
+        if (updatedItem == null && item.serverItemId == null)
+            throw InvalidJobException()
+        item.serverItemId = updatedItem?.serverItemId ?: item.serverItemId
         if (item.serverItemId == null) {
             // TODO this should never happen as soon as the API is fixed
             jobManager.addJobInBackground(SyncJob())

@@ -188,6 +188,6 @@ class MainActivity : AppCompatActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onItemEvent(event: ItemEvent) {
         if (!event.success)
-            toast(R.string.add_item_error)
+            toast(R.string.error_update_server)
     }
 }

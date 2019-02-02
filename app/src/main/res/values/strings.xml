@@ -9,7 +9,7 @@
     <string name="content_hint">Item text</string>
     <string name="btn_add_item">Add item</string>
     <string name="add_item_success">Item added to inbox</string>
-    <string name="add_item_error">Failed to add item</string>
+    <string name="error_update_server">So sorry! Failed to inform the server about this recent change.</string>
     <string name="process_text_action_name">Add To Inbox</string>
     <string name="bookmark_hint">Add the tag #quickdynalist or #inbox to items that should appear in this list. Updates might take a moment to take effect and require WIFI.</string>
     <string name="open_large">Open in large window</string>
