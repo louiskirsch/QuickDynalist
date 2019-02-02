@@ -9,6 +9,15 @@
     android:background="@drawable/activatable_selectable_background"
     android:layout_height="wrap_content">
 
+    <CheckBox
+        android:id="@+id/itemCheckedStatus"
+        android:layout_width="24sp"
+        android:layout_height="24sp"
+        android:button="@null"
+        android:background="?android:attr/listChoiceIndicatorMultiple"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.louiskirsch.quickdynalist.views.SquareImageView
         android:id="@+id/itemImage"
         android:layout_width="wrap_content"
@@ -47,7 +56,7 @@
         android:textColor="?android:attr/textColorPrimary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/itemCheckedStatus"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@id/itemImage" />
 
@@ -59,7 +68,7 @@
         android:ellipsize="end"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/itemCheckedStatus"
         app:layout_constraintTop_toBottomOf="@id/itemText"
         app:layout_constraintEnd_toStartOf="@id/itemRightAlignedViews" />
 
@@ -69,7 +78,7 @@
         android:textColor="?android:attr/textColorSecondary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/itemCheckedStatus"
         app:layout_constraintTop_toBottomOf="@id/itemNotes"
         app:layout_constraintEnd_toStartOf="@id/itemImage" />
 

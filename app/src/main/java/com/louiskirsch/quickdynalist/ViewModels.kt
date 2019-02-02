@@ -2,9 +2,7 @@ package com.louiskirsch.quickdynalist
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
@@ -35,21 +33,19 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         })
     }
 
-    private var parent: DynalistItem? = null
-    private lateinit var itemsLiveData: TransformedOBLiveData<DynalistItem, CachedDynalistItem>
-
-    fun getItemsLiveData(parent: DynalistItem):
-            TransformedOBLiveData<DynalistItem, CachedDynalistItem> {
-        if(this.parent != parent) {
-            this.parent = parent
-            itemsLiveData = TransformedOBLiveData(box.query {
+    val itemsParent = MutableLiveData<DynalistItem>()
+    val itemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
+        Transformations.switchMap(itemsParent) { parent ->
+            TransformedOBLiveData(box.query {
                 equal(DynalistItem_.parentId, parent.clientId)
                 and()
                 notEqual(DynalistItem_.name, "")
                 and()
                 equal(DynalistItem_.hidden, false)
-                and()
-                equal(DynalistItem_.isChecked, false)
+                if (!parent.areCheckedItemsVisible) {
+                    and()
+                    equal(DynalistItem_.isChecked, false)
+                }
                 order(DynalistItem_.position)
                 eager(100, DynalistItem_.children)
             }) { items ->
@@ -57,7 +53,6 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 items.map { CachedDynalistItem(it, getApplication()) }
             }
         }
-        return itemsLiveData
     }
 }
 

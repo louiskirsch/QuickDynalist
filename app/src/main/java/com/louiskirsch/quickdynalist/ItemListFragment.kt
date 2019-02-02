@@ -18,7 +18,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.TagConstraint
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -26,6 +25,7 @@ import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
 import com.louiskirsch.quickdynalist.adapters.ItemTouchCallback
 import com.louiskirsch.quickdynalist.jobs.DeleteItemJob
+import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
 import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
@@ -44,13 +44,13 @@ class ItemListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dynalist = Dynalist(context!!)
-        arguments?.let {
+        arguments!!.let {
             location = it.getParcelable(ARG_LOCATION)!!
             DynalistApp.instance.boxStore.boxFor<DynalistItem>().attach(location)
         }
         setHasOptionsMenu(true)
 
-        adapter = ItemListAdapter().apply {
+        adapter = ItemListAdapter(location.isChecklist).apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (itemCount == 1 && !adapter.moveInProgress)
@@ -76,7 +76,7 @@ class ItemListFragment : Fragment() {
                     MoveItemJob(item, item.parent.target, toPosition)
             )
         }
-        adapter.onRowMovedOnDropoff = { item, dropId ->
+        adapter.onRowMovedOnDropoffListener = { item, dropId ->
             when (dropId) {
                 R.id.dropoff_parent -> {
                     if (location.parent.isNull) {
@@ -94,9 +94,14 @@ class ItemListFragment : Fragment() {
             }
         }
         adapter.onRowSwipedListener = { deleteItem(it) }
+        adapter.onCheckedStatusChangedListener = { item, checked ->
+            item.isChecked = checked
+            DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(item))
+        }
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.getItemsLiveData(location).observe(this, Observer<List<CachedDynalistItem>> {
+        model.itemsParent.value = location
+        model.itemsLiveData.observe(this, Observer<List<CachedDynalistItem>> {
             adapter.updateItems(it)
         })
     }
@@ -222,6 +227,8 @@ class ItemListFragment : Fragment() {
             menu.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
             val shortcutsSupported = ShortcutManagerCompat.isRequestPinShortcutSupported(context!!)
             menu.findItem(R.id.create_shortcut).isVisible = shortcutsSupported
+            menu.findItem(R.id.toggle_show_checked_items).isChecked = location.areCheckedItemsVisible
+            menu.findItem(R.id.toggle_checklist).isChecked = location.isChecklist
         }
         if (location.isInbox && !location.markedAsPrimaryInbox)
             inflater.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
@@ -256,8 +263,45 @@ class ItemListFragment : Fragment() {
             R.id.goto_parent -> openDynalistItem(location.parent.target)
             R.id.share -> shareDynalistItem()
             R.id.create_shortcut -> createShortcut()
+            R.id.toggle_checklist -> toggleChecklist(item)
+            R.id.toggle_show_checked_items -> toggleShowChecked(item)
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun toggleShowChecked(menuItem: MenuItem): Boolean {
+        val checked = !menuItem.isChecked
+        menuItem.isChecked = checked
+        location.areCheckedItemsVisible = checked
+        val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+        model.itemsParent.value = location
+        doAsync {
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            DynalistApp.instance.boxStore.runInTx {
+                box.get(location.clientId)?.apply {
+                    areCheckedItemsVisible = checked
+                    box.put(this)
+                }
+            }
+        }
+        return true
+    }
+
+    private fun toggleChecklist(menuItem: MenuItem): Boolean {
+        val checked = !menuItem.isChecked
+        menuItem.isChecked = checked
+        adapter.showChecklist = checked
+        location.isChecklist = checked
+        doAsync {
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            DynalistApp.instance.boxStore.runInTx {
+                box.get(location.clientId)?.apply {
+                    isChecklist = checked
+                    box.put(this)
+                }
+            }
+        }
+        return true
     }
 
     private fun createShortcut(): Boolean {

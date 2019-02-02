@@ -71,7 +71,11 @@ class DynalistApp : Application() {
         if (version < 16) {
             val box: Box<DynalistItem> = boxStore.boxFor()
             boxStore.runInTxAsync({
-                box.put(box.all.apply { forEach { it.hidden = false } })
+                box.put(box.all.apply { forEach {
+                    it.hidden = false
+                    it.areCheckedItemsVisible = false
+                    it.isChecklist = false
+                } })
             }, null)
         }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE

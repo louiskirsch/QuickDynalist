@@ -23,6 +23,7 @@ import java.util.*
 
 
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    val itemCheckedStatus = itemView.itemCheckedStatus!!
     val itemText = itemView.itemText!!
     val itemNotes = itemView.itemNotes!!
     val itemChildren = itemView.itemChildren!!
@@ -61,7 +62,8 @@ class CachedDynalistItem(val item: DynalistItem, context: Context) {
     override fun hashCode() = hashKode(spannableText, spannableNotes, spannableChildren, item)
 }
 
-class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchCallback.ItemTouchHelperContract {
+class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView.ViewHolder>(),
+        ItemTouchCallback.ItemTouchHelperContract {
 
     private val items = ArrayList<CachedDynalistItem>()
     var moveInProgress: Boolean = false
@@ -71,13 +73,22 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
     var onLongClickListener: ((DynalistItem) -> Boolean)? = null
     var onPopupItemClickListener: ((DynalistItem, MenuItem) -> Boolean)? = null
     var onRowMovedListener: ((DynalistItem, Int) -> Unit)? = null
-    var onRowMovedOnDropoff: ((DynalistItem, Int) -> Unit)? = null
+    var onRowMovedOnDropoffListener: ((DynalistItem, Int) -> Unit)? = null
     var onRowMovedIntoListener: ((DynalistItem, DynalistItem) -> Unit)? = null
     var onRowSwipedListener: ((DynalistItem) -> Unit)? = null
+    var onCheckedStatusChangedListener: ((DynalistItem, Boolean) -> Unit)? = null
 
     init {
         setHasStableIds(true)
     }
+
+    var showChecklist: Boolean = showChecklist
+        set(value) {
+            if (value != field) {
+                field = value
+                notifyItemRangeChanged(0, itemCount)
+            }
+        }
 
     fun updateItems(newItems: List<CachedDynalistItem>) {
         if (moveInProgress) {
@@ -166,6 +177,16 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
 
     private fun onBindItemViewHolder(holder: ItemListViewHolder, position: Int) {
         val item = items[position]
+
+        holder.itemCheckedStatus.apply {
+            visibility = if (showChecklist) View.VISIBLE else View.GONE
+            setOnCheckedChangeListener(null)
+            isChecked = item.item.isChecked
+            setOnCheckedChangeListener { _, isChecked ->
+                onCheckedStatusChangedListener?.invoke(items[position].item, isChecked)
+            }
+        }
+
         holder.itemText.text = item.spannableText
         holder.itemNotes.visibility = if (item.spannableNotes.isEmpty()) View.GONE else View.VISIBLE
         holder.itemNotes.text = item.spannableNotes
@@ -241,7 +262,7 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
                 items.removeAt(fromIndex)
                 notifyItemRemoved(fromPosition)
             }
-            onRowMovedOnDropoff?.invoke(fromItem, itemId)
+            onRowMovedOnDropoffListener?.invoke(fromItem, itemId)
         } else {
             val intoIndex = correctPositionForDropOffs(intoPosition)!!
             val intoItem = items[intoIndex].item

@@ -23,4 +23,16 @@
         android:title="@string/create_shortcut"
         app:showAsAction="never" />
 
+    <group android:checkableBehavior="all">
+        <item android:id="@+id/toggle_checklist"
+            android:checkable="true"
+            android:title="@string/toggle_checklist"
+            app:showAsAction="never" />
+
+        <item android:id="@+id/toggle_show_checked_items"
+            android:checkable="true"
+            android:title="@string/toggle_show_checked_items"
+            app:showAsAction="never" />
+    </group>
+
 </menu>

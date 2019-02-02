@@ -33,6 +33,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var position: Int = 0
     @Index var syncJob: String? = null
     var hidden: Boolean = false
+    var isChecklist: Boolean = false
+    var areCheckedItemsVisible: Boolean = false
 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>

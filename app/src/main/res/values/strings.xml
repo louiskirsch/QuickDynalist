@@ -71,4 +71,6 @@
     <string name="action_edit">Edit</string>
     <string name="action_show_image">Show image</string>
     <string name="title_edit">Edit item</string>
+    <string name="toggle_checklist">Make checklist</string>
+    <string name="toggle_show_checked_items">Show checked items</string>
 </resources>
