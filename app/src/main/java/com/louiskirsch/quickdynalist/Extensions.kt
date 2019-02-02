@@ -21,6 +21,7 @@ import android.graphics.Paint.Align
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.text.SpannableStringBuilder
 import android.util.Log
+import android.view.ViewGroup
 import android.widget.TextView
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
@@ -29,6 +30,7 @@ import io.objectbox.kotlin.query
 import kotlin.math.roundToInt
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver
+import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.network.DynalistResponse
 import retrofit2.Call
 import retrofit2.Response
@@ -141,4 +143,10 @@ fun <T: DynalistResponse>
         return clone().execute()
     }
     return response
+}
+
+val RecyclerView.children: List<RecyclerView.ViewHolder> get() {
+    return IntRange(0, layoutManager!!.childCount - 1).map {
+        getChildViewHolder(layoutManager!!.getChildAt(it)!!)
+    }
 }

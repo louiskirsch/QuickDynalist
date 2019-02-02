@@ -6,6 +6,7 @@ import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
@@ -17,6 +18,8 @@ import kotlinx.android.synthetic.main.item_list_item.view.*
 import nl.pvdberg.hashkode.compareFields
 import nl.pvdberg.hashkode.hashKode
 import java.lang.Exception
+import java.util.*
+
 
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemText = itemView.itemText!!
@@ -25,6 +28,8 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemImage = itemView.itemImage!!
     val itemDetailsButton = itemView.itemDetailsButton!!
 }
+
+class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
 
 class CachedDynalistItem(val item: DynalistItem, context: Context) {
     val spannableText = item.getSpannableText(context).run {
@@ -46,17 +51,25 @@ class CachedDynalistItem(val item: DynalistItem, context: Context) {
     override fun hashCode() = hashKode(spannableText, spannableNotes, spannableChildren, item)
 }
 
-class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
+class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchCallback.ItemTouchHelperContract {
 
     private val items = ArrayList<CachedDynalistItem>()
+    var moveInProgress: Boolean = false
+        private set
+
     var onClickListener: ((DynalistItem) -> Unit)? = null
     var onDetailsClickListener: ((DynalistItem) -> Unit)? = null
+    var onRowMovedListener: ((DynalistItem, Int) -> Unit)? = null
+    var onRowSwipedListener: ((DynalistItem) -> Unit)? = null
 
     init {
         setHasStableIds(true)
     }
 
     fun updateItems(newItems: List<CachedDynalistItem>) {
+        if (moveInProgress) {
+            return
+        }
         val update = {
             items.clear()
             items.addAll(newItems)
@@ -73,23 +86,72 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
         }
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int {
+        if (moveInProgress)
+            return items.size + 2
+        return items.size
+    }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemListViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ItemListViewHolder(inflater.inflate(R.layout.item_list_item,
-                parent, false)).apply {
-            itemText.setOnTouchListener(OnLinkTouchListener())
-            itemNotes.setOnTouchListener(OnLinkTouchListener())
-            itemChildren.setOnTouchListener(OnLinkTouchListener())
+        return if (viewType == R.id.view_type_item) {
+            ItemListViewHolder(inflater.inflate(R.layout.item_list_item,
+                    parent, false)).apply {
+                itemText.setOnTouchListener(OnLinkTouchListener())
+                itemNotes.setOnTouchListener(OnLinkTouchListener())
+                itemChildren.setOnTouchListener(OnLinkTouchListener())
+            }
+        } else {
+            DropOffViewHolder(inflater.inflate(R.layout.item_list_dropoff,
+                    parent, false) as TextView)
         }
     }
 
-    private fun getItemId(item: CachedDynalistItem): Long = item.item.clientId
-    override fun getItemId(position: Int): Long = getItemId(items[position])
+    override fun getItemViewType(position: Int): Int {
+        if (moveInProgress && (position == 0 || position == itemCount - 1))
+            return R.id.view_type_dropoff
+        return R.id.view_type_item
+    }
 
-    override fun onBindViewHolder(holder: ItemListViewHolder, position: Int) {
+    private fun getItemId(item: CachedDynalistItem): Long = item.item.clientId
+    override fun getItemId(position: Int): Long {
+        return correctPositionForDropOffs(position)?.let { getItemId(items[it]) } ?: run {
+            return if (position == 0)
+                R.id.dropoff_parent.toLong()
+            else
+                R.id.dropoff_duplicate.toLong()
+        }
+    }
+
+    private fun correctPositionForDropOffs(position: Int): Int? {
+        if (!moveInProgress)
+            return position
+        if (getItemViewType(position) == R.id.view_type_dropoff)
+            return null
+        return position - 1
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (getItemViewType(position) == R.id.view_type_item) {
+            val fixedPosition = correctPositionForDropOffs(position)!!
+            onBindItemViewHolder(holder as ItemListViewHolder, fixedPosition)
+        } else {
+            onBindDropOffViewHolder(holder as DropOffViewHolder, position)
+        }
+    }
+
+    private fun onBindDropOffViewHolder(holder: DropOffViewHolder, position: Int) {
+        val context = holder.itemView.context
+        val text = when (getItemId(position)) {
+            R.id.dropoff_parent.toLong() -> context.getString(R.string.dropoff_parent)
+            R.id.dropoff_duplicate.toLong() -> context.getString(R.string.dropoff_duplicate)
+            else -> throw IllegalStateException("Invalid drop off point")
+        }
+        holder.textView.text = text
+    }
+
+    private fun onBindItemViewHolder(holder: ItemListViewHolder, position: Int) {
         val item = items[position]
         holder.itemText.text = item.spannableText
         holder.itemNotes.visibility = if (item.spannableNotes.isEmpty()) View.GONE else View.VISIBLE
@@ -128,5 +190,61 @@ class ItemListAdapter: RecyclerView.Adapter<ItemListViewHolder>() {
                 holder.itemDetailsButton.visibility = View.VISIBLE
             }
         }
+    }
+
+    override fun onRowMoved(fromPosition: Int, toPosition: Int) {
+        val itemsFromPosition = correctPositionForDropOffs(fromPosition)!!
+        val itemsToPosition = correctPositionForDropOffs(toPosition)!!
+        if (itemsFromPosition < itemsToPosition) {
+            for (i in itemsFromPosition until itemsToPosition) {
+                Collections.swap(items, i, i + 1)
+            }
+        } else {
+            for (i in itemsFromPosition downTo itemsToPosition + 1) {
+                Collections.swap(items, i, i - 1)
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition)
+    }
+
+    override fun onRowMovedToDestination(toPosition: Int) {
+        val index = correctPositionForDropOffs(toPosition)!!
+        val item = items[index].item
+        // TODO create move job
+        onRowMovedListener?.invoke(item, index)
+    }
+
+    override fun onRowSwiped(position: Int) {
+        val item = items[position].item
+        items.removeAt(position)
+        notifyItemRemoved(position)
+        // TODO create move job
+        onRowSwipedListener?.invoke(item)
+    }
+
+    override fun onMoveStart(position: Int) {
+        // TODO add duplicate and parent drop offs
+        moveInProgress = true
+        notifyItemInserted(0)
+        notifyItemInserted(itemCount - 1)
+    }
+
+    override fun onMoveEnd(position: Int) {
+        // TODO remove dupe and parent drop off
+        notifyItemRemoved(0)
+        notifyItemRemoved(itemCount - 1)
+        moveInProgress = false
+    }
+
+    override fun onRowMovedInto(fromPosition: Int, intoPosition: Int) {
+        val index = correctPositionForDropOffs(fromPosition)!!
+        val item = items[index].item
+        items.removeAt(index)
+        notifyItemRemoved(fromPosition)
+        // TODO create move job
+    }
+
+    override fun canDropOver(position: Int): Boolean {
+        return position in 1..(itemCount - 2)
     }
 }

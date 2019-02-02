@@ -61,4 +61,6 @@
     <string name="activity_details">Details</string>
     <string name="error_disabled_shortcut">This shortcut is no longer valid. Please create a new one.</string>
     <string name="alert_rate_limit_delay">Syncing takes a bit longer than usual. Dynalist\'s API slowed us down.</string>
+    <string name="dropoff_parent">Move to parent</string>
+    <string name="dropoff_duplicate">Duplicate</string>
 </resources>

@@ -17,12 +17,14 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.birbit.android.jobqueue.TagConstraint
 import com.google.android.material.snackbar.Snackbar
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
+import com.louiskirsch.quickdynalist.adapters.ItemTouchCallback
 import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import io.objectbox.kotlin.boxFor
@@ -50,7 +52,7 @@ class ItemListFragment : Fragment() {
         adapter = ItemListAdapter().apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                    if (itemCount == 1)
+                    if (itemCount == 1 && !adapter.moveInProgress)
                         itemList.scrollToPosition(positionStart)
                 }
             })
@@ -135,6 +137,7 @@ class ItemListFragment : Fragment() {
 
         itemList.layoutManager = LinearLayoutManager(context)
         itemList.adapter = adapter
+        ItemTouchHelper(ItemTouchCallback(adapter)).attachToRecyclerView(itemList)
     }
 
     override fun onStart() {
