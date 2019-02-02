@@ -63,4 +63,8 @@
     <string name="alert_rate_limit_delay">Syncing takes a bit longer than usual. Dynalist\'s API slowed us down.</string>
     <string name="dropoff_parent">Move to parent</string>
     <string name="dropoff_duplicate">Duplicate</string>
+    <string name="error_dropoff_no_parent">This is already the root item</string>
+    <string name="delete_item_success">Item deleted</string>
+    <string name="undo">Undo</string>
+    <string name="error_not_implemented_duplicate">Cloning items is not yet supported</string>
 </resources>

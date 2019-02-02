@@ -2,7 +2,6 @@ package com.louiskirsch.quickdynalist
 
 
 import android.app.ActivityOptions
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -12,7 +11,6 @@ import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -20,18 +18,21 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.TagConstraint
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
 import com.louiskirsch.quickdynalist.adapters.ItemTouchCallback
-import com.louiskirsch.quickdynalist.jobs.BookmarksJob
+import com.louiskirsch.quickdynalist.jobs.DeleteItemJob
+import com.louiskirsch.quickdynalist.jobs.MoveItemJob
+import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import io.objectbox.kotlin.boxFor
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.custom.async
 import android.util.Pair as UtilPair
 
 class ItemListFragment : Fragment() {
@@ -57,19 +58,64 @@ class ItemListFragment : Fragment() {
                 }
             })
         }
-        adapter.onClickListener = {
-            if (it.serverItemId != null) {
-                openDynalistItem(it)
-            } else {
-                alertRequireSync()
+        adapter.onClickListener = { openDynalistItem(it) }
+        adapter.onDetailsClickListener = { showItemDetails(it) }
+        adapter.onRowMovedIntoListener = { from, to ->
+            DynalistApp.instance.jobManager.addJobInBackground(
+                    MoveItemJob(from, to, -1)
+            )
+        }
+        adapter.onRowMovedListener = { item, toPosition ->
+            DynalistApp.instance.jobManager.addJobInBackground(
+                    MoveItemJob(item, item.parent.target, toPosition)
+            )
+        }
+        adapter.onRowMovedOnDropoff = { item, dropId ->
+            when (dropId) {
+                R.id.dropoff_parent -> {
+                    if (location.parent.isNull) {
+                        context!!.toast(R.string.error_dropoff_no_parent)
+                    } else {
+                        DynalistApp.instance.jobManager.addJobInBackground(
+                                MoveItemJob(item, location.parent.target, -1)
+                        )
+                    }
+                }
+                R.id.dropoff_duplicate -> {
+                    // TODO implement
+                    context!!.toast(R.string.error_not_implemented_duplicate)
+                }
             }
         }
-        adapter.onDetailsClickListener = { showItemDetails(it) }
+        adapter.onRowSwipedListener = { deleteItem(it) }
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.getItemsLiveData(location).observe(this, Observer<List<CachedDynalistItem>> {
             adapter.updateItems(it)
         })
+    }
+
+    private fun deleteItem(item: DynalistItem) {
+        val boxStore = DynalistApp.instance.boxStore
+        val box = boxStore.boxFor<DynalistItem>()
+        boxStore.runInTxAsync({
+            box.put(box.get(item.clientId).apply { hidden = true })
+        }, null)
+        Snackbar.make(view!!, R.string.delete_item_success, Snackbar.LENGTH_SHORT).apply {
+            setAction(R.string.undo) {
+                boxStore.runInTxAsync({
+                    box.put(box.get(item.clientId).apply { hidden = false })
+                }, null)
+            }
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION) {
+                        DynalistApp.instance.jobManager.addJobInBackground(DeleteItemJob(item))
+                    }
+                }
+            })
+            show()
+        }
     }
 
     private fun showItemDetails(item: DynalistItem): Boolean {
@@ -87,9 +133,9 @@ class ItemListFragment : Fragment() {
             setAction(R.string.action_sync) {
                 DynalistApp.instance.jobManager.run {
                     cancelJobsInBackground({
-                        val job = BookmarksJob(false)
+                        val job = SyncJob(false)
                         addJobInBackground(job)
-                    }, TagConstraint.ALL, arrayOf(BookmarksJob.TAG))
+                    }, TagConstraint.ALL, arrayOf(SyncJob.TAG))
                 }
             }
             show()

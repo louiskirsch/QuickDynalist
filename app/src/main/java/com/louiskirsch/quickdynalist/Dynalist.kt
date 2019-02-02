@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.EditText
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
-import com.louiskirsch.quickdynalist.jobs.BookmarksJob
+import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
@@ -41,7 +41,7 @@ class Dynalist(private val context: Context) {
         get() = preferences.getInt("PREFS_VERSION", 1)
         set(version) = preferences.edit().putInt("PREFS_VERSION", version).apply()
 
-    var lastBookmarkQuery: Date
+    var lastFullSync: Date
         get() = Date(preferences.getLong("BOOKMARK_UPDATE", 0))
         set(lastQuery) = preferences.edit().putLong("BOOKMARK_UPDATE", lastQuery.time).apply()
 
@@ -54,10 +54,10 @@ class Dynalist(private val context: Context) {
     fun subscribe() {
         EventBus.getDefault().register(this)
 
-        val bookmarksOutdated = lastBookmarkQuery.time < Date().time - 60 * 1000L
+        val bookmarksOutdated = lastFullSync.time < Date().time - 60 * 1000L
         if (isAuthenticated && bookmarksOutdated) {
             val jobManager = DynalistApp.instance.jobManager
-            jobManager.addJobInBackground(BookmarksJob())
+            jobManager.addJobInBackground(SyncJob())
         }
     }
 
@@ -71,7 +71,7 @@ class Dynalist(private val context: Context) {
             context.toast(R.string.token_invalid)
             authenticate()
         } else {
-            DynalistApp.instance.jobManager.addJobInBackground(BookmarksJob())
+            DynalistApp.instance.jobManager.addJobInBackground(SyncJob())
         }
     }
 

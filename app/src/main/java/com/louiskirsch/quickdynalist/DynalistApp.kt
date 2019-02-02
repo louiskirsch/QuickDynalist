@@ -4,18 +4,16 @@ import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.config.Configuration
 import android.app.Application
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService.*
-import com.louiskirsch.quickdynalist.jobs.BookmarksJob
+import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.jobs.JobService
 import com.louiskirsch.quickdynalist.network.DynalistService
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.MyObjectBox
-import com.squareup.picasso.LruCache
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
-import io.objectbox.kotlin.query
 import org.jetbrains.anko.doAsync
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -67,10 +65,16 @@ class DynalistApp : Application() {
                 val box: Box<DynalistItem> = boxStore.boxFor()
                 box.put(DynalistItem.newInbox())
                 if (dynalist.isAuthenticated)
-                    jobManager.addJobInBackground(BookmarksJob())
+                    jobManager.addJobInBackground(SyncJob())
             }
-            dynalist.preferencesVersion = BuildConfig.VERSION_CODE
         }
+        if (version < 16) {
+            val box: Box<DynalistItem> = boxStore.boxFor()
+            boxStore.runInTxAsync({
+                box.put(box.all.apply { forEach { it.hidden = false } })
+            }, null)
+        }
+        dynalist.preferencesVersion = BuildConfig.VERSION_CODE
     }
 
     private fun createJobManager(): JobManager {

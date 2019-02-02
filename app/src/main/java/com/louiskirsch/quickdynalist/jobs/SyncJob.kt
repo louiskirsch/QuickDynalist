@@ -17,9 +17,9 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 
-class BookmarksJob(unmeteredNetwork: Boolean = true)
+class SyncJob(unmeteredNetwork: Boolean = true)
     : Job(Params(-1).setRequiresUnmeteredNetwork(unmeteredNetwork)
-        .singleInstanceBy("dynalistItems").addTags(TAG)) {
+        .singleInstanceBy(TAG).addTags(TAG)) {
 
     companion object {
         const val TAG = "syncJob"
@@ -61,16 +61,18 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
                 val clientItem = if (candidate in notAssociatedClientItems) candidate else null
                 clientItem?.apply {
                     serverFileId = doc.id
-                    serverParentId = it.parent  // Currently this does nothing, bug in API
                     serverItemId = it.id
-                    name = it.content
-                    note = it.note
                     childrenIds = it.children ?: emptyList()
                     isInbox = false
                     isBookmark = false
-                    isChecked = it.checked
-                    position = 0
-                    parent.target = null
+                    if (syncJob == null) {
+                        isChecked = it.checked
+                        position = 0
+                        name = it.content
+                        note = it.note
+                        parent.target = null
+                        serverParentId = it.parent  // Currently this does nothing, bug in API
+                    }
                     notAssociatedClientItems.remove(this)
                 } ?: DynalistItem(doc.id, it.parent, it.id, it.content, it.note,
                         it.children ?: emptyList(), isChecked = it.checked)
@@ -109,7 +111,7 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
             box.remove((notAssociatedClientItems - newInbox).filter { it.syncJob == null })
             box.put(serverItems)
         }
-        dynalist.lastBookmarkQuery = Date()
+        dynalist.lastFullSync = Date()
         EventBus.getDefault().post(SyncEvent(true, requiresUnmeteredNetwork()))
     }
 

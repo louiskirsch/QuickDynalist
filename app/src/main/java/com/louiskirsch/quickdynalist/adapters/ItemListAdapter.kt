@@ -60,6 +60,8 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
     var onClickListener: ((DynalistItem) -> Unit)? = null
     var onDetailsClickListener: ((DynalistItem) -> Unit)? = null
     var onRowMovedListener: ((DynalistItem, Int) -> Unit)? = null
+    var onRowMovedOnDropoff: ((DynalistItem, Int) -> Unit)? = null
+    var onRowMovedIntoListener: ((DynalistItem, DynalistItem) -> Unit)? = null
     var onRowSwipedListener: ((DynalistItem) -> Unit)? = null
 
     init {
@@ -210,7 +212,6 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
     override fun onRowMovedToDestination(toPosition: Int) {
         val index = correctPositionForDropOffs(toPosition)!!
         val item = items[index].item
-        // TODO create move job
         onRowMovedListener?.invoke(item, index)
     }
 
@@ -218,30 +219,38 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
         val item = items[position].item
         items.removeAt(position)
         notifyItemRemoved(position)
-        // TODO create move job
         onRowSwipedListener?.invoke(item)
     }
 
     override fun onMoveStart(position: Int) {
-        // TODO add duplicate and parent drop offs
         moveInProgress = true
         notifyItemInserted(0)
         notifyItemInserted(itemCount - 1)
     }
 
     override fun onMoveEnd(position: Int) {
-        // TODO remove dupe and parent drop off
         notifyItemRemoved(0)
         notifyItemRemoved(itemCount - 1)
         moveInProgress = false
     }
 
     override fun onRowMovedInto(fromPosition: Int, intoPosition: Int) {
-        val index = correctPositionForDropOffs(fromPosition)!!
-        val item = items[index].item
-        items.removeAt(index)
-        notifyItemRemoved(fromPosition)
-        // TODO create move job
+        val fromIndex = correctPositionForDropOffs(fromPosition)!!
+        val fromItem = items[fromIndex].item
+        if (getItemViewType(intoPosition) == R.id.view_type_dropoff) {
+            val itemId = getItemId(intoPosition).toInt()
+            if (itemId != R.id.dropoff_duplicate) {
+                items.removeAt(fromIndex)
+                notifyItemRemoved(fromPosition)
+            }
+            onRowMovedOnDropoff?.invoke(fromItem, itemId)
+        } else {
+            val intoIndex = correctPositionForDropOffs(intoPosition)!!
+            val intoItem = items[intoIndex].item
+            items.removeAt(fromIndex)
+            notifyItemRemoved(fromPosition)
+            onRowMovedIntoListener?.invoke(fromItem, intoItem)
+        }
     }
 
     override fun canDropOver(position: Int): Boolean {

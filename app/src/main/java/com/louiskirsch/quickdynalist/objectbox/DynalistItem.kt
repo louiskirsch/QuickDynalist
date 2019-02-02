@@ -32,6 +32,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     @Id var clientId: Long = 0
     var position: Int = 0
     @Index var syncJob: String? = null
+    var hidden: Boolean = false
 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
@@ -168,9 +169,11 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     fun populateChildren(itemMap: Map<Pair<String, String>, DynalistItem>) {
         childrenIds!!.forEachIndexed { idx, childId ->
             itemMap[Pair(serverFileId, childId)]!!.let { child ->
-                child.serverParentId = serverItemId
-                child.parent.target = this
-                child.position = idx
+                if (child.syncJob == null) {
+                    child.serverParentId = serverItemId
+                    child.parent.target = this
+                    child.position = idx
+                }
             }
         }
     }

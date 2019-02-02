@@ -12,7 +12,7 @@ import android.view.View
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.louiskirsch.quickdynalist.jobs.BookmarksJob
+import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.android.synthetic.main.app_bar_navigation.*
@@ -154,7 +154,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.menu_item_bookmarks_hint -> alert {
                 messageResource = R.string.bookmark_hint
                 okButton { }
-                DynalistApp.instance.jobManager.addJobInBackground(BookmarksJob())
+                DynalistApp.instance.jobManager.addJobInBackground(SyncJob())
                 show()
             }
         }

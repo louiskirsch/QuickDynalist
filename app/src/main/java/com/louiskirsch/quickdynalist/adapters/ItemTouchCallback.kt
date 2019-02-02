@@ -9,6 +9,7 @@ import com.louiskirsch.quickdynalist.children
 class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouchHelper.Callback() {
 
     private var dropIntoTarget: RecyclerView.ViewHolder? = null
+    private var dragging: Boolean = false
 
     override fun isLongPressDragEnabled(): Boolean = true
     override fun isItemViewSwipeEnabled(): Boolean = true
@@ -39,6 +40,7 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouch
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         super.onSelectedChanged(viewHolder, actionState)
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
+            dragging = true
             adapter.onMoveStart(viewHolder.adapterPosition)
             val recyclerView = viewHolder.itemView.parent as RecyclerView
             recyclerView.setOnTouchListener { _, event ->
@@ -62,15 +64,18 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouch
     @SuppressLint("ClickableViewAccessibility")
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
-        if (dropIntoTarget != null) {
-            adapter.onRowMovedInto(viewHolder.adapterPosition, dropIntoTarget!!.adapterPosition)
-            dropIntoTarget!!.itemView.isActivated = false
-            dropIntoTarget = null
-        } else {
-            adapter.onRowMovedToDestination(viewHolder.adapterPosition)
+        if (dragging) {
+            if (dropIntoTarget != null) {
+                adapter.onRowMovedInto(viewHolder.adapterPosition, dropIntoTarget!!.adapterPosition)
+                dropIntoTarget!!.itemView.isActivated = false
+                dropIntoTarget = null
+            } else {
+                adapter.onRowMovedToDestination(viewHolder.adapterPosition)
+            }
+            recyclerView.setOnTouchListener(null)
+            adapter.onMoveEnd(viewHolder.adapterPosition)
+            dragging = false
         }
-        recyclerView.setOnTouchListener(null)
-        adapter.onMoveEnd(viewHolder.adapterPosition)
     }
 
     interface ItemTouchHelperContract {
