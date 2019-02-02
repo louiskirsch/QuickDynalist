@@ -226,16 +226,19 @@ class ItemListFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (location.serverFileId != null && location.serverItemId != null) {
+        if (location.isInbox && !location.markedAsPrimaryInbox)
+            inflater.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
+        else {
             inflater.inflate(R.menu.item_list_activity_menu, menu)
             menu.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
             val shortcutsSupported = ShortcutManagerCompat.isRequestPinShortcutSupported(context!!)
             menu.findItem(R.id.create_shortcut).isVisible = shortcutsSupported
             menu.findItem(R.id.toggle_show_checked_items).isChecked = location.areCheckedItemsVisible
             menu.findItem(R.id.toggle_checklist).isChecked = location.isChecklist
+            if (location.serverItemId == null) {
+                menu.findItem(R.id.open_in_dynalist).isVisible = false
+            }
         }
-        if (location.isInbox && !location.markedAsPrimaryInbox)
-            inflater.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
     }
 
     private fun setupItemContentsTextField() {
