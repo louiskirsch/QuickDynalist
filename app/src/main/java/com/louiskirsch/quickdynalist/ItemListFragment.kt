@@ -81,16 +81,20 @@ class ItemListFragment : Fragment() {
                 R.id.dropoff_parent -> {
                     if (location.parent.isNull) {
                         context!!.toast(R.string.error_dropoff_no_parent)
+                        false
                     } else {
                         DynalistApp.instance.jobManager.addJobInBackground(
                                 MoveItemJob(item, location.parent.target, -1)
                         )
+                        true
                     }
                 }
                 R.id.dropoff_duplicate -> {
                     // TODO implement
                     context!!.toast(R.string.error_not_implemented_duplicate)
+                    false
                 }
+                else -> false
             }
         }
         adapter.onRowSwipedListener = { deleteItem(it) }
@@ -122,7 +126,7 @@ class ItemListFragment : Fragment() {
         boxStore.runInTxAsync({
             box.put(box.get(item.clientId).apply { hidden = true })
         }, null)
-        Snackbar.make(view!!, R.string.delete_item_success, Snackbar.LENGTH_SHORT).apply {
+        Snackbar.make(view!!, R.string.delete_item_success, Snackbar.LENGTH_LONG).apply {
             setAction(R.string.undo) {
                 boxStore.runInTxAsync({
                     box.put(box.get(item.clientId).apply { hidden = false })

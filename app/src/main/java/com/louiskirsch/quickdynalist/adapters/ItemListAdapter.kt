@@ -73,7 +73,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     var onLongClickListener: ((DynalistItem) -> Boolean)? = null
     var onPopupItemClickListener: ((DynalistItem, MenuItem) -> Boolean)? = null
     var onRowMovedListener: ((DynalistItem, Int) -> Unit)? = null
-    var onRowMovedOnDropoffListener: ((DynalistItem, Int) -> Unit)? = null
+    var onRowMovedOnDropoffListener: ((DynalistItem, Int) -> Boolean)? = null
     var onRowMovedIntoListener: ((DynalistItem, DynalistItem) -> Unit)? = null
     var onRowSwipedListener: ((DynalistItem) -> Unit)? = null
     var onCheckedStatusChangedListener: ((DynalistItem, Boolean) -> Unit)? = null
@@ -258,17 +258,17 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         val fromItem = items[fromIndex].item
         if (getItemViewType(intoPosition) == R.id.view_type_dropoff) {
             val itemId = getItemId(intoPosition).toInt()
-            if (itemId != R.id.dropoff_duplicate) {
+            val result = onRowMovedOnDropoffListener?.invoke(fromItem, itemId) ?: false
+            if (itemId != R.id.dropoff_duplicate && result) {
                 items.removeAt(fromIndex)
                 notifyItemRemoved(fromPosition)
             }
-            onRowMovedOnDropoffListener?.invoke(fromItem, itemId)
         } else {
             val intoIndex = correctPositionForDropOffs(intoPosition)!!
             val intoItem = items[intoIndex].item
+            onRowMovedIntoListener?.invoke(fromItem, intoItem)
             items.removeAt(fromIndex)
             notifyItemRemoved(fromPosition)
-            onRowMovedIntoListener?.invoke(fromItem, intoItem)
         }
     }
 
