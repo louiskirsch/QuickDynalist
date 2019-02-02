@@ -1,6 +1,7 @@
 package com.louiskirsch.quickdynalist.adapters
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -10,6 +11,7 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouch
 
     private var dropIntoTarget: RecyclerView.ViewHolder? = null
     private var dragging: Boolean = false
+    private var draggedToDifferentPosition: Boolean = false
 
     override fun isLongPressDragEnabled(): Boolean = true
     override fun isItemViewSwipeEnabled(): Boolean = true
@@ -29,6 +31,7 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouch
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
                         target: RecyclerView.ViewHolder): Boolean {
         adapter.onRowMoved(viewHolder.adapterPosition, target.adapterPosition)
+        draggedToDifferentPosition = true
         return true
     }
 
@@ -40,7 +43,9 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouch
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         super.onSelectedChanged(viewHolder, actionState)
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
+            Log.d("MOVEMENT", "MOVED")
             dragging = true
+            draggedToDifferentPosition = false
             adapter.onMoveStart(viewHolder.adapterPosition)
             val recyclerView = viewHolder.itemView.parent as RecyclerView
             recyclerView.setOnTouchListener { _, event ->
@@ -70,7 +75,11 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouch
                 dropIntoTarget!!.itemView.isActivated = false
                 dropIntoTarget = null
             } else {
-                adapter.onRowMovedToDestination(viewHolder.adapterPosition)
+                if (!draggedToDifferentPosition) {
+                    adapter.onLongClick(viewHolder.adapterPosition)
+                } else {
+                    adapter.onRowMovedToDestination(viewHolder.adapterPosition)
+                }
             }
             recyclerView.setOnTouchListener(null)
             adapter.onMoveEnd(viewHolder.adapterPosition)
@@ -86,5 +95,6 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouch
         fun onRowMovedToDestination(toPosition: Int)
         fun onRowMovedInto(fromPosition: Int, intoPosition: Int)
         fun onRowSwiped(position: Int)
+        fun onLongClick(position: Int)
     }
 }

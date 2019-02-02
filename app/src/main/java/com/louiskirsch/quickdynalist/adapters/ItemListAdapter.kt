@@ -58,6 +58,7 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
         private set
 
     var onClickListener: ((DynalistItem) -> Unit)? = null
+    var onLongClickListener: ((DynalistItem) -> Boolean)? = null
     var onDetailsClickListener: ((DynalistItem) -> Unit)? = null
     var onRowMovedListener: ((DynalistItem, Int) -> Unit)? = null
     var onRowMovedOnDropoff: ((DynalistItem, Int) -> Unit)? = null
@@ -255,5 +256,10 @@ class ItemListAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouc
 
     override fun canDropOver(position: Int): Boolean {
         return position in 1..(itemCount - 2)
+    }
+
+    override fun onLongClick(position: Int) {
+        val index = correctPositionForDropOffs(position)!!
+        onLongClickListener?.invoke(items[index].item)
     }
 }
