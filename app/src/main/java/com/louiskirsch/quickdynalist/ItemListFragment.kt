@@ -256,7 +256,6 @@ class ItemListFragment : Fragment() {
             R.id.goto_parent -> openDynalistItem(location.parent.target)
             R.id.share -> shareDynalistItem()
             R.id.create_shortcut -> createShortcut()
-            R.id.action_show_details -> showItemDetails(location)
             else -> super.onOptionsItemSelected(item)
         }
     }
