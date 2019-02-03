@@ -15,6 +15,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.actionBarView
+import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
 import kotlinx.android.synthetic.main.activity_advanced_item.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe

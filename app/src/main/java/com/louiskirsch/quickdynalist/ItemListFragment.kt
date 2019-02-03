@@ -29,6 +29,10 @@ import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
 import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.ImageCache
+import com.louiskirsch.quickdynalist.utils.inputMethodManager
+import com.louiskirsch.quickdynalist.utils.prependIfNotBlank
+import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
 import io.objectbox.kotlin.boxFor
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
@@ -80,6 +84,8 @@ class ItemListFragment : Fragment() {
             when (menuItem.itemId) {
                 R.id.action_show_details -> showItemDetails(item)
                 R.id.action_edit -> editingItem = item
+                R.id.action_show_image -> ImageCache(context!!)
+                        .openInGallery(item.image!!, context!!)
             }
             true
         }

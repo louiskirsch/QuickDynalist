@@ -5,7 +5,7 @@ import android.util.Log
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.louiskirsch.quickdynalist.children
+import com.louiskirsch.quickdynalist.utils.children
 
 class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouchHelper.Callback() {
 

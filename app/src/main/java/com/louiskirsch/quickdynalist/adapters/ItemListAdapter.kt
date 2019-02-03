@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_list_item.view.*
@@ -202,9 +203,9 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         }
 
         holder.itemText.text = item.spannableText
-        holder.itemNotes.visibility = if (item.spannableNotes.isEmpty()) View.GONE else View.VISIBLE
+        holder.itemNotes.visibility = if (item.spannableNotes.isBlank()) View.GONE else View.VISIBLE
         holder.itemNotes.text = item.spannableNotes
-        holder.itemChildren.visibility = if (item.spannableChildren.isEmpty()) View.GONE else View.VISIBLE
+        holder.itemChildren.visibility = if (item.spannableChildren.isBlank()) View.GONE else View.VISIBLE
         holder.itemChildren.text = item.spannableChildren
         holder.itemView.setOnClickListener { onClickListener?.invoke(items[position].item) }
         holder.itemView.isActivated = selectedItem == item.item
@@ -217,14 +218,21 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         holder.itemMenu.visibility = View.VISIBLE
         holder.itemImage.visibility = View.GONE
 
-        item.item.image?.let { image ->
-            Picasso.get().load(image).into(holder.itemImage, object: Callback {
-                override fun onError(e: Exception?) {}
-                override fun onSuccess() {
-                    holder.itemMenu.visibility = View.GONE
-                    holder.itemImage.visibility = View.VISIBLE
-                }
-            })
+        item.item.image?.also { image ->
+            val picasso = Picasso.get()
+            val imageCache = ImageCache(holder.itemView.context)
+            val request = imageCache.getFile(image)?.let { picasso.load(it) }
+                    ?: picasso.load(image)
+            request.apply {
+                into(holder.itemImage, object: Callback {
+                    override fun onError(e: Exception?) {}
+                    override fun onSuccess() {
+                        holder.itemMenu.visibility = View.GONE
+                        holder.itemImage.visibility = View.VISIBLE
+                    }
+                })
+                into(ImageCache(holder.itemView.context).getPutInCacheCallback(image))
+            }
         }
     }
 

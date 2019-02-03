@@ -1,8 +1,7 @@
-package com.louiskirsch.quickdynalist
+package com.louiskirsch.quickdynalist.utils
 
 import android.app.Activity
 import android.content.Context
-import android.content.pm.ShortcutManager
 import android.text.InputType
 import android.text.Spannable
 import android.text.TextUtils
@@ -12,30 +11,20 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.pm.ShortcutManagerCompat
 import org.jetbrains.anko.find
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Paint.Align
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.text.SpannableStringBuilder
-import android.util.Log
-import android.view.ViewGroup
 import android.widget.TextView
-import com.louiskirsch.quickdynalist.objectbox.DynalistItem
-import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
-import io.objectbox.Box
-import io.objectbox.kotlin.query
 import kotlin.math.roundToInt
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.ViewTreeObserver
 import androidx.recyclerview.widget.RecyclerView
+import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.network.DynalistResponse
 import retrofit2.Call
 import retrofit2.Response
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
 
 
 fun EditText.setupGrowingMultiline(maxLines: Int) {

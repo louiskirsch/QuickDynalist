@@ -2,7 +2,6 @@ package com.louiskirsch.quickdynalist
 
 import android.app.Activity
 import android.app.TaskStackBuilder
-import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +19,9 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import com.louiskirsch.quickdynalist.adapters.EmojiAdapter
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.actionBarView
+import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
+import com.louiskirsch.quickdynalist.utils.toBitmap
 import kotlinx.android.synthetic.main.activity_shortcut.*
 
 class ShortcutActivity : AppCompatActivity() {

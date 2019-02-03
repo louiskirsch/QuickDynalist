@@ -2,15 +2,14 @@ package com.louiskirsch.quickdynalist.objectbox
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.*
 import android.text.format.DateFormat
 import android.text.style.*
-import android.view.textclassifier.TextLinks
 import com.louiskirsch.quickdynalist.*
+import com.louiskirsch.quickdynalist.utils.*
 import io.objectbox.annotation.*
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query

@@ -73,4 +73,5 @@
     <string name="title_edit">Edit item</string>
     <string name="toggle_checklist">Make checklist</string>
     <string name="toggle_show_checked_items">Show checked items</string>
+    <string name="error_image_loading">Image is still loading</string>
 </resources>

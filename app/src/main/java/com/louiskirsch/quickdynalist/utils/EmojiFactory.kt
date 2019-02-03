@@ -1,4 +1,4 @@
-package com.louiskirsch.quickdynalist.adapters
+package com.louiskirsch.quickdynalist.utils
 
 object EmojiFactory {
 
