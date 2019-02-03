@@ -77,6 +77,20 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     var onRowMovedIntoListener: ((DynalistItem, DynalistItem) -> Unit)? = null
     var onRowSwipedListener: ((DynalistItem) -> Unit)? = null
     var onCheckedStatusChangedListener: ((DynalistItem, Boolean) -> Unit)? = null
+    var onMoveStartListener: (() -> Unit)? = null
+
+    var selectedItem: DynalistItem? = null
+        set(value: DynalistItem?) {
+            if (field != null) {
+                val index = items.indexOfFirst { it.item == field }
+                if (index >= 0) notifyItemChanged(index)
+            }
+            if (value != null) {
+                val index = items.indexOfFirst { it.item == value }
+                if (index >= 0) notifyItemChanged(index)
+            }
+            field = value
+        }
 
     init {
         setHasStableIds(true)
@@ -193,6 +207,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         holder.itemChildren.visibility = if (item.spannableChildren.isEmpty()) View.GONE else View.VISIBLE
         holder.itemChildren.text = item.spannableChildren
         holder.itemView.setOnClickListener { onClickListener?.invoke(items[position].item) }
+        holder.itemView.isActivated = selectedItem == item.item
 
         val popupListener = { menuItem: MenuItem ->
             onPopupItemClickListener?.invoke(items[position].item, menuItem) ?: false
@@ -248,6 +263,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     }
 
     override fun onMoveStart(position: Int) {
+        onMoveStartListener?.invoke()
         moveInProgress = true
         notifyItemInserted(0)
         notifyItemInserted(itemCount - 1)

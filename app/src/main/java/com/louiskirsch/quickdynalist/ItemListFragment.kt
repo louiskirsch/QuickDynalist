@@ -41,6 +41,23 @@ class ItemListFragment : Fragment() {
     private lateinit var location: DynalistItem
     private lateinit var adapter: ItemListAdapter
 
+    private var editingItem: DynalistItem? = null
+        set(value) {
+            if (field != null && value == null) {
+                itemContents.text.clear()
+            }
+            if (value != null) {
+                itemContents.apply {
+                    setText(value.name)
+                    requestFocus()
+                    setSelection(text.length)
+                    context!!.inputMethodManager.showSoftInput(this, 0)
+                }
+            }
+            adapter.selectedItem = value
+            field = value
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         dynalist = Dynalist(context!!)
@@ -62,7 +79,7 @@ class ItemListFragment : Fragment() {
         adapter.onPopupItemClickListener = { item, menuItem ->
             when (menuItem.itemId) {
                 R.id.action_show_details -> showItemDetails(item)
-                R.id.action_edit -> editItem(item)
+                R.id.action_edit -> editingItem = item
             }
             true
         }
@@ -102,6 +119,7 @@ class ItemListFragment : Fragment() {
             item.isChecked = checked
             DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(item))
         }
+        adapter.onMoveStartListener = { editingItem = null }
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.itemsParent.value = location
@@ -110,17 +128,9 @@ class ItemListFragment : Fragment() {
         })
     }
 
-    private fun editItem(item: DynalistItem) {
-        val intent = Intent(context, AdvancedItemActivity::class.java)
-        intent.putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, item as Parcelable)
-        val activity = activity as AppCompatActivity
-        val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
-                UtilPair.create(activity.toolbar as View, "toolbar"),
-                UtilPair.create(itemContents as View, "itemContents"))
-        startActivity(intent, transition.toBundle())
-    }
-
     private fun deleteItem(item: DynalistItem) {
+        if (item == editingItem)
+            editingItem = null
         val boxStore = DynalistApp.instance.boxStore
         val box = boxStore.boxFor<DynalistItem>()
         boxStore.runInTxAsync({
@@ -173,8 +183,13 @@ class ItemListFragment : Fragment() {
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
                 .commit()
-        itemContents.text.clear()
+        clearItemContents()
         return true
+    }
+
+    private fun clearItemContents() {
+        itemContents.text.clear()
+        editingItem = null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -182,28 +197,50 @@ class ItemListFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_item_list, container, false)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable("EDITING_ITEM", editingItem)
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         itemContents.setText(arguments!!.getCharSequence(ARG_ITEM_TEXT))
 
         setupItemContentsTextField()
+        editingItem = savedInstanceState?.getParcelable("EDITING_ITEM")
+
+        if (itemContents.text.isNotBlank())
+            itemContents.setSelection(itemContents.text.length)
 
         submitButton.setOnClickListener {
-            dynalist.addItem(itemContents.text.toString(), location)
-            itemContents.text.clear()
+            val text = itemContents.text.toString()
+            if (editingItem == null) {
+                dynalist.addItem(text, location)
+            } else if (editingItem!!.name != text) {
+                editingItem!!.name = text
+                DynalistApp.instance.jobManager.addJobInBackground(
+                        EditItemJob(editingItem!!)
+                )
+            }
+            clearItemContents()
         }
         updateSubmitEnabled()
 
         advancedItemButton.setOnClickListener {
             val intent = Intent(context, AdvancedItemActivity::class.java)
-            intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, location as Parcelable)
-            intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
+            if (editingItem != null) {
+                editingItem!!.name = itemContents.text.toString()
+                intent.putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, editingItem as Parcelable)
+            } else {
+                intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, location as Parcelable)
+                intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
+            }
             val activity = activity as AppCompatActivity
             val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
                     UtilPair.create(activity.toolbar as View, "toolbar"),
                     UtilPair.create(itemContents as View, "itemContents"))
             startActivity(intent, transition.toBundle())
-            itemContents.text.clear()
+            clearItemContents()
         }
 
         itemList.layoutManager = LinearLayoutManager(context)
