@@ -4,6 +4,7 @@ import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.*
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
 import org.jetbrains.anko.collections.forEachWithIndex
 import retrofit2.Response
@@ -15,6 +16,7 @@ class EditItemJob(val item: DynalistItem): ItemJob() {
         item.syncJob = id
         box.attach(item)
         box.put(item)
+        ListAppWidget.notifyItemChanged(applicationContext, item)
     }
 
     @Throws(Throwable::class)

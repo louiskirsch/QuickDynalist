@@ -7,6 +7,7 @@ import com.louiskirsch.quickdynalist.network.InsertItemRequest
 import com.louiskirsch.quickdynalist.network.MoveItemRequest
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
 import org.jetbrains.anko.collections.forEachWithIndex
 import retrofit2.Response
@@ -34,6 +35,8 @@ class MoveItemJob(val item: DynalistItem, val parent: DynalistItem, val toPositi
                 box.put(currentChildren)
             }
         }
+        ListAppWidget.notifyItemChanged(applicationContext, item)
+        ListAppWidget.notifyItemChanged(applicationContext, parent)
     }
 
     @Throws(Throwable::class)

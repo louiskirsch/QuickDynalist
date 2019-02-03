@@ -1,5 +1,7 @@
 package com.louiskirsch.quickdynalist.jobs
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import com.birbit.android.jobqueue.RetryConstraint
 import com.birbit.android.jobqueue.CancelReason
 import com.birbit.android.jobqueue.Job
@@ -10,6 +12,7 @@ import com.louiskirsch.quickdynalist.network.ReadDocumentRequest
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.utils.execRespectRateLimit
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
@@ -114,6 +117,7 @@ class SyncJob(unmeteredNetwork: Boolean = true)
         }
         dynalist.lastFullSync = Date()
         EventBus.getDefault().post(SyncEvent(true, requiresUnmeteredNetwork()))
+        ListAppWidget.notifyAllDataChanged(applicationContext)
     }
 
     override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {}

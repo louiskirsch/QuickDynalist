@@ -74,4 +74,7 @@
     <string name="toggle_checklist">Make checklist</string>
     <string name="toggle_show_checked_items">Show checked items</string>
     <string name="error_image_loading">Image is still loading</string>
+    <string name="appwidget_header">Quick Dynalist</string>
+    <string name="activity_list_app_widget">List widget</string>
+    <string name="create_list_app_widget">Create</string>
 </resources>

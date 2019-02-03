@@ -5,8 +5,7 @@ import com.louiskirsch.quickdynalist.network.DynalistResponse
 import com.louiskirsch.quickdynalist.network.InboxRequest
 import com.louiskirsch.quickdynalist.network.InsertItemRequest
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
-import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
-import io.objectbox.kotlin.query
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import retrofit2.Response
 
 
@@ -24,6 +23,7 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
                 box.put(newItem)
             }
         }
+        ListAppWidget.notifyItemChanged(applicationContext, newItem)
     }
 
     private fun insertAPIRequest(): Response<DynalistResponse> {

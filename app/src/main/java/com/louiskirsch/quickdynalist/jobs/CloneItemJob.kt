@@ -4,6 +4,7 @@ import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.*
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
 import org.jetbrains.anko.collections.forEachWithIndex
 import retrofit2.Response
@@ -18,6 +19,7 @@ class CloneItemJob(val item: DynalistItem): ItemJob() {
                 box.put(cloneRecursively(item).apply { syncJob = "$id-root" })
             }
         }
+        ListAppWidget.notifyItemChanged(applicationContext, item)
     }
 
     private fun cloneRecursively(item: DynalistItem): DynalistItem {
