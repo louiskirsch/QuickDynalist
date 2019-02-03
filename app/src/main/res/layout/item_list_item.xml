@@ -58,7 +58,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toEndOf="@id/itemCheckedStatus"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/itemImage" />
+        app:layout_constraintEnd_toStartOf="@id/itemRightAlignedViews" />
 
     <TextView
         android:id="@+id/itemNotes"
