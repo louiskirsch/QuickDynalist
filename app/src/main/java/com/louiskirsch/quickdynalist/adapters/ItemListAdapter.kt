@@ -219,10 +219,16 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         if (itemsFromPosition < itemsToPosition) {
             for (i in itemsFromPosition until itemsToPosition) {
                 Collections.swap(items, i, i + 1)
+                items[i].item.position = items[i + 1].item.position.also {
+                    items[i + 1].item.position = items[i].item.position
+                }
             }
         } else {
             for (i in itemsFromPosition downTo itemsToPosition + 1) {
                 Collections.swap(items, i, i - 1)
+                items[i].item.position = items[i - 1].item.position.also {
+                    items[i - 1].item.position = items[i].item.position
+                }
             }
         }
         notifyItemMoved(fromPosition, toPosition)
@@ -231,7 +237,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     override fun onRowMovedToDestination(toPosition: Int) {
         val index = correctPositionForDropOffs(toPosition)!!
         val item = items[index].item
-        onRowMovedListener?.invoke(item, index)
+        onRowMovedListener?.invoke(item, item.position)
     }
 
     override fun onRowSwiped(position: Int) {
