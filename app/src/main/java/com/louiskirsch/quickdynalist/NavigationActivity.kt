@@ -187,13 +187,14 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             try {
                 Runtime.getRuntime().exec( "logcat -f " + outputFile.absolutePath)
 
+                val logData = outputFile.readLines().takeLast(1000).joinToString()
                 val emailIntent = Intent(Intent.ACTION_SEND)
                 emailIntent.type = "vnd.android.cursor.dir/email"
                 emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("bugs@louiskirsch.com"))
-                emailIntent.putExtra(Intent.EXTRA_TEXT, outputFile.readText())
+                emailIntent.putExtra(Intent.EXTRA_TEXT, logData)
                 emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bug report for Quick Dynalist")
                 startActivity(Intent.createChooser(emailIntent, "Send email..."))
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 toast(R.string.error_log_collection)
             }
         }
