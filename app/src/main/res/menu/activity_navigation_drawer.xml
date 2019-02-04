@@ -25,4 +25,18 @@
         </menu>
     </item>
 
+    <item
+        android:id="@+id/submenu_social"
+        android:title="@string/title_social">
+        <menu>
+            <item android:id="@+id/share_quickdynalist"
+                android:title="@string/share_quickdynalist"
+                android:icon="@drawable/ic_action_share_quickdynalist" />
+
+            <item android:id="@+id/send_bug_report"
+                android:title="@string/send_logs"
+                android:icon="@drawable/ic_action_send_bug_report" />
+        </menu>
+    </item>
+
 </menu>

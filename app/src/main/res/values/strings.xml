@@ -79,4 +79,7 @@
     <string name="create_list_app_widget">Create</string>
     <string name="send_logs">Send bug report</string>
     <string name="error_log_collection">Could not collect logs</string>
+    <string name="title_social">Social</string>
+    <string name="share_quickdynalist">Share Quick Dynalist</string>
+    <string name="share_quickdynalist_text">Check out Quick Dynalist: https://play.google.com/store/apps/details?id=com.louiskirsch.quickdynalist</string>
 </resources>

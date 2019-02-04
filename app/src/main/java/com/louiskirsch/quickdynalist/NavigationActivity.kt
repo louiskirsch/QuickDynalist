@@ -154,13 +154,6 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item!!.itemId) {
-            R.id.send_bug_report -> sendBugReport()
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (item.groupId == R.id.group_bookmarks_list) {
             openDynalistItem(inboxes!![item.itemId])
@@ -175,9 +168,20 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 DynalistApp.instance.jobManager.addJobInBackground(SyncJob())
                 show()
             }
+            R.id.send_bug_report -> sendBugReport()
+            R.id.share_quickdynalist -> shareQuickDynalist()
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun shareQuickDynalist() {
+        Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.share_quickdynalist_text))
+            type = "text/plain"
+            startActivity(this)
+        }
     }
 
     private fun sendBugReport(): Boolean {
