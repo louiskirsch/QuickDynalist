@@ -17,7 +17,11 @@ class DeleteItemJob(val item: DynalistItem): ItemJob() {
         DynalistApp.instance.boxStore.runInTx {
             box.get(item.clientId)?.let { item ->
                 val items = getChildrenRecursively(item) + listOf(item)
-                box.remove(items)
+                items.forEach {
+                    it.hidden = true
+                    it.syncJob = id
+                }
+                box.put(items)
             }
         }
         ListAppWidget.notifyItemChanged(applicationContext, parent)
@@ -36,6 +40,9 @@ class DeleteItemJob(val item: DynalistItem): ItemJob() {
         val response = dynalistService.deleteItem(request).execute()
         val body = response.body()!!
         requireSuccess(body)
+        DynalistApp.instance.boxStore.runInTx {
+            box.remove(*box.query { equal(DynalistItem_.syncJob, id) }.findIds())
+        }
     }
 
 }

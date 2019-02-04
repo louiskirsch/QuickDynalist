@@ -30,8 +30,10 @@ abstract class ItemJob: Job(Params(1)
         if (updatedItem == null && item.serverItemId == null)
             throw InvalidJobException()
         item.serverItemId = updatedItem?.serverItemId ?: item.serverItemId
+        // TODO this should never happen as soon as the API is fixed
         if (item.serverItemId == null) {
-            // TODO this should never happen as soon as the API is fixed
+            if (currentRunCount > 3)
+                throw InvalidJobException()
             jobManager.addJobInBackground(SyncJob())
             throw ItemIdUnavailableException()
         }
@@ -71,6 +73,8 @@ abstract class ItemJob: Job(Params(1)
         markItemsCompleted()
     }
 
+    override fun getRetryLimit(): Int = 13
+
     override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int,
                                         maxRunCount: Int): RetryConstraint {
         val constraint = when (throwable) {
@@ -80,6 +84,7 @@ abstract class ItemJob: Job(Params(1)
                 constraint.newDelayInMs = 60 * 1000
                 return constraint
             }
+            // Wait 24 hours at maximum
             else -> RetryConstraint.createExponentialBackoff(runCount, 10 * 1000)
         }
         constraint.setApplyNewDelayToGroup(true)
