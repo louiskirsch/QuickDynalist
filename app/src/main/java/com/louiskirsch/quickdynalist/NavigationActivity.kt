@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist
 
+import android.Manifest
 import android.os.Bundle
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
@@ -25,6 +26,14 @@ import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.toast
+import android.content.Intent
+import android.net.Uri
+import android.os.Environment.getExternalStorageDirectory
+import com.github.florent37.runtimepermission.RuntimePermission.askPermission
+import com.github.florent37.runtimepermission.kotlin.askPermission
+import java.io.File
+import java.io.IOException
+
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private val dynalist: Dynalist = Dynalist(this)
@@ -145,6 +154,13 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         return true
     }
 
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item!!.itemId) {
+            R.id.send_bug_report -> sendBugReport()
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (item.groupId == R.id.group_bookmarks_list) {
             openDynalistItem(inboxes!![item.itemId])
@@ -161,6 +177,26 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             }
         }
         drawer_layout.closeDrawer(GravityCompat.START)
+        return true
+    }
+
+    private fun sendBugReport(): Boolean {
+        askPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+            // save logcat in file
+            val outputFile = File(getExternalStorageDirectory(), "quick-dynalist-logs.txt")
+            try {
+                Runtime.getRuntime().exec( "logcat -f " + outputFile.absolutePath)
+
+                val emailIntent = Intent(Intent.ACTION_SEND)
+                emailIntent.type = "vnd.android.cursor.dir/email"
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("bugs@louiskirsch.com"))
+                emailIntent.putExtra(Intent.EXTRA_TEXT, outputFile.readText())
+                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bug report for Quick Dynalist")
+                startActivity(Intent.createChooser(emailIntent, "Send email..."))
+            } catch (e: IOException) {
+                toast(R.string.error_log_collection)
+            }
+        }
         return true
     }
 

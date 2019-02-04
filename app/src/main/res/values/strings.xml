@@ -77,4 +77,6 @@
     <string name="appwidget_header">Quick Dynalist</string>
     <string name="activity_list_app_widget">List widget</string>
     <string name="create_list_app_widget">Create</string>
+    <string name="send_logs">Send bug report</string>
+    <string name="error_log_collection">Could not collect logs</string>
 </resources>
