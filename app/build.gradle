@@ -44,7 +44,6 @@ dependencies {
     implementation "io.objectbox:objectbox-kotlin:$objectboxVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'com.github.florent37:runtime-permission-kotlin:1.1.0'
     implementation project(':hashkode')
 }
 

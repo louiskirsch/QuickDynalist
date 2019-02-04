@@ -1,6 +1,5 @@
 package com.louiskirsch.quickdynalist
 
-import android.Manifest
 import android.os.Bundle
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
@@ -27,12 +26,8 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.toast
 import android.content.Intent
-import android.net.Uri
-import android.os.Environment.getExternalStorageDirectory
-import com.github.florent37.runtimepermission.RuntimePermission.askPermission
-import com.github.florent37.runtimepermission.kotlin.askPermission
+import androidx.core.content.FileProvider
 import java.io.File
-import java.io.IOException
 
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -185,22 +180,25 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     private fun sendBugReport(): Boolean {
-        askPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
-            // save logcat in file
-            val outputFile = File(getExternalStorageDirectory(), "quick-dynalist-logs.txt")
-            try {
-                Runtime.getRuntime().exec( "logcat -f " + outputFile.absolutePath)
+        // save logcat in file
+        val logsPath = File(cacheDir, "logs-cache")
+        logsPath.mkdir()
+        val outputFile = logsPath.resolve("quick-dynalist-logs.txt")
+        try {
+            Runtime.getRuntime().exec( "logcat -f " + outputFile.absolutePath)
 
-                val logData = outputFile.readLines().takeLast(1000).joinToString()
-                val emailIntent = Intent(Intent.ACTION_SEND)
-                emailIntent.type = "vnd.android.cursor.dir/email"
-                emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("bugs@louiskirsch.com"))
-                emailIntent.putExtra(Intent.EXTRA_TEXT, logData)
-                emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Bug report for Quick Dynalist")
-                startActivity(Intent.createChooser(emailIntent, "Send email..."))
-            } catch (e: Exception) {
-                toast(R.string.error_log_collection)
+            val logUri = FileProvider.getUriForFile(this,
+                    "com.louiskirsch.quickdynalist.fileprovider", outputFile)
+            Intent(Intent.ACTION_SEND).apply {
+                type = "vnd.android.cursor.dir/email"
+                putExtra(Intent.EXTRA_EMAIL, arrayOf("bugs@louiskirsch.com"))
+                putExtra(Intent.EXTRA_STREAM, logUri)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                putExtra(Intent.EXTRA_SUBJECT, "Bug report for Quick Dynalist")
+                startActivity(Intent.createChooser(this, "Send email..."))
             }
+        } catch (e: Exception) {
+            toast(R.string.error_log_collection)
         }
         return true
     }
