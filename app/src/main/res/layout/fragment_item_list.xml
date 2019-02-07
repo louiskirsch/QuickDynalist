@@ -49,7 +49,7 @@
             android:ems="10"
             android:backgroundTint="@android:color/transparent"
             android:hint="@string/content_hint"
-            android:inputType="text" />
+            android:inputType="text|textAutoCorrect" />
 
         <ImageButton
             android:id="@+id/submitButton"
