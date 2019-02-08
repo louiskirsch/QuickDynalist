@@ -20,8 +20,7 @@
             android:parentActivityName=".NavigationActivity" />
         <activity
             android:name=".ShortcutActivity"
-            android:label="@string/activity_shortcut"
-            android:excludeFromRecents="true">
+            android:label="@string/activity_shortcut">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
 
@@ -46,7 +45,8 @@
         <activity
             android:name=".MainActivity"
             android:theme="@style/DialogAppTheme"
-            android:windowSoftInputMode="stateVisible">
+            android:windowSoftInputMode="stateVisible"
+            android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
