@@ -85,4 +85,5 @@
     <string name="bug_report_email">bugs@louiskirsch.com</string>
     <string name="bug_report_subject">Bug report for Quick Dynalist %1$s</string>
     <string name="bug_report_intent_title">Send email…</string>
+    <string name="rate_quickdynalist">Rate Quick Dynalist</string>
 </resources>

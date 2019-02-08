@@ -33,6 +33,10 @@
                 android:title="@string/share_quickdynalist"
                 android:icon="@drawable/ic_action_share_quickdynalist" />
 
+            <item android:id="@+id/rate_quickdynalist"
+                android:title="@string/rate_quickdynalist"
+                android:icon="@drawable/ic_action_rate_quickdynalist" />
+
             <item android:id="@+id/send_bug_report"
                 android:title="@string/send_logs"
                 android:icon="@drawable/ic_action_send_bug_report" />

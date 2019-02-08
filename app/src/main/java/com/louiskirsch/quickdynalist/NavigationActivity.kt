@@ -26,8 +26,12 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.toast
 import android.content.Intent
+import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
+import android.content.ActivityNotFoundException
+
+
 
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -165,9 +169,21 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             }
             R.id.send_bug_report -> sendBugReport()
             R.id.share_quickdynalist -> shareQuickDynalist()
+            R.id.rate_quickdynalist -> rateQuickDynalist()
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun rateQuickDynalist() {
+        val uri = Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID)
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
+        } catch (e: ActivityNotFoundException) {
+            val browserUri = Uri.parse("https://play.google.com/store/apps/details?id="
+                    + BuildConfig.APPLICATION_ID)
+            startActivity(Intent(Intent.ACTION_VIEW, browserUri))
+        }
     }
 
     private fun shareQuickDynalist() {
