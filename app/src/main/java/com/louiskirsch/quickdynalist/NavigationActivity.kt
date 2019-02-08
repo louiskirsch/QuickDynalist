@@ -175,7 +175,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, getString(R.string.share_quickdynalist_text))
             type = "text/plain"
-            startActivity(this)
+            startActivity(Intent.createChooser(this, getString(R.string.share_quickdynalist)))
         }
     }
 
