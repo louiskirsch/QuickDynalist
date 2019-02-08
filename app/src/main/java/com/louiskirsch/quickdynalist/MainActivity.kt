@@ -128,7 +128,10 @@ class MainActivity : AppCompatActivity() {
             dynalist.addItem(itemContents.text.toString(), location!!)
             finish()
         }
+    }
 
+    override fun finish() {
+        finishAndRemoveTask()
     }
 
     override fun onStart() {
