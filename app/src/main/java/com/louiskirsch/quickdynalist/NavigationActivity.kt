@@ -191,11 +191,11 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                     "com.louiskirsch.quickdynalist.fileprovider", outputFile)
             Intent(Intent.ACTION_SEND).apply {
                 type = "vnd.android.cursor.dir/email"
-                putExtra(Intent.EXTRA_EMAIL, arrayOf("bugs@louiskirsch.com"))
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.bug_report_email)))
                 putExtra(Intent.EXTRA_STREAM, logUri)
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                putExtra(Intent.EXTRA_SUBJECT, "Bug report for Quick Dynalist")
-                startActivity(Intent.createChooser(this, "Send email..."))
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.bug_report_subject))
+                startActivity(Intent.createChooser(this, getString(R.string.bug_report_intent_title)))
             }
         } catch (e: Exception) {
             toast(R.string.error_log_collection)
