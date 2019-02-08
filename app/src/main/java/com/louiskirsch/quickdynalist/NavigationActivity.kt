@@ -194,8 +194,10 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.bug_report_email)))
                 putExtra(Intent.EXTRA_STREAM, logUri)
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.bug_report_subject))
-                startActivity(Intent.createChooser(this, getString(R.string.bug_report_intent_title)))
+                val subject = getString(R.string.bug_report_subject, BuildConfig.VERSION_NAME)
+                putExtra(Intent.EXTRA_SUBJECT, subject)
+                val intentTitle = getString(R.string.bug_report_intent_title)
+                startActivity(Intent.createChooser(this, intentTitle))
             }
         } catch (e: Exception) {
             toast(R.string.error_log_collection)

@@ -83,6 +83,6 @@
     <string name="share_quickdynalist">Share Quick Dynalist</string>
     <string name="share_quickdynalist_text">Check out Quick Dynalist: https://play.google.com/store/apps/details?id=com.louiskirsch.quickdynalist</string>
     <string name="bug_report_email">bugs@louiskirsch.com</string>
-    <string name="bug_report_subject">Bug report for Quick Dynalist</string>
-    <string name="bug_report_intent_title">Send email...</string>
+    <string name="bug_report_subject">Bug report for Quick Dynalist %1$s</string>
+    <string name="bug_report_intent_title">Send email…</string>
 </resources>
