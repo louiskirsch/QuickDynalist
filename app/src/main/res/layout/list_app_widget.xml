@@ -8,6 +8,7 @@
         android:id="@+id/appwidget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.TextView"
         android:background="@color/colorPrimary"
         android:padding="8dp"
         android:elevation="1dp"
@@ -24,6 +25,7 @@
     <ListView
         android:id="@+id/appwidget_list"
         android:divider="@null"
+        style="@style/Widget.AppCompat.ListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widgetItem"
     android:orientation="vertical"
     android:padding="8dp"
@@ -11,14 +12,18 @@
     <TextView
         android:id="@+id/itemText"
         android:textSize="16sp"
-        android:textColor="?android:attr/textColorPrimary"
+        style="@style/Widget.AppCompat.TextView"
+        tools:text="Item text"
+        android:textColor="@color/textColorPrimary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/itemNotes"
         android:textSize="12sp"
-        android:textColor="?android:attr/textColorSecondary"
+        style="@style/Widget.AppCompat.TextView"
+        tools:text="A very long description."
+        android:textColor="@color/textColorSecondary"
         android:maxLines="2"
         android:ellipsize="end"
         android:layout_width="match_parent"
@@ -27,7 +32,9 @@
     <TextView
         android:id="@+id/itemChildren"
         android:textSize="12sp"
-        android:textColor="?android:attr/textColorSecondary"
+        style="@style/Widget.AppCompat.TextView"
+        tools:text="Child 1\n Child 2\n Child 3"
+        android:textColor="@color/textColorSecondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
