@@ -170,6 +170,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.send_bug_report -> sendBugReport()
             R.id.share_quickdynalist -> shareQuickDynalist()
             R.id.rate_quickdynalist -> rateQuickDynalist()
+            R.id.action_sync_now -> SyncJob.forceSync()
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true

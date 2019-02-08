@@ -171,17 +171,11 @@ class ItemListFragment : Fragment() {
 
     private fun alertRequireSync() {
         Snackbar.make(itemList, R.string.alert_sync_required, Snackbar.LENGTH_SHORT).apply {
-            setAction(R.string.action_sync) {
-                DynalistApp.instance.jobManager.run {
-                    cancelJobsInBackground({
-                        val job = SyncJob(false)
-                        addJobInBackground(job)
-                    }, TagConstraint.ALL, arrayOf(SyncJob.TAG))
-                }
-            }
+            setAction(R.string.action_sync) { SyncJob.forceSync() }
             show()
         }
     }
+
 
     private fun openDynalistItem(item: DynalistItem): Boolean {
         val fragment = newInstance(item, itemContents.text)

@@ -1,11 +1,6 @@
 package com.louiskirsch.quickdynalist.jobs
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import com.birbit.android.jobqueue.RetryConstraint
-import com.birbit.android.jobqueue.CancelReason
-import com.birbit.android.jobqueue.Job
-import com.birbit.android.jobqueue.Params
+import com.birbit.android.jobqueue.*
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.AuthenticatedRequest
 import com.louiskirsch.quickdynalist.network.ReadDocumentRequest
@@ -27,6 +22,14 @@ class SyncJob(unmeteredNetwork: Boolean = true)
 
     companion object {
         const val TAG = "syncJob"
+
+        fun forceSync() {
+            DynalistApp.instance.jobManager.run {
+                cancelJobsInBackground({
+                    addJobInBackground(SyncJob(false))
+                }, TagConstraint.ALL, arrayOf(SyncJob.TAG))
+            }
+        }
     }
 
     override fun onAdded() {}
