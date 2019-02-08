@@ -15,7 +15,7 @@
         android:clickable="true"
         android:focusable="true"
         android:maxLines="1"
-        android:foreground="?android:attr/selectableItemBackground"
+        android:foreground="@drawable/abc_item_background_holo_light"
         android:contentDescription="@string/appwidget_header"
         android:text="@string/appwidget_header"
         android:ellipsize="end"

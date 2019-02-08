@@ -6,7 +6,7 @@
     android:padding="8dp"
     android:layout_width="match_parent"
     android:descendantFocusability="blocksDescendants"
-    android:foreground="?android:attr/selectableItemBackground"
+    android:foreground="@drawable/abc_item_background_holo_light"
     android:layout_height="wrap_content">
 
     <TextView
