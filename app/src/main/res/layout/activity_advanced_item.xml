@@ -25,12 +25,16 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:ems="10"
         android:hint="@string/content_hint"
         android:inputType="text|textAutoCorrect"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/itemLocation" />
+        app:layout_constraintTop_toBottomOf="@id/itemLocation">
+        <requestFocus />
+    </EditText>
 
     <EditText
         android:id="@+id/itemDate"

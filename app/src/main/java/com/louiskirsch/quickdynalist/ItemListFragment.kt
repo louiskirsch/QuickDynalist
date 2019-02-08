@@ -259,9 +259,6 @@ class ItemListFragment : Fragment() {
         activity!!.title = location.strippedMarkersName
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
         model.selectedDynalistItem.value = location
-        itemContents.showSoftInputOnFocus = false
-        itemContents.requestFocus()
-        itemContents.showSoftInputOnFocus = true
     }
 
     private fun updateSubmitEnabled() {

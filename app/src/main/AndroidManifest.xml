@@ -48,6 +48,7 @@
         <activity
             android:name=".NavigationActivity"
             android:label="@string/app_name"
+            android:windowSoftInputMode="stateHidden"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -109,7 +110,8 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <activity android:name=".AdvancedItemActivity" />
+        <activity android:name=".AdvancedItemActivity"
+            android:windowSoftInputMode="stateVisible" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

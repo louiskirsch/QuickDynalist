@@ -87,6 +87,12 @@ class AdvancedItemActivity : AppCompatActivity() {
             }
         }
 
+        itemContents.apply {
+            setSelection(text.length)
+            requestFocus()
+            isCursorVisible = true
+        }
+
         setupDatePicker()
         setupTimePicker()
     }
