@@ -87,4 +87,6 @@
     <string name="bug_report_intent_title">Send email…</string>
     <string name="rate_quickdynalist">Rate Quick Dynalist</string>
     <string name="action_sync_now">Sync now</string>
+    <string name="action_sync_now_long_label">Sync Quick Dynalist</string>
+    <string name="sync_started">Quick Dynalist is syncing</string>
 </resources>
