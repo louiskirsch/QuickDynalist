@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/shortcut_name_hint"
-        android:inputType="text"
+        android:inputType="text|textAutoCorrect"
         android:maxLength="10"
         android:importantForAutofill="no"
         tools:targetApi="o" />
