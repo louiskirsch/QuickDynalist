@@ -43,11 +43,15 @@ class ShortcutActivity : AppCompatActivity() {
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
+        shortcutTypeQuickDialog.isChecked = true
+        shortcutIconList.layoutManager = GridLayoutManager(this, 7)
+        shortcutIconList.adapter = emojiAdapter
+
         if (intent.hasExtra(EXTRA_LOCATION)) {
             location = intent.getParcelableExtra(EXTRA_LOCATION) as DynalistItem
             shortcutLocation.visibility = View.GONE
             shortcutLocationHeader.visibility = View.GONE
-            shortcutName.setText(location!!.strippedMarkersName.take(10))
+            updateFromLocation()
         } else {
             val adapter = ArrayAdapter<DynalistItem>(this,
                     android.R.layout.simple_spinner_item, ArrayList())
@@ -58,7 +62,7 @@ class ShortcutActivity : AppCompatActivity() {
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     location = adapter.getItem(position)!!
-                    shortcutName.setText(location!!.strippedMarkersName.take(10))
+                    updateFromLocation()
                 }
             }
 
@@ -70,10 +74,14 @@ class ShortcutActivity : AppCompatActivity() {
                 adapter.addAll(it)
             })
         }
+    }
 
-        shortcutTypeQuickDialog.isChecked = true
-        shortcutIconList.layoutManager = GridLayoutManager(this, 7)
-        shortcutIconList.adapter = emojiAdapter
+    private fun updateFromLocation() {
+        shortcutName.setText(location!!.nameWithoutSymbol.take(10))
+        location!!.symbol?.let {
+            emojiAdapter.selectedValue = it
+            shortcutIconList.smoothScrollToPosition(emojiAdapter.selectedPosition)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

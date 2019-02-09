@@ -13,4 +13,6 @@ object EmojiFactory {
         val unicodePoints = COMPOUND_EMOJIS[position - EMOJIS.size]
         return String(unicodePoints, 0, unicodePoints.size)
     }
+
+    val emojis = (0..(size - 1)).map { getEmojiAt(it) }
 }

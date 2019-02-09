@@ -12,12 +12,20 @@ class EmojiViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
 
 class EmojiAdapter: RecyclerView.Adapter<EmojiViewHolder>() {
 
-    private var selectedView: View? = null
     var selectedPosition: Int = 0
-        private set
+        set(value) {
+            assert(value in 0..(itemCount - 1))
+            val oldValue = field
+            field = value
+            notifyItemChanged(oldValue)
+            notifyItemChanged(value)
+        }
 
-    val selectedValue: String
+    var selectedValue: String
         get() = EmojiFactory.getEmojiAt(selectedPosition)
+        set(value) = EmojiFactory.emojis.indexOf(value).let {
+            if (it >= 0) selectedPosition = it
+        }
 
     init {
         setHasStableIds(true)
@@ -33,18 +41,10 @@ class EmojiAdapter: RecyclerView.Adapter<EmojiViewHolder>() {
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun onBindViewHolder(holder: EmojiViewHolder, position: Int) {
-        if (selectedPosition == position) {
-            selectedView = holder.textView
-        }
         holder.textView.run {
             isActivated = selectedPosition == position
             text = EmojiFactory.getEmojiAt(position)
-            setOnClickListener {
-                selectedView?.isActivated = false
-                selectedView = it
-                selectedPosition = position
-                it.isActivated = true
-            }
+            setOnClickListener { selectedPosition = position }
             forceLayout()
         }
     }

@@ -213,6 +213,13 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 null
         }
 
+    val symbol: String?
+        get() = EmojiFactory.emojis.firstOrNull { it in name }
+
+    val nameWithoutSymbol: String
+        get() = symbol?.let { strippedMarkersName.replace(it, "").trim() }
+                ?: strippedMarkersName
+
     val nameWithoutDate: String
         get() = name.replace(dateTimeRegex, "").trim()
 
