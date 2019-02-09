@@ -67,6 +67,8 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         ItemTouchCallback.ItemTouchHelperContract {
 
     private val items = ArrayList<CachedDynalistItem>()
+    private val idToItem = HashMap<Long, CachedDynalistItem>()
+
     var moveInProgress: Boolean = false
         private set
 
@@ -81,7 +83,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     var onMoveStartListener: (() -> Unit)? = null
 
     var selectedItem: DynalistItem? = null
-        set(value: DynalistItem?) {
+        set(value) {
             if (field != null) {
                 val index = items.indexOfFirst { it.item == field }
                 if (index >= 0) notifyItemChanged(index)
@@ -112,6 +114,8 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         val update = {
             items.clear()
             items.addAll(newItems)
+            idToItem.clear()
+            idToItem.putAll(newItems.map { Pair(it.item.clientId, it) })
             Unit
         }
         val oldSize = items.size
@@ -192,13 +196,14 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
 
     private fun onBindItemViewHolder(holder: ItemListViewHolder, position: Int) {
         val item = items[position]
+        val clientId = item.item.clientId
 
         holder.itemCheckedStatus.apply {
             visibility = if (showChecklist) View.VISIBLE else View.GONE
             setOnCheckedChangeListener(null)
             isChecked = item.item.isChecked
             setOnCheckedChangeListener { _, isChecked ->
-                onCheckedStatusChangedListener?.invoke(items[position].item, isChecked)
+                onCheckedStatusChangedListener?.invoke(idToItem[clientId]!!.item, isChecked)
             }
         }
 
@@ -207,11 +212,11 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         holder.itemNotes.text = item.spannableNotes
         holder.itemChildren.visibility = if (item.spannableChildren.isBlank()) View.GONE else View.VISIBLE
         holder.itemChildren.text = item.spannableChildren
-        holder.itemView.setOnClickListener { onClickListener?.invoke(items[position].item) }
+        holder.itemView.setOnClickListener { onClickListener?.invoke(idToItem[clientId]!!.item) }
         holder.itemView.isActivated = selectedItem == item.item
 
         val popupListener = { menuItem: MenuItem ->
-            onPopupItemClickListener?.invoke(items[position].item, menuItem) ?: false
+            onPopupItemClickListener?.invoke(idToItem[clientId]!!.item, menuItem) ?: false
         }
         holder.menuPopup.setOnMenuItemClickListener(popupListener)
         holder.imagePopup.setOnMenuItemClickListener(popupListener)
