@@ -24,6 +24,11 @@
         app:showAsAction="never" />
 
     <group android:checkableBehavior="all">
+        <item android:id="@+id/toggle_bookmark"
+            android:checkable="true"
+            android:title="@string/toggle_bookmark"
+            app:showAsAction="never" />
+
         <item android:id="@+id/toggle_checklist"
             android:checkable="true"
             android:title="@string/toggle_checklist"

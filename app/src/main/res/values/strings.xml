@@ -92,4 +92,5 @@
     <string name="sync_in_progress">Sync in progress…</string>
     <string name="alert_sync_no_success">Error: Sync failed</string>
     <string name="invalid_date">Invalid date</string>
+    <string name="toggle_bookmark">Make inbox</string>
 </resources>

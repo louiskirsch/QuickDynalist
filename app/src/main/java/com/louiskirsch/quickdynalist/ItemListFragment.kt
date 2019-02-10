@@ -18,7 +18,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.birbit.android.jobqueue.TagConstraint
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
@@ -267,6 +266,7 @@ class ItemListFragment : Fragment() {
             menu.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
             val shortcutsSupported = ShortcutManagerCompat.isRequestPinShortcutSupported(context!!)
             menu.findItem(R.id.create_shortcut).isVisible = shortcutsSupported
+            menu.findItem(R.id.toggle_bookmark).isChecked = location.isBookmark
             menu.findItem(R.id.toggle_show_checked_items).isChecked = location.areCheckedItemsVisible
             menu.findItem(R.id.toggle_checklist).isChecked = location.isChecklist
             if (location.serverItemId == null) {
@@ -304,10 +304,19 @@ class ItemListFragment : Fragment() {
             R.id.goto_parent -> openDynalistItem(location.parent.target)
             R.id.share -> shareDynalistItem()
             R.id.create_shortcut -> createShortcut()
+            R.id.toggle_bookmark -> toggleBookmark(item)
             R.id.toggle_checklist -> toggleChecklist(item)
             R.id.toggle_show_checked_items -> toggleShowChecked(item)
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun toggleBookmark(menuItem: MenuItem): Boolean {
+        val checked = !menuItem.isChecked
+        menuItem.isChecked = checked
+        location.markedAsBookmark = checked
+        doAsync { DynalistItem.updateGlobally(location) { it.markedAsBookmark = checked }}
+        return true
     }
 
     private fun toggleShowChecked(menuItem: MenuItem): Boolean {
@@ -316,15 +325,7 @@ class ItemListFragment : Fragment() {
         location.areCheckedItemsVisible = checked
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.itemsParent.value = location
-        doAsync {
-            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
-            DynalistApp.instance.boxStore.runInTx {
-                box.get(location.clientId)?.apply {
-                    areCheckedItemsVisible = checked
-                    box.put(this)
-                }
-            }
-        }
+        doAsync { DynalistItem.updateLocally(location) { it.areCheckedItemsVisible = checked }}
         return true
     }
 
@@ -333,15 +334,7 @@ class ItemListFragment : Fragment() {
         menuItem.isChecked = checked
         adapter.showChecklist = checked
         location.isChecklist = checked
-        doAsync {
-            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
-            DynalistApp.instance.boxStore.runInTx {
-                box.get(location.clientId)?.apply {
-                    isChecklist = checked
-                    box.put(this)
-                }
-            }
-        }
+        doAsync { DynalistItem.updateLocally(location) { it.isChecklist = checked }}
         return true
     }
 

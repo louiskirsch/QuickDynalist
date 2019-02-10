@@ -9,6 +9,7 @@ import android.text.*
 import android.text.format.DateFormat
 import android.text.style.*
 import com.louiskirsch.quickdynalist.*
+import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.utils.*
 import io.objectbox.annotation.*
 import io.objectbox.kotlin.boxFor
@@ -198,12 +199,25 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     val markedAsPrimaryInbox: Boolean
         get() = markedAsBookmark && "#primary" in tags
 
-    val markedAsBookmark: Boolean
+    var markedAsBookmark: Boolean
         get() = tagMarkers.any { it in tags }
+        set(value) {
+            if (value && !markedAsBookmark) {
+                note = "${tagMarkers[0]} $note"
+            }
+            if (!value && markedAsBookmark) {
+                name = strippedMarkersName
+                note = strippedMarkersNote
+            }
+            isBookmark = value
+        }
 
-    val strippedMarkersName: String
-        get() = tagMarkers.fold(name) { acc, marker ->
-            acc.replace(marker, "", true) } .trim()
+    val strippedMarkersName: String get() = removeMarkers(name)
+    val strippedMarkersNote: String get() = removeMarkers(note)
+
+    private fun removeMarkers(text: String) = tagMarkers.fold(text) { acc, marker ->
+        acc.replace(marker, "", true)
+    }.trim()
 
     val date: Date?
         get() = dateTimeRegex.find(name)?.groupValues?.get(1)?.let { date ->
@@ -231,7 +245,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     companion object {
         fun newInbox() = DynalistItem(null, null, "inbox",
                 "\uD83D\uDCE5 Inbox", "", emptyList(), isInbox = true, isBookmark = true)
-        private val tagMarkers = listOf("#quickdynalist", "#inbox")
+        private val tagMarkers = listOf("#inbox", "#quickdynalist")
         @SuppressLint("SimpleDateFormat")
         private val dateReader = SimpleDateFormat("yyyy-MM-dd")
         @SuppressLint("SimpleDateFormat")
@@ -271,6 +285,24 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 }
             }
             override fun newArray(size: Int) = arrayOfNulls<DynalistItem>(size)
+        }
+
+        fun updateLocally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            DynalistApp.instance.boxStore.runInTx {
+                box.get(item.clientId)?.apply {
+                    updater(this)
+                    box.put(this)
+                }
+            }
+        }
+
+        fun updateGlobally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            box.get(item.clientId)?.apply {
+                updater(this)
+                DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(this))
+            }
         }
     }
 
