@@ -36,6 +36,7 @@ import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import com.louiskirsch.quickdynalist.utils.prependIfNotBlank
 import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
+import com.louiskirsch.quickdynalist.views.ScrollFABBehavior
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import com.louiskirsch.quickdynalist.widget.ListAppWidgetConfigurationReceiver
 import io.objectbox.kotlin.boxFor
@@ -251,6 +252,11 @@ class ItemListFragment : Fragment() {
         itemList.layoutManager = LinearLayoutManager(context)
         itemList.adapter = adapter
         ItemTouchHelper(ItemTouchCallback(adapter)).attachToRecyclerView(itemList)
+
+        itemListScrollButton.setOnClickListener {
+            itemList.smoothScrollToPosition(adapter.itemCount - 1)
+            itemListScrollButton.hide(ScrollFABBehavior.hideListener)
+        }
     }
 
     override fun onStart() {
