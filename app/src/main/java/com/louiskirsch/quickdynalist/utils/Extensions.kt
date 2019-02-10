@@ -29,7 +29,9 @@ import retrofit2.Response
 
 fun EditText.setupGrowingMultiline(maxLines: Int) {
     // These properties must be set programmatically because order of execution matters
-    inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+    inputType = (InputType.TYPE_CLASS_TEXT or
+                 InputType.TYPE_TEXT_FLAG_CAP_SENTENCES or
+                 InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
     setSingleLine(true)
     this.maxLines = maxLines
     setHorizontallyScrolling(false)
