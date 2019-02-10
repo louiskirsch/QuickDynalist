@@ -103,4 +103,6 @@
     <string name="confirm_no_sync_mobile_data">Use WiFi only</string>
     <string name="dialog_title_sync_mobile_data">Configure syncing</string>
     <string name="dialog_message_sync_mobile_data">Syncing with your Dynalist might use a lot of your mobile data volume. Please choose whether you want to stick with WiFi or also use your mobile data plan for syncing. <b>This only affects syncing changes from your Dynalist to Quick Dynalist.</b> Changes you make in this app are always uploaded immediately.</string>
+    <string name="dialog_title_image_setting">Can\'t access your images</string>
+    <string name="dialog_message_image_setting">In order for Quick Dynalist to show your images you need to enable \'Allow others to access via link\' in your Dynalist upload settings.</string>
 </resources>

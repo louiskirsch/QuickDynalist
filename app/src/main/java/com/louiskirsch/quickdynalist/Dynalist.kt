@@ -46,6 +46,10 @@ class Dynalist(private val context: Context) {
         get() = Date(preferences.getLong("BOOKMARK_UPDATE", 0))
         set(lastQuery) = preferences.edit().putLong("BOOKMARK_UPDATE", lastQuery.time).apply()
 
+    var notifiedDynalistImageSetting: Boolean
+        get() = preferences.getBoolean("IMAGE_SETTING_NOTIFICATION", false)
+        set(value) = preferences.edit().putBoolean("IMAGE_SETTING_NOTIFICATION", value).apply()
+
     private val itemBox: Box<DynalistItem>
         get() = DynalistApp.instance.boxStore.boxFor()
 
@@ -106,6 +110,19 @@ class Dynalist(private val context: Context) {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onRateLimitDelay(event: RateLimitDelay) {
         context.toast(R.string.alert_rate_limit_delay)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onForbiddenImageEvent(event: ForbiddenImageEvent) {
+        if (notifiedDynalistImageSetting)
+            return
+        context.alert {
+            titleResource = R.string.dialog_title_image_setting
+            messageResource = R.string.dialog_message_image_setting
+            okButton {}
+            show()
+        }
+        notifiedDynalistImageSetting = true
     }
 
     fun addItem(contents: String, parent: DynalistItem, note: String = "") {
