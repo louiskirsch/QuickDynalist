@@ -116,6 +116,23 @@ class Dynalist(private val context: Context) {
 
     fun sync(isManual: Boolean = false) {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        if (!isManual && !settings.contains("sync_mobile_data")) {
+            context.alert {
+                isCancelable = false
+                titleResource = R.string.dialog_title_sync_mobile_data
+                messageResource = R.string.dialog_message_sync_mobile_data
+                positiveButton(R.string.confirm_sync_mobile_data) {
+                    settings.edit().putBoolean("sync_mobile_data", true).apply()
+                    sync(isManual)
+                }
+                negativeButton(R.string.confirm_no_sync_mobile_data) {
+                    settings.edit().putBoolean("sync_mobile_data", false).apply()
+                    sync(isManual)
+                }
+                show()
+            }
+            return
+        }
         val syncMobileData = settings.getBoolean("sync_mobile_data", false)
         val job = SyncJob(!syncMobileData, isManual)
         DynalistApp.instance.jobManager.addJobInBackground(job)
