@@ -163,17 +163,23 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.open_quick_dialog -> fixedFinishAfterTransition()
             R.id.menu_item_bookmarks_hint -> alert {
                 messageResource = R.string.bookmark_hint
-                okButton { }
-                DynalistApp.instance.jobManager.addJobInBackground(SyncJob())
+                okButton { dynalist.sync() }
                 show()
             }
             R.id.send_bug_report -> sendBugReport()
+            R.id.open_settings -> openSettings()
             R.id.share_quickdynalist -> shareQuickDynalist()
             R.id.rate_quickdynalist -> rateQuickDynalist()
             R.id.action_sync_now -> SyncJob.forceSync()
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun openSettings() {
+        Intent(this, SettingsActivity::class.java).apply {
+            startActivity(this)
+        }
     }
 
     private fun rateQuickDynalist() {

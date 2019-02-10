@@ -34,7 +34,7 @@ abstract class ItemJob: Job(Params(1)
         if (item.serverItemId == null) {
             if (currentRunCount > 3)
                 throw InvalidJobException()
-            jobManager.addJobInBackground(SyncJob())
+            Dynalist(applicationContext).sync()
             throw ItemIdUnavailableException()
         }
     }

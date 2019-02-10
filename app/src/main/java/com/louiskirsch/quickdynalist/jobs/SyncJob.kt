@@ -16,8 +16,8 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 
-class SyncJob(unmeteredNetwork: Boolean = true, val isManual: Boolean = false)
-    : Job(Params(-1).setRequiresUnmeteredNetwork(unmeteredNetwork)
+class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = false)
+    : Job(Params(-1).setRequiresUnmeteredNetwork(requireUnmeteredNetwork)
         .singleInstanceBy(TAG).addTags(TAG)) {
 
     companion object {
@@ -26,7 +26,7 @@ class SyncJob(unmeteredNetwork: Boolean = true, val isManual: Boolean = false)
         fun forceSync() {
             DynalistApp.instance.jobManager.run {
                 cancelJobsInBackground({
-                    addJobInBackground(SyncJob(unmeteredNetwork = false, isManual = true))
+                    addJobInBackground(SyncJob(requireUnmeteredNetwork = false, isManual = true))
                 }, TagConstraint.ALL, arrayOf(SyncJob.TAG))
             }
         }

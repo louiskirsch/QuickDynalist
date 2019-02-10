@@ -95,4 +95,8 @@
     <string name="toggle_bookmark">Make inbox</string>
     <string name="create_widget">Create widget</string>
     <string name="error_create_widget_not_supported">Creating widgets has to be done on your homescreen. Long press the Quick Dynalist launcher icon.</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="open_settings">Settings</string>
+    <string name="pref_title_sync_mobile_data">Sync with mobile data</string>
+    <string name="pref_description_sync_mobile_data">Whether automatic syncing should be allowed when no WiFi connection is available.</string>
 </resources>

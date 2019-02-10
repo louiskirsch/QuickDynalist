@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.EditText
+import androidx.preference.PreferenceManager
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
 import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
@@ -56,8 +57,7 @@ class Dynalist(private val context: Context) {
 
         val bookmarksOutdated = lastFullSync.time < Date().time - 60 * 1000L
         if (isAuthenticated && bookmarksOutdated) {
-            val jobManager = DynalistApp.instance.jobManager
-            jobManager.addJobInBackground(SyncJob())
+            sync()
         }
     }
 
@@ -71,7 +71,7 @@ class Dynalist(private val context: Context) {
             context.toast(R.string.token_invalid)
             authenticate()
         } else {
-            DynalistApp.instance.jobManager.addJobInBackground(SyncJob())
+            sync()
         }
     }
 
@@ -112,6 +112,13 @@ class Dynalist(private val context: Context) {
         val jobManager = DynalistApp.instance.jobManager
         val job = AddItemJob(contents, note, parent)
         jobManager.addJobInBackground(job)
+    }
+
+    fun sync(isManual: Boolean = false) {
+        val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        val syncMobileData = settings.getBoolean("sync_mobile_data", false)
+        val job = SyncJob(!syncMobileData, isManual)
+        DynalistApp.instance.jobManager.addJobInBackground(job)
     }
 
     fun authenticate() {

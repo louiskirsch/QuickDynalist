@@ -65,7 +65,7 @@ class DynalistApp : Application() {
                 val box: Box<DynalistItem> = boxStore.boxFor()
                 box.put(DynalistItem.newInbox())
                 if (dynalist.isAuthenticated)
-                    jobManager.addJobInBackground(SyncJob())
+                    dynalist.sync()
             }
         }
         if (version < 16) {
