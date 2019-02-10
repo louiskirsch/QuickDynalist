@@ -6,14 +6,13 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
-import android.os.Build
-import android.os.Bundle
-import android.os.Parcelable
+import android.os.*
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
+import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.Fragment
@@ -61,7 +60,16 @@ class ItemListFragment : Fragment() {
                     setText(value.name)
                     requestFocus()
                     setSelection(text.length)
-                    context!!.inputMethodManager.showSoftInput(this, 0)
+                    val inputResultReceiver = object: ResultReceiver(Handler()) {
+                        override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                            postDelayed({
+                                val itemPosition = adapter.findPosition(value)
+                                if (itemPosition >= 0) itemList.smoothScrollToPosition(itemPosition)
+                            }, 500)
+                        }
+                    }
+                    context!!.inputMethodManager.showSoftInput(this, 0,
+                            inputResultReceiver)
                 }
             }
             adapter.selectedItem = value
