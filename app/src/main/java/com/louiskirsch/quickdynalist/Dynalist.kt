@@ -95,8 +95,11 @@ class Dynalist(private val context: Context) {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onSyncEvent(event: SyncEvent) {
-        if (event.success && !event.requiredUnmeteredNetwork) {
+        if (event.status == SyncStatus.SUCCESS && event.isManual) {
             context.toast(R.string.alert_sync_success)
+        }
+        if (event.status == SyncStatus.NO_SUCCESS) {
+            context.toast(R.string.alert_sync_no_success)
         }
     }
 

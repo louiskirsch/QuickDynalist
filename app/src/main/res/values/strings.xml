@@ -89,4 +89,7 @@
     <string name="action_sync_now">Sync now</string>
     <string name="action_sync_now_long_label">Sync Quick Dynalist</string>
     <string name="sync_started">Quick Dynalist is syncing</string>
+    <string name="sync_in_progress">Sync in progress…</string>
+    <string name="alert_sync_no_success">Error: Sync failed</string>
+    <string name="invalid_date">Invalid date</string>
 </resources>

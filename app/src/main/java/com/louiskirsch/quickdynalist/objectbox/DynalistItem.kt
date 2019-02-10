@@ -16,6 +16,7 @@ import io.objectbox.kotlin.query
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 import java.io.Serializable
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -99,12 +100,16 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
         spannable.replaceAll(imageRegex) { "" }
         spannable.replaceAll(dateTimeRegex) {
-            val date = dateReader.parse(it.groupValues[1])
-            val replaceText = if (it.groupValues[2].isEmpty()) {
-                "\uD83D\uDCC5 ${dateFormat.format(date)}"
-            } else {
-                val time = timeReader.parse(it.groupValues[2])
-                "\uD83D\uDCC5 ${dateFormat.format(date)} ${timeFormat.format(time)}"
+            val replaceText = try {
+                val date = dateReader.parse(it.groupValues[1])
+                if (it.groupValues[2].isEmpty()) {
+                    "\uD83D\uDCC5 ${dateFormat.format(date)}"
+                } else {
+                    val time = timeReader.parse(it.groupValues[2])
+                    "\uD83D\uDCC5 ${dateFormat.format(date)} ${timeFormat.format(time)}"
+                }
+            } catch (e: Exception) {
+                "\uD83D\uDCC5 ${context.getString(R.string.invalid_date)}"
             }
             SpannableString(replaceText).apply {
                 val bg = BackgroundColorSpan(spanHighlight)

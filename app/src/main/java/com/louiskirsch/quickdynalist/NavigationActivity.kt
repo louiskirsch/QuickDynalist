@@ -244,4 +244,19 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     fun onDynalistLocateEvent(event: DynalistLocateEvent) {
         openDynalistItem(event.item)
     }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onSyncEvent(event: SyncEvent) {
+        when (event.status) {
+            SyncStatus.RUNNING -> nav_view.menu.findItem(R.id.action_sync_now).apply {
+                isEnabled = false
+                setTitle(R.string.sync_in_progress)
+            }
+            SyncStatus.NOT_RUNNING -> nav_view.menu.findItem(R.id.action_sync_now).apply {
+                isEnabled = true
+                setTitle(R.string.action_sync_now)
+            }
+            else -> Unit
+        }
+    }
 }

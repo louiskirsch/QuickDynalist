@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 
-class SyncJob(unmeteredNetwork: Boolean = true)
+class SyncJob(unmeteredNetwork: Boolean = true, val isManual: Boolean = false)
     : Job(Params(-1).setRequiresUnmeteredNetwork(unmeteredNetwork)
         .singleInstanceBy(TAG).addTags(TAG)) {
 
@@ -26,7 +26,7 @@ class SyncJob(unmeteredNetwork: Boolean = true)
         fun forceSync() {
             DynalistApp.instance.jobManager.run {
                 cancelJobsInBackground({
-                    addJobInBackground(SyncJob(false))
+                    addJobInBackground(SyncJob(unmeteredNetwork = false, isManual = true))
                 }, TagConstraint.ALL, arrayOf(SyncJob.TAG))
             }
         }
@@ -36,6 +36,7 @@ class SyncJob(unmeteredNetwork: Boolean = true)
 
     @Throws(Throwable::class)
     override fun onRun() {
+        EventBus.getDefault().postSticky(SyncEvent(SyncStatus.RUNNING, isManual))
         val dynalist = Dynalist(applicationContext)
         val token = dynalist.token
         val service = DynalistApp.instance.dynalistService
@@ -119,11 +120,19 @@ class SyncJob(unmeteredNetwork: Boolean = true)
             box.put(serverItems)
         }
         dynalist.lastFullSync = Date()
-        EventBus.getDefault().post(SyncEvent(true, requiresUnmeteredNetwork()))
+        EventBus.getDefault().apply {
+            postSticky(SyncEvent(SyncStatus.NOT_RUNNING, isManual))
+            post(SyncEvent(SyncStatus.SUCCESS, isManual))
+        }
         ListAppWidget.notifyAllDataChanged(applicationContext)
     }
 
-    override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {}
+    override fun getRetryLimit(): Int = 2
+    override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {
+        if (cancelReason == CancelReason.REACHED_RETRY_LIMIT) {
+            EventBus.getDefault().post(SyncEvent(SyncStatus.NO_SUCCESS, isManual))
+        }
+    }
 
     override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int,
                                         maxRunCount: Int): RetryConstraint {
