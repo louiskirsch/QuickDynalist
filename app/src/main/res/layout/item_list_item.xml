@@ -6,17 +6,27 @@
     android:layout_width="match_parent"
     android:focusable="true"
     android:clickable="true"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="@drawable/activatable_selectable_background"
     android:layout_height="wrap_content">
+
+    <CheckBox
+        android:id="@+id/itemCheckedStatus"
+        android:layout_width="24sp"
+        android:layout_height="24sp"
+        android:button="@null"
+        android:background="?android:attr/listChoiceIndicatorMultiple"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.louiskirsch.quickdynalist.views.SquareImageView
         android:id="@+id/itemImage"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:adjustViewBounds="true"
         android:focusable="true"
         android:clickable="true"
         android:scaleType="centerCrop"
+        android:layout_marginStart="8dp"
         app:layout_constraintHeight_min="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,15 +34,14 @@
         tools:ignore="ContentDescription" />
 
     <ImageButton
-        android:id="@+id/itemDetailsButton"
+        android:id="@+id/itemMenu"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/action_show_details"
-        android:src="@drawable/ic_action_show_text"
+        android:text="@string/action_menu"
+        android:src="@drawable/ic_action_more"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/itemNotes"
-        app:layout_constraintBottom_toBottomOf="@id/itemNotes"
+        app:layout_constraintTop_toTopOf="parent"
         android:contentDescription="@string/action_show_details" />
 
     <androidx.constraintlayout.widget.Barrier
@@ -40,7 +49,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="start"
-        app:constraint_referenced_ids="itemDetailsButton,itemImage"/>
+        app:constraint_referenced_ids="itemMenu,itemImage"/>
 
     <TextView
         android:id="@+id/itemText"
@@ -48,9 +57,9 @@
         android:textColor="?android:attr/textColorPrimary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/itemCheckedStatus"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/itemImage" />
+        app:layout_constraintEnd_toStartOf="@id/itemRightAlignedViews" />
 
     <TextView
         android:id="@+id/itemNotes"
@@ -60,7 +69,7 @@
         android:ellipsize="end"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/itemCheckedStatus"
         app:layout_constraintTop_toBottomOf="@id/itemText"
         app:layout_constraintEnd_toStartOf="@id/itemRightAlignedViews" />
 
@@ -70,7 +79,7 @@
         android:textColor="?android:attr/textColorSecondary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/itemCheckedStatus"
         app:layout_constraintTop_toBottomOf="@id/itemNotes"
         app:layout_constraintEnd_toStartOf="@id/itemImage" />
 

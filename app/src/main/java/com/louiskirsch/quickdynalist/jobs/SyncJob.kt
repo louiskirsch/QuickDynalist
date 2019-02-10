@@ -1,14 +1,13 @@
 package com.louiskirsch.quickdynalist.jobs
 
-import com.birbit.android.jobqueue.RetryConstraint
-import com.birbit.android.jobqueue.CancelReason
-import com.birbit.android.jobqueue.Job
-import com.birbit.android.jobqueue.Params
+import com.birbit.android.jobqueue.*
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.AuthenticatedRequest
 import com.louiskirsch.quickdynalist.network.ReadDocumentRequest
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
+import com.louiskirsch.quickdynalist.utils.execRespectRateLimit
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
@@ -17,18 +16,27 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 
-class BookmarksJob(unmeteredNetwork: Boolean = true)
-    : Job(Params(-1).setRequiresUnmeteredNetwork(unmeteredNetwork)
-        .singleInstanceBy("dynalistItems").addTags(TAG)) {
+class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = false)
+    : Job(Params(-1).requireNetwork().setRequiresUnmeteredNetwork(requireUnmeteredNetwork)
+        .singleInstanceBy(TAG).addTags(TAG)) {
 
     companion object {
         const val TAG = "syncJob"
+
+        fun forceSync() {
+            DynalistApp.instance.jobManager.run {
+                cancelJobsInBackground({
+                    addJobInBackground(SyncJob(requireUnmeteredNetwork = false, isManual = true))
+                }, TagConstraint.ALL, arrayOf(SyncJob.TAG))
+            }
+        }
     }
 
     override fun onAdded() {}
 
     @Throws(Throwable::class)
     override fun onRun() {
+        EventBus.getDefault().postSticky(SyncEvent(SyncStatus.RUNNING, isManual))
         val dynalist = Dynalist(applicationContext)
         val token = dynalist.token
         val service = DynalistApp.instance.dynalistService
@@ -61,16 +69,18 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
                 val clientItem = if (candidate in notAssociatedClientItems) candidate else null
                 clientItem?.apply {
                     serverFileId = doc.id
-                    serverParentId = it.parent  // Currently this does nothing, bug in API
                     serverItemId = it.id
-                    name = it.content
-                    note = it.note
                     childrenIds = it.children ?: emptyList()
                     isInbox = false
                     isBookmark = false
-                    isChecked = it.checked
-                    position = 0
-                    parent.target = null
+                    if (syncJob == null) {
+                        isChecked = it.checked
+                        position = 0
+                        name = it.content
+                        note = it.note
+                        parent.target = null
+                        serverParentId = it.parent  // Currently this does nothing, bug in API
+                    }
                     notAssociatedClientItems.remove(this)
                 } ?: DynalistItem(doc.id, it.parent, it.id, it.content, it.note,
                         it.children ?: emptyList(), isChecked = it.checked)
@@ -109,11 +119,20 @@ class BookmarksJob(unmeteredNetwork: Boolean = true)
             box.remove((notAssociatedClientItems - newInbox).filter { it.syncJob == null })
             box.put(serverItems)
         }
-        dynalist.lastBookmarkQuery = Date()
-        EventBus.getDefault().post(SyncEvent(true, requiresUnmeteredNetwork()))
+        dynalist.lastFullSync = Date()
+        EventBus.getDefault().apply {
+            postSticky(SyncEvent(SyncStatus.NOT_RUNNING, isManual))
+            post(SyncEvent(SyncStatus.SUCCESS, isManual))
+        }
+        ListAppWidget.notifyAllDataChanged(applicationContext)
     }
 
-    override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {}
+    override fun getRetryLimit(): Int = 2
+    override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {
+        if (cancelReason == CancelReason.REACHED_RETRY_LIMIT) {
+            EventBus.getDefault().post(SyncEvent(SyncStatus.NO_SUCCESS, isManual))
+        }
+    }
 
     override fun shouldReRunOnThrowable(throwable: Throwable, runCount: Int,
                                         maxRunCount: Int): RetryConstraint {

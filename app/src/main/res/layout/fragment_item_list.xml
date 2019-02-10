@@ -2,19 +2,43 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    app:layout_behavior=".views.MoveUpwardBehavior"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ItemListFragment">
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/itemList"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/itemListCoordinator"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/insertBar" />
+        app:layout_constraintBottom_toTopOf="@+id/insertBar">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/itemList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/itemListScrollButton"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#FFF"
+            android:elevation="2dp"
+            app:fabSize="mini"
+            app:borderWidth="0dp"
+            android:layout_gravity="bottom|end"
+            app:layout_anchor="@id/itemList"
+            app:layout_anchorGravity="bottom|end"
+            app:layout_behavior="com.louiskirsch.quickdynalist.views.ScrollFABBehavior"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_action_jump_to_bottom"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 
     <LinearLayout
         android:id="@+id/insertBar"
@@ -26,7 +50,7 @@
         android:background="#EEEEEE"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/itemList"
+        app:layout_constraintTop_toBottomOf="@id/itemListCoordinator"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageButton
@@ -49,7 +73,9 @@
             android:ems="10"
             android:backgroundTint="@android:color/transparent"
             android:hint="@string/content_hint"
-            android:inputType="text|textAutoCorrect" />
+            android:inputType="text|textAutoCorrect">
+            <requestFocus />
+        </EditText>
 
         <ImageButton
             android:id="@+id/submitButton"

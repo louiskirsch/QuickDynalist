@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1068626277769387505",
-      "lastPropertyId": "13:1704676466088362766",
+      "lastPropertyId": "16:8912394732544674842",
       "name": "DynalistItem",
       "properties": [
         {
@@ -60,6 +60,18 @@
           "id": "13:1704676466088362766",
           "indexId": "5:2178402680321130063",
           "name": "syncJob"
+        },
+        {
+          "id": "14:5829357412349811992",
+          "name": "hidden"
+        },
+        {
+          "id": "15:2775535655642430617",
+          "name": "isChecklist"
+        },
+        {
+          "id": "16:8912394732544674842",
+          "name": "areCheckedItemsVisible"
         }
       ],
       "relations": []

@@ -4,18 +4,15 @@ import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.config.Configuration
 import android.app.Application
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService.*
-import com.louiskirsch.quickdynalist.jobs.BookmarksJob
 import com.louiskirsch.quickdynalist.jobs.JobService
 import com.louiskirsch.quickdynalist.network.DynalistService
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.MyObjectBox
-import com.squareup.picasso.LruCache
-import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
-import io.objectbox.kotlin.query
+import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.doAsync
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -50,8 +47,18 @@ class DynalistApp : Application() {
         boxStore = MyObjectBox.builder().androidContext(this).build()
 
         Picasso.Builder(this).apply {
-            val cacheSize = 200 * 1024 * 1024L // 200MB
-            downloader(OkHttp3Downloader(applicationContext, cacheSize))
+            listener { _, uri, exception ->
+                try {
+                    // Picasso does not expose HTTP error code
+                    exception.javaClass.getDeclaredField("code").apply {
+                        isAccessible = true
+                        val code = getInt(exception)
+                        if (code == 403 || code == 401) {
+                            EventBus.getDefault().post(ForbiddenImageEvent(uri))
+                        }
+                    }
+                } catch (e: Exception) {}
+            }
             Picasso.setSingletonInstance(build())
         }
 
@@ -67,10 +74,20 @@ class DynalistApp : Application() {
                 val box: Box<DynalistItem> = boxStore.boxFor()
                 box.put(DynalistItem.newInbox())
                 if (dynalist.isAuthenticated)
-                    jobManager.addJobInBackground(BookmarksJob())
+                    dynalist.sync()
             }
-            dynalist.preferencesVersion = BuildConfig.VERSION_CODE
         }
+        if (version < 16) {
+            val box: Box<DynalistItem> = boxStore.boxFor()
+            boxStore.runInTxAsync({
+                box.put(box.all.apply { forEach {
+                    it.hidden = false
+                    it.areCheckedItemsVisible = false
+                    it.isChecklist = false
+                } })
+            }, null)
+        }
+        dynalist.preferencesVersion = BuildConfig.VERSION_CODE
     }
 
     private fun createJobManager(): JobManager {

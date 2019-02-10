@@ -12,8 +12,10 @@ import android.view.View
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.louiskirsch.quickdynalist.jobs.BookmarksJob
+import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
+import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
@@ -23,6 +25,14 @@ import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
 import org.jetbrains.anko.toast
+import android.content.Intent
+import android.net.Uri
+import androidx.core.content.FileProvider
+import java.io.File
+import android.content.ActivityNotFoundException
+
+
+
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private val dynalist: Dynalist = Dynalist(this)
@@ -153,12 +163,68 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.open_quick_dialog -> fixedFinishAfterTransition()
             R.id.menu_item_bookmarks_hint -> alert {
                 messageResource = R.string.bookmark_hint
-                okButton { }
-                DynalistApp.instance.jobManager.addJobInBackground(BookmarksJob())
+                okButton { dynalist.sync() }
                 show()
             }
+            R.id.send_bug_report -> sendBugReport()
+            R.id.open_settings -> openSettings()
+            R.id.share_quickdynalist -> shareQuickDynalist()
+            R.id.rate_quickdynalist -> rateQuickDynalist()
+            R.id.action_sync_now -> SyncJob.forceSync()
         }
         drawer_layout.closeDrawer(GravityCompat.START)
+        return true
+    }
+
+    private fun openSettings() {
+        Intent(this, SettingsActivity::class.java).apply {
+            startActivity(this)
+        }
+    }
+
+    private fun rateQuickDynalist() {
+        val uri = Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID)
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
+        } catch (e: ActivityNotFoundException) {
+            val browserUri = Uri.parse("https://play.google.com/store/apps/details?id="
+                    + BuildConfig.APPLICATION_ID)
+            startActivity(Intent(Intent.ACTION_VIEW, browserUri))
+        }
+    }
+
+    private fun shareQuickDynalist() {
+        Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.share_quickdynalist_text))
+            type = "text/plain"
+            startActivity(Intent.createChooser(this, getString(R.string.share_quickdynalist)))
+        }
+    }
+
+    private fun sendBugReport(): Boolean {
+        // save logcat in file
+        val logsPath = File(cacheDir, "logs-cache")
+        logsPath.mkdir()
+        val outputFile = logsPath.resolve("quick-dynalist-logs.txt")
+        try {
+            Runtime.getRuntime().exec( "logcat -f " + outputFile.absolutePath)
+
+            val logUri = FileProvider.getUriForFile(this,
+                    "com.louiskirsch.quickdynalist.fileprovider", outputFile)
+            Intent(Intent.ACTION_SEND).apply {
+                type = "vnd.android.cursor.dir/email"
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.bug_report_email)))
+                putExtra(Intent.EXTRA_STREAM, logUri)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                val subject = getString(R.string.bug_report_subject, BuildConfig.VERSION_NAME)
+                putExtra(Intent.EXTRA_SUBJECT, subject)
+                val intentTitle = getString(R.string.bug_report_intent_title)
+                startActivity(Intent.createChooser(this, intentTitle))
+            }
+        } catch (e: Exception) {
+            toast(R.string.error_log_collection)
+        }
         return true
     }
 
@@ -177,11 +243,26 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onItemEvent(event: ItemEvent) {
         if (!event.success)
-            toast(R.string.add_item_error)
+            toast(R.string.error_update_server)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onDynalistLocateEvent(event: DynalistLocateEvent) {
         openDynalistItem(event.item)
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onSyncEvent(event: SyncEvent) {
+        when (event.status) {
+            SyncStatus.RUNNING -> nav_view.menu.findItem(R.id.action_sync_now).apply {
+                isEnabled = false
+                setTitle(R.string.sync_in_progress)
+            }
+            SyncStatus.NOT_RUNNING -> nav_view.menu.findItem(R.id.action_sync_now).apply {
+                isEnabled = true
+                setTitle(R.string.action_sync_now)
+            }
+            else -> Unit
+        }
     }
 }

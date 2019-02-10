@@ -2,7 +2,6 @@ package com.louiskirsch.quickdynalist
 
 import android.app.Activity
 import android.app.TaskStackBuilder
-import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +19,9 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import com.louiskirsch.quickdynalist.adapters.EmojiAdapter
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.actionBarView
+import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
+import com.louiskirsch.quickdynalist.utils.toBitmap
 import kotlinx.android.synthetic.main.activity_shortcut.*
 
 class ShortcutActivity : AppCompatActivity() {
@@ -41,11 +43,15 @@ class ShortcutActivity : AppCompatActivity() {
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
+        shortcutTypeQuickDialog.isChecked = true
+        shortcutIconList.layoutManager = GridLayoutManager(this, 7)
+        shortcutIconList.adapter = emojiAdapter
+
         if (intent.hasExtra(EXTRA_LOCATION)) {
             location = intent.getParcelableExtra(EXTRA_LOCATION) as DynalistItem
             shortcutLocation.visibility = View.GONE
             shortcutLocationHeader.visibility = View.GONE
-            shortcutName.setText(location!!.strippedMarkersName.take(10))
+            updateFromLocation()
         } else {
             val adapter = ArrayAdapter<DynalistItem>(this,
                     android.R.layout.simple_spinner_item, ArrayList())
@@ -56,7 +62,7 @@ class ShortcutActivity : AppCompatActivity() {
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     location = adapter.getItem(position)!!
-                    shortcutName.setText(location!!.strippedMarkersName.take(10))
+                    updateFromLocation()
                 }
             }
 
@@ -68,10 +74,14 @@ class ShortcutActivity : AppCompatActivity() {
                 adapter.addAll(it)
             })
         }
+    }
 
-        shortcutTypeQuickDialog.isChecked = true
-        shortcutIconList.layoutManager = GridLayoutManager(this, 7)
-        shortcutIconList.adapter = emojiAdapter
+    private fun updateFromLocation() {
+        shortcutName.setText(location!!.nameWithoutSymbol.take(10))
+        location!!.symbol?.let {
+            emojiAdapter.selectedValue = it
+            shortcutIconList.smoothScrollToPosition(emojiAdapter.selectedPosition)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

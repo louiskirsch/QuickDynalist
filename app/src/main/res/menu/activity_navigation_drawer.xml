@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
+    <item android:id="@+id/action_sync_now"
+        android:title="@string/action_sync_now"
+        android:icon="@drawable/ic_action_sync" />
+
     <item android:id="@+id/open_quick_dialog"
         android:title="@string/open_quick_dialog"
         android:icon="@drawable/ic_action_quick_dialog" />
@@ -22,6 +26,28 @@
         <menu>
             <group android:checkableBehavior="single" android:id="@+id/group_documents_list">
             </group>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/submenu_social"
+        android:title="@string/title_social">
+        <menu>
+            <item android:id="@+id/share_quickdynalist"
+                android:title="@string/share_quickdynalist"
+                android:icon="@drawable/ic_action_share_quickdynalist" />
+
+            <item android:id="@+id/rate_quickdynalist"
+                android:title="@string/rate_quickdynalist"
+                android:icon="@drawable/ic_action_rate_quickdynalist" />
+
+            <item android:id="@+id/send_bug_report"
+                android:title="@string/send_logs"
+                android:icon="@drawable/ic_action_send_bug_report" />
+
+            <item android:id="@+id/open_settings"
+                android:title="@string/open_settings"
+                android:icon="@drawable/ic_action_open_settings" />
         </menu>
     </item>
 

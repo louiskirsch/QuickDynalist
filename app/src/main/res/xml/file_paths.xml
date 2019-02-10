@@ -3,4 +3,7 @@
     <cache-path
         name="image-cache"
         path="image-cache/" />
+    <cache-path
+        name="logs-cache"
+        path="logs-cache/" />
 </paths>

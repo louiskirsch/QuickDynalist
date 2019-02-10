@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -127,7 +128,10 @@ class MainActivity : AppCompatActivity() {
             dynalist.addItem(itemContents.text.toString(), location!!)
             finish()
         }
+    }
 
+    override fun finish() {
+        finishAndRemoveTask()
     }
 
     override fun onStart() {
@@ -188,6 +192,6 @@ class MainActivity : AppCompatActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onItemEvent(event: ItemEvent) {
         if (!event.success)
-            toast(R.string.add_item_error)
+            toast(R.string.error_update_server)
     }
 }

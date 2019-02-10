@@ -13,10 +13,6 @@
         android:title="@string/action_share"
         app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/action_show_details"
-        android:title="@string/action_show_details"
-        app:showAsAction="never" />
-
     <item android:id="@+id/open_in_dynalist"
         android:icon="@drawable/ic_action_open_in_browser"
         android:title="@string/open_in_dynalist"
@@ -26,5 +22,26 @@
         android:icon="@drawable/ic_action_create_shortcut"
         android:title="@string/create_shortcut"
         app:showAsAction="never" />
+
+    <item android:id="@+id/create_widget"
+        android:title="@string/create_widget"
+        app:showAsAction="never" />
+
+    <group android:checkableBehavior="all">
+        <item android:id="@+id/toggle_bookmark"
+            android:checkable="true"
+            android:title="@string/toggle_bookmark"
+            app:showAsAction="never" />
+
+        <item android:id="@+id/toggle_checklist"
+            android:checkable="true"
+            android:title="@string/toggle_checklist"
+            app:showAsAction="never" />
+
+        <item android:id="@+id/toggle_show_checked_items"
+            android:checkable="true"
+            android:title="@string/toggle_show_checked_items"
+            app:showAsAction="never" />
+    </group>
 
 </menu>

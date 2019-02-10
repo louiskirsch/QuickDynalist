@@ -2,21 +2,22 @@ package com.louiskirsch.quickdynalist.objectbox
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.*
 import android.text.format.DateFormat
 import android.text.style.*
-import android.view.textclassifier.TextLinks
 import com.louiskirsch.quickdynalist.*
+import com.louiskirsch.quickdynalist.jobs.EditItemJob
+import com.louiskirsch.quickdynalist.utils.*
 import io.objectbox.annotation.*
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 import java.io.Serializable
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,6 +33,9 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     @Id var clientId: Long = 0
     var position: Int = 0
     @Index var syncJob: String? = null
+    var hidden: Boolean = false
+    var isChecklist: Boolean = false
+    var areCheckedItemsVisible: Boolean = false
 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
@@ -56,7 +60,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
     fun getSpannableChildren(context: Context, maxItems: Int): Spannable {
         val sb = SpannableStringBuilder()
-        val children = children.filter { !it.isChecked } .take(maxItems)
+        val children = children.filter { !it.isChecked && !it.hidden } .take(maxItems)
         children.mapIndexed { idx, child ->
             child.getSpannableText(context).run {
                 if (isNotBlank()) {
@@ -97,12 +101,16 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
         spannable.replaceAll(imageRegex) { "" }
         spannable.replaceAll(dateTimeRegex) {
-            val date = dateReader.parse(it.groupValues[1])
-            val replaceText = if (it.groupValues[2].isEmpty()) {
-                "\uD83D\uDCC5 ${dateFormat.format(date)}"
-            } else {
-                val time = timeReader.parse(it.groupValues[2])
-                "\uD83D\uDCC5 ${dateFormat.format(date)} ${timeFormat.format(time)}"
+            val replaceText = try {
+                val date = dateReader.parse(it.groupValues[1])
+                if (it.groupValues[2].isEmpty()) {
+                    "\uD83D\uDCC5 ${dateFormat.format(date)}"
+                } else {
+                    val time = timeReader.parse(it.groupValues[2])
+                    "\uD83D\uDCC5 ${dateFormat.format(date)} ${timeFormat.format(time)}"
+                }
+            } catch (e: Exception) {
+                "\uD83D\uDCC5 ${context.getString(R.string.invalid_date)}"
             }
             SpannableString(replaceText).apply {
                 val bg = BackgroundColorSpan(spanHighlight)
@@ -168,9 +176,11 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     fun populateChildren(itemMap: Map<Pair<String, String>, DynalistItem>) {
         childrenIds!!.forEachIndexed { idx, childId ->
             itemMap[Pair(serverFileId, childId)]!!.let { child ->
-                child.serverParentId = serverItemId
-                child.parent.target = this
-                child.position = idx
+                if (child.syncJob == null) {
+                    child.serverParentId = serverItemId
+                    child.parent.target = this
+                    child.position = idx
+                }
             }
         }
     }
@@ -189,17 +199,53 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     val markedAsPrimaryInbox: Boolean
         get() = markedAsBookmark && "#primary" in tags
 
-    val markedAsBookmark: Boolean
+    var markedAsBookmark: Boolean
         get() = tagMarkers.any { it in tags }
+        set(value) {
+            if (value && !markedAsBookmark) {
+                note = "${tagMarkers[0]} $note"
+            }
+            if (!value && markedAsBookmark) {
+                name = strippedMarkersName
+                note = strippedMarkersNote
+            }
+            isBookmark = value
+        }
 
-    val strippedMarkersName: String
-        get() = tagMarkers.fold(name) { acc, marker ->
-            acc.replace(marker, "", true) } .trim()
+    val strippedMarkersName: String get() = removeMarkers(name)
+    val strippedMarkersNote: String get() = removeMarkers(note)
+
+    private fun removeMarkers(text: String) = tagMarkers.fold(text) { acc, marker ->
+        acc.replace(marker, "", true)
+    }.trim()
+
+    val date: Date?
+        get() = dateTimeRegex.find(name)?.groupValues?.get(1)?.let { date ->
+            dateReader.parse(date)
+        }
+
+    val time: Date?
+        get() = dateTimeRegex.find(name)?.groupValues?.get(2)?.let { time ->
+            return if (time.isNotBlank())
+                timeReader.parse(time)
+            else
+                null
+        }
+
+    val symbol: String?
+        get() = EmojiFactory.emojis.firstOrNull { it in name }
+
+    val nameWithoutSymbol: String
+        get() = symbol?.let { strippedMarkersName.replace(it, "").trim() }
+                ?: strippedMarkersName
+
+    val nameWithoutDate: String
+        get() = name.replace(dateTimeRegex, "").trim()
 
     companion object {
         fun newInbox() = DynalistItem(null, null, "inbox",
                 "\uD83D\uDCE5 Inbox", "", emptyList(), isInbox = true, isBookmark = true)
-        private val tagMarkers = listOf("#quickdynalist", "#inbox")
+        private val tagMarkers = listOf("#inbox", "#quickdynalist")
         @SuppressLint("SimpleDateFormat")
         private val dateReader = SimpleDateFormat("yyyy-MM-dd")
         @SuppressLint("SimpleDateFormat")
@@ -233,11 +279,30 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                         clientId = readLong()
                         position = readInt()
                         syncJob = readString()
+                        hidden = readInt() > 0
                         parent.targetId = readLong()
                     }
                 }
             }
             override fun newArray(size: Int) = arrayOfNulls<DynalistItem>(size)
+        }
+
+        fun updateLocally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            DynalistApp.instance.boxStore.runInTx {
+                box.get(item.clientId)?.apply {
+                    updater(this)
+                    box.put(this)
+                }
+            }
+        }
+
+        fun updateGlobally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            box.get(item.clientId)?.apply {
+                updater(this)
+                DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(this))
+            }
         }
     }
 
@@ -255,6 +320,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             writeLong(clientId)
             writeInt(position)
             writeString(syncJob)
+            writeInt(hidden.int)
             writeLong(parent.targetId)
         }
     }

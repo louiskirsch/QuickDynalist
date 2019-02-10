@@ -12,8 +12,8 @@ android {
         applicationId "com.louiskirsch.quickdynalist"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 15
-        versionName "1.11"
+        versionCode 19
+        versionName "2.0.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -43,6 +43,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0-alpha02'
     implementation "io.objectbox:objectbox-kotlin:$objectboxVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    implementation "androidx.preference:preference:1.0.0"
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation project(':hashkode')
 }

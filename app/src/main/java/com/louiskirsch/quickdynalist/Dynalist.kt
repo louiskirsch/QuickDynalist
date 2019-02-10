@@ -6,8 +6,9 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.EditText
+import androidx.preference.PreferenceManager
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
-import com.louiskirsch.quickdynalist.jobs.BookmarksJob
+import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
@@ -41,9 +42,13 @@ class Dynalist(private val context: Context) {
         get() = preferences.getInt("PREFS_VERSION", 1)
         set(version) = preferences.edit().putInt("PREFS_VERSION", version).apply()
 
-    var lastBookmarkQuery: Date
+    var lastFullSync: Date
         get() = Date(preferences.getLong("BOOKMARK_UPDATE", 0))
         set(lastQuery) = preferences.edit().putLong("BOOKMARK_UPDATE", lastQuery.time).apply()
+
+    var notifiedDynalistImageSetting: Boolean
+        get() = preferences.getBoolean("IMAGE_SETTING_NOTIFICATION", false)
+        set(value) = preferences.edit().putBoolean("IMAGE_SETTING_NOTIFICATION", value).apply()
 
     private val itemBox: Box<DynalistItem>
         get() = DynalistApp.instance.boxStore.boxFor()
@@ -54,10 +59,9 @@ class Dynalist(private val context: Context) {
     fun subscribe() {
         EventBus.getDefault().register(this)
 
-        val bookmarksOutdated = lastBookmarkQuery.time < Date().time - 60 * 1000L
+        val bookmarksOutdated = lastFullSync.time < Date().time - 60 * 1000L
         if (isAuthenticated && bookmarksOutdated) {
-            val jobManager = DynalistApp.instance.jobManager
-            jobManager.addJobInBackground(BookmarksJob())
+            sync()
         }
     }
 
@@ -71,7 +75,7 @@ class Dynalist(private val context: Context) {
             context.toast(R.string.token_invalid)
             authenticate()
         } else {
-            DynalistApp.instance.jobManager.addJobInBackground(BookmarksJob())
+            sync()
         }
     }
 
@@ -95,8 +99,11 @@ class Dynalist(private val context: Context) {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onSyncEvent(event: SyncEvent) {
-        if (event.success && !event.requiredUnmeteredNetwork) {
+        if (event.status == SyncStatus.SUCCESS && event.isManual) {
             context.toast(R.string.alert_sync_success)
+        }
+        if (event.status == SyncStatus.NO_SUCCESS) {
+            context.toast(R.string.alert_sync_no_success)
         }
     }
 
@@ -105,10 +112,47 @@ class Dynalist(private val context: Context) {
         context.toast(R.string.alert_rate_limit_delay)
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onForbiddenImageEvent(event: ForbiddenImageEvent) {
+        if (notifiedDynalistImageSetting)
+            return
+        context.alert {
+            titleResource = R.string.dialog_title_image_setting
+            messageResource = R.string.dialog_message_image_setting
+            okButton {}
+            show()
+        }
+        notifiedDynalistImageSetting = true
+    }
+
     fun addItem(contents: String, parent: DynalistItem, note: String = "") {
         val jobManager = DynalistApp.instance.jobManager
         val job = AddItemJob(contents, note, parent)
         jobManager.addJobInBackground(job)
+    }
+
+    fun sync(isManual: Boolean = false) {
+        val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        if (!isManual && !settings.contains("sync_mobile_data")) {
+            context.alert {
+                isCancelable = false
+                titleResource = R.string.dialog_title_sync_mobile_data
+                messageResource = R.string.dialog_message_sync_mobile_data
+                positiveButton(R.string.confirm_sync_mobile_data) {
+                    settings.edit().putBoolean("sync_mobile_data", true).apply()
+                    sync(isManual)
+                }
+                negativeButton(R.string.confirm_no_sync_mobile_data) {
+                    settings.edit().putBoolean("sync_mobile_data", false).apply()
+                    sync(isManual)
+                }
+                show()
+            }
+            return
+        }
+        val syncMobileData = settings.getBoolean("sync_mobile_data", false)
+        val job = SyncJob(!syncMobileData, isManual)
+        DynalistApp.instance.jobManager.addJobInBackground(job)
     }
 
     fun authenticate() {

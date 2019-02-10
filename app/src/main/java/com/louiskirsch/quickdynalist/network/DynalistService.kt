@@ -17,6 +17,18 @@ interface DynalistService {
 
     @POST("doc/edit")
     fun addToDocument(@Body request: InsertItemRequest): Call<DynalistResponse>
+
+    @POST("doc/edit")
+    fun addToDocument(@Body request: BulkInsertItemRequest): Call<DynalistResponse>
+
+    @POST("doc/edit")
+    fun moveItem(@Body request: MoveItemRequest): Call<DynalistResponse>
+
+    @POST("doc/edit")
+    fun deleteItem(@Body request: DeleteItemRequest): Call<DynalistResponse>
+
+    @POST("doc/edit")
+    fun editItem(@Body request: EditItemRequest): Call<DynalistResponse>
 }
 
 class AuthenticatedRequest(val token: String)
@@ -26,12 +38,45 @@ class ReadDocumentRequest(val file_id: String, val token: String)
 class InsertItemRequest(val file_id: String, parent_id: String,
                         content: String, note: String, val token: String) {
 
-    class InsertSpec(val parent_id: String, val content: String, val note: String) {
+    class InsertSpec(val parent_id: String, val content: String, val note: String,
+                     val index: Int = -1) {
         val action: String = "insert"
-        val index: Int = -1
     }
 
     val changes = arrayOf(InsertSpec(parent_id, content, note))
+}
+
+class BulkInsertItemRequest(val file_id: String, val token: String,
+                            val changes: Array<InsertItemRequest.InsertSpec>)
+
+class EditItemRequest(val file_id: String, node_id: String,
+                      content: String, note: String, checked: Boolean, val token: String) {
+
+    class EditSpec(val node_id: String, val content: String,
+                   val note: String, val checked: Boolean) {
+        val action: String = "edit"
+    }
+
+    val changes = arrayOf(EditSpec(node_id, content, note, checked))
+}
+
+class MoveItemRequest(val file_id: String, parent_id: String, node_id: String,
+                      index: Int, val token: String) {
+
+    class MoveSpec(val parent_id: String, val node_id: String, val index: Int) {
+        val action: String = "move"
+    }
+
+    val changes = arrayOf(MoveSpec(parent_id, node_id, index))
+}
+
+class DeleteItemRequest(val file_id: String, node_id: String, val token: String) {
+
+    class DeleteSpec(val node_id: String) {
+        val action: String = "delete"
+    }
+
+    val changes = arrayOf(DeleteSpec(node_id))
 }
 
 open class DynalistResponse {
@@ -45,6 +90,9 @@ open class DynalistResponse {
 
     val isInboxNotConfigured: Boolean
         get() = _code == "NoInbox"
+
+    val isRequestUnfulfillable: Boolean
+        get() = _code in listOf("Unauthorized", "NotFound", "NodeNotFound")
 
     val isOK: Boolean
         get() = _code == "Ok"
