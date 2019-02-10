@@ -107,6 +107,8 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
             }
         }
 
+    fun findPosition(item: DynalistItem) = items.indexOfFirst { it.item == item }
+
     fun updateItems(newItems: List<CachedDynalistItem>) {
         if (moveInProgress) {
             return

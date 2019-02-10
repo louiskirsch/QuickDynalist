@@ -135,9 +135,20 @@ class ItemListFragment : Fragment() {
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.itemsParent.value = location
-        model.itemsLiveData.observe(this, Observer<List<CachedDynalistItem>> {
-            adapter.updateItems(it)
+        model.itemsLiveData.observe(this, Observer<List<CachedDynalistItem>> { newItems ->
+            val initializing = adapter.itemCount == 0
+            adapter.updateItems(newItems)
+            if (initializing) scrollToIntendedLocation()
         })
+    }
+
+    private fun scrollToIntendedLocation() {
+        arguments!!.getParcelable<DynalistItem>(ARG_SCROLL_TO)?.let { item: DynalistItem ->
+            val index = adapter.findPosition(item)
+            if (index >= 0) {
+                itemList.scrollToPosition(index)
+            }
+        }
     }
 
     private fun deleteItem(item: DynalistItem) {
@@ -182,9 +193,9 @@ class ItemListFragment : Fragment() {
         }
     }
 
-
     private fun openDynalistItem(item: DynalistItem): Boolean {
-        val fragment = newInstance(item, itemContents.text)
+        val scrollTo = if (item == location.parent.target) location else null
+        val fragment = newInstance(item, itemContents.text, scrollTo)
         fragmentManager!!.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
@@ -257,6 +268,7 @@ class ItemListFragment : Fragment() {
             itemList.smoothScrollToPosition(adapter.itemCount - 1)
             itemListScrollButton.hide(ScrollFABBehavior.hideListener)
         }
+        scrollToIntendedLocation()
     }
 
     override fun onStart() {
@@ -422,15 +434,19 @@ class ItemListFragment : Fragment() {
 
     companion object {
         private const val ARG_LOCATION = "EXTRA_LOCATION"
+        private const val ARG_SCROLL_TO = "EXTRA_SCROLL_TO"
         private const val ARG_ITEM_TEXT = "EXTRA_ITEM_TEXT"
 
         @JvmStatic
-        fun newInstance(parent: DynalistItem, itemText: CharSequence) =
-                ItemListFragment().apply {
-                    arguments = Bundle().apply {
-                        putParcelable(ARG_LOCATION, parent)
-                        putCharSequence(ARG_ITEM_TEXT, itemText)
-                    }
+        fun newInstance(parent: DynalistItem, itemText: CharSequence,
+                        scrollTo: DynalistItem? = null): ItemListFragment {
+            return ItemListFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_LOCATION, parent)
+                    putCharSequence(ARG_ITEM_TEXT, itemText)
+                    scrollTo?.let { putParcelable(ARG_SCROLL_TO, it) }
                 }
+            }
+        }
     }
 }
