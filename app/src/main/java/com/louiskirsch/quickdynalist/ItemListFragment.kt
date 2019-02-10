@@ -2,7 +2,11 @@ package com.louiskirsch.quickdynalist
 
 
 import android.app.ActivityOptions
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -32,6 +36,8 @@ import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import com.louiskirsch.quickdynalist.utils.prependIfNotBlank
 import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
+import com.louiskirsch.quickdynalist.widget.ListAppWidgetConfigurationReceiver
 import io.objectbox.kotlin.boxFor
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
@@ -304,6 +310,7 @@ class ItemListFragment : Fragment() {
             R.id.goto_parent -> openDynalistItem(location.parent.target)
             R.id.share -> shareDynalistItem()
             R.id.create_shortcut -> createShortcut()
+            R.id.create_widget -> createWidget()
             R.id.toggle_bookmark -> toggleBookmark(item)
             R.id.toggle_checklist -> toggleChecklist(item)
             R.id.toggle_show_checked_items -> toggleShowChecked(item)
@@ -335,6 +342,25 @@ class ItemListFragment : Fragment() {
         adapter.showChecklist = checked
         location.isChecklist = checked
         doAsync { DynalistItem.updateLocally(location) { it.isChecklist = checked }}
+        return true
+    }
+
+    private fun createWidget(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val widgetManager = context!!.getSystemService(AppWidgetManager::class.java)
+            if (widgetManager.isRequestPinAppWidgetSupported) {
+                val widgetProvider = ComponentName(context!!, ListAppWidget::class.java)
+                val callback = Intent(context!!,
+                        ListAppWidgetConfigurationReceiver::class.java).apply {
+                    putExtra(DynalistApp.EXTRA_DISPLAY_ITEM_ID, location.clientId)
+                }
+                val pendingCallback = PendingIntent.getBroadcast(
+                        context!!, 0,callback, 0)
+                widgetManager.requestPinAppWidget(widgetProvider, null, pendingCallback)
+                return true
+            }
+        }
+        context!!.longToast(R.string.error_create_widget_not_supported)
         return true
     }
 

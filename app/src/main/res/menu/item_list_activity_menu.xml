@@ -23,6 +23,10 @@
         android:title="@string/create_shortcut"
         app:showAsAction="never" />
 
+    <item android:id="@+id/create_widget"
+        android:title="@string/create_widget"
+        app:showAsAction="never" />
+
     <group android:checkableBehavior="all">
         <item android:id="@+id/toggle_bookmark"
             android:checkable="true"

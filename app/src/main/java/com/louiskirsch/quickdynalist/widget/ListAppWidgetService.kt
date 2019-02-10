@@ -30,7 +30,6 @@ class ListViewsFactory(private val context: Context, intent: Intent)
     private val items = ArrayList<CachedDynalistItem>()
     private val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID)
-    private val parentId = ListAppWidgetConfigureActivity.getLocation(context, widgetId)
 
     override fun onCreate() {}
     override fun onDestroy() {}
@@ -41,6 +40,7 @@ class ListViewsFactory(private val context: Context, intent: Intent)
     override fun getViewTypeCount(): Int = 1
 
     override fun onDataSetChanged() {
+        val parentId = ListAppWidgetConfigureActivity.getLocation(context, widgetId)
         val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
         val newItems = box.query {
             equal(DynalistItem_.parentId, parentId)

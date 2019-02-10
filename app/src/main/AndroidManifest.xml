@@ -14,7 +14,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SyncShortcutActivity"
+        <receiver
+            android:name=".widget.ListAppWidgetConfigurationReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".SyncShortcutActivity"
             android:exported="true"
             android:label="@string/action_sync_now"
             android:theme="@style/InvisibleTheme" />

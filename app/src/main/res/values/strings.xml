@@ -93,4 +93,6 @@
     <string name="alert_sync_no_success">Error: Sync failed</string>
     <string name="invalid_date">Invalid date</string>
     <string name="toggle_bookmark">Make inbox</string>
+    <string name="create_widget">Create widget</string>
+    <string name="error_create_widget_not_supported">Creating widgets has to be done on your homescreen. Long press the Quick Dynalist launcher icon.</string>
 </resources>
