@@ -3,12 +3,14 @@ package com.louiskirsch.quickdynalist.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import androidx.annotation.Keep
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
+@Keep
 class ScrollFABBehavior(context: Context?, attrs: AttributeSet?)
     : FloatingActionButton.Behavior(context, attrs) {
 
