@@ -17,7 +17,7 @@ import java.util.*
 
 
 class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = false)
-    : Job(Params(-1).setRequiresUnmeteredNetwork(requireUnmeteredNetwork)
+    : Job(Params(-1).requireNetwork().setRequiresUnmeteredNetwork(requireUnmeteredNetwork)
         .singleInstanceBy(TAG).addTags(TAG)) {
 
     companion object {
