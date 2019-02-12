@@ -280,6 +280,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                         position = readInt()
                         syncJob = readString()
                         hidden = readInt() > 0
+                        isChecklist = readInt() > 0
+                        areCheckedItemsVisible = readInt() > 0
                         parent.targetId = readLong()
                     }
                 }
@@ -321,6 +323,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             writeInt(position)
             writeString(syncJob)
             writeInt(hidden.int)
+            writeInt(isChecklist.int)
+            writeInt(areCheckedItemsVisible.int)
             writeLong(parent.targetId)
         }
     }
