@@ -118,6 +118,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         DynalistApp.instance.boxStore.runInTx {
             box.remove((notAssociatedClientItems - newInbox).filter { it.syncJob == null })
             box.put(serverItems)
+            box.put(newInbox)
         }
         dynalist.lastFullSync = Date()
         EventBus.getDefault().apply {
