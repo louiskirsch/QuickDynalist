@@ -9,4 +9,49 @@
     <item android:id="@+id/action_edit"
         android:title="@string/action_edit"
         app:showAsAction="never" />
+
+    <item android:id="@+id/action_clone"
+        android:title="@string/action_clone"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/action_move_to_inbox"
+        android:title="@string/action_move_to_inbox"
+        app:showAsAction="never">
+        <menu />
+    </item>
+
+    <item android:id="@+id/action_move_to_recent"
+        android:title="@string/action_move_to_recent"
+        app:showAsAction="never">
+        <menu />
+    </item>
+
+    <item android:id="@+id/action_link_to_recent"
+        android:title="@string/action_link_to_recent"
+        app:showAsAction="never">
+        <menu />
+    </item>
+
+    <item android:id="@+id/action_change_date"
+        android:title="@string/action_change_date"
+        app:showAsAction="never">
+        <menu>
+            <item android:id="@+id/action_add_date_today"
+                android:title="@string/action_add_date_today"
+                app:showAsAction="never" />
+
+            <item android:id="@+id/action_add_date_mod"
+                android:title="@string/action_add_date_mod"
+                app:showAsAction="never" />
+
+            <item android:id="@+id/action_add_date_choose"
+                android:title="@string/action_add_date_choose"
+                app:showAsAction="never" />
+
+            <item android:id="@+id/action_change_date_remove"
+                android:title="@string/action_change_date_remove"
+                app:showAsAction="never" />
+        </menu>
+    </item>
 </menu>

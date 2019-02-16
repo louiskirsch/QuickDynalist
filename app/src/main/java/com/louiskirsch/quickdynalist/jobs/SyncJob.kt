@@ -55,6 +55,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         }
 
         // Query from local database
+        val syncTime = Date().time
         val clientItems = box.all
         val previousInbox = box.query { equal(DynalistItem_.isInbox, true) } .findUnique()!!
         val clientItemsById = clientItems.associateBy { it.serverAbsoluteId }
@@ -74,16 +75,24 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                     isInbox = false
                     isBookmark = false
                     if (syncJob == null) {
+                        val hasChanged = listOf(
+                                isChecked != it.checked,
+                                name != it.content,
+                                note != it.note).any()
                         isChecked = it.checked
                         position = 0
                         name = it.content
                         note = it.note
                         parent.target = null
                         serverParentId = it.parent  // Currently this does nothing, bug in API
+                        if (hasChanged)
+                            notifyModified(syncTime)
                     }
                     notAssociatedClientItems.remove(this)
                 } ?: DynalistItem(doc.id, it.parent, it.id, it.content, it.note,
-                        it.children ?: emptyList(), isChecked = it.checked)
+                        it.children ?: emptyList(), isChecked = it.checked).apply {
+                    notifyModified(syncTime)
+                }
             }
         }
         val itemMap = serverItems.associateBy { it.serverAbsoluteId!! }

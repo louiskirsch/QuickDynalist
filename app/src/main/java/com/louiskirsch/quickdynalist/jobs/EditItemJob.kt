@@ -15,6 +15,7 @@ class EditItemJob(val item: DynalistItem): ItemJob() {
     override fun addToDatabase() {
         item.syncJob = id
         box.attach(item)
+        item.notifyModified()
         box.put(item)
         ListAppWidget.notifyItemChanged(applicationContext, item)
     }

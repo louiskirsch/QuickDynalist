@@ -16,6 +16,7 @@ import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.doAsync
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 
 
 class DynalistApp : Application() {
@@ -85,6 +86,13 @@ class DynalistApp : Application() {
                     it.areCheckedItemsVisible = false
                     it.isChecklist = false
                 } })
+            }, null)
+        }
+        if (version < 21) {
+            val box: Box<DynalistItem> = boxStore.boxFor()
+            boxStore.runInTxAsync({
+                val now = Date().time
+                box.put(box.all.apply { forEach { it.notifyModified(now) } })
             }, null)
         }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE

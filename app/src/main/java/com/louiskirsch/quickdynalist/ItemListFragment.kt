@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist
 
 
 import android.app.ActivityOptions
+import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -42,6 +43,7 @@ import io.objectbox.kotlin.boxFor
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.jetbrains.anko.*
+import java.util.*
 import android.util.Pair as UtilPair
 
 class ItemListFragment : Fragment() {
@@ -99,6 +101,17 @@ class ItemListFragment : Fragment() {
                 R.id.action_show_details -> showItemDetails(item)
                 R.id.action_edit -> editingItem = item
                 R.id.action_show_image -> ImageCache(context!!).openInGallery(item.image!!)
+                R.id.action_clone -> context!!.toast(R.string.error_not_implemented_duplicate)
+                R.id.action_add_date_today -> {
+                    DynalistItem.updateGlobally(item) { it.date = Date() }
+                }
+                R.id.action_add_date_mod -> {
+                    DynalistItem.updateGlobally(item) { it.date = Date(it.lastModified) }
+                }
+                R.id.action_add_date_choose -> chooseItemDate(item)
+                R.id.action_change_date_remove -> {
+                    DynalistItem.updateGlobally(item) { it.date = null }
+                }
             }
             true
         }
@@ -147,6 +160,19 @@ class ItemListFragment : Fragment() {
             adapter.updateItems(newItems)
             if (initializing) scrollToIntendedLocation()
         })
+    }
+
+    private fun chooseItemDate(item: DynalistItem) {
+        val calendar = Calendar.getInstance()
+        val dialog = DatePickerDialog(context!!, { _, year, month, dayOfMonth ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, month)
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            DynalistItem.updateGlobally(item) { it.date = calendar.time }
+        }, calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH))
+        dialog.show()
     }
 
     private fun scrollToIntendedLocation() {

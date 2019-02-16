@@ -36,10 +36,21 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var hidden: Boolean = false
     var isChecklist: Boolean = false
     var areCheckedItemsVisible: Boolean = false
+    var lastModified: Long = Date().time
+        private set
 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
     lateinit var parent: ToOne<DynalistItem>
+
+    fun notifyModified(time: Long = Date().time) {
+        lastModified = time
+    }
+
+    fun List<DynalistItem>.notifyModified() {
+        val now = Date().time
+        forEach { it.notifyModified(now) }
+    }
 
     override fun toString() = shortenedName.toString()
     override fun hashCode(): Int = (clientId % Int.MAX_VALUE).toInt()
@@ -221,9 +232,18 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         acc.replace(marker, "", true)
     }.trim()
 
-    val date: Date?
+    var date: Date?
         get() = dateTimeRegex.find(name)?.groupValues?.get(1)?.let { date ->
             dateReader.parse(date)
+        }
+        set(value) {
+            val stripped = name.replace(dateTimeRegex, "").trim()
+            name = if (value != null) {
+                val date = "!(${dateReader.format(value)})"
+                "$stripped $date"
+            } else {
+                stripped
+            }
         }
 
     val time: Date?

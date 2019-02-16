@@ -20,6 +20,7 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
                 newItem.syncJob = id
                 newItem.position = parent.children.size
                 newItem.parent.target = parent
+                newItem.notifyModified()
                 box.put(newItem)
             }
         }
