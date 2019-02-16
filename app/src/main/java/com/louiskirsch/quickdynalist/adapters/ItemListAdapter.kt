@@ -15,6 +15,7 @@ import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.ImageCache
+import com.louiskirsch.quickdynalist.utils.isEllipsized
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_list_item.view.*
@@ -236,6 +237,9 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         holder.imagePopup.setOnMenuItemClickListener(popupListener)
         holder.itemMenu.visibility = View.VISIBLE
         holder.itemImage.visibility = View.GONE
+        holder.itemNotes.isEllipsized {
+            holder.menuPopup.menu.findItem(R.id.action_show_details).isVisible = it
+        }
 
         item.item.image?.also { image ->
             val picasso = Picasso.get()
@@ -247,6 +251,9 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
                     override fun onSuccess() {
                         holder.itemMenu.visibility = View.GONE
                         holder.itemImage.visibility = View.VISIBLE
+                        holder.itemNotes.isEllipsized {
+                            holder.imagePopup.menu.findItem(R.id.action_show_details).isVisible = it
+                        }
                     }
                 })
                 into(imageCache.getPutInCacheCallback(image))
