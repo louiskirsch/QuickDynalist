@@ -165,15 +165,16 @@ class DynalistItemFilter {
 
     val items: List<DynalistItem> get() = postQueryFilter(query.find())
 
-    private fun postQueryFilter(items: List<DynalistItem>): List<DynalistItem> {
-        return if (hideIfParentIncluded) {
+    private fun postQueryFilter(items: List<DynalistItem>) = if (hideIfParentIncluded) {
             val foundSet = items.toSet()
             items.filter { it.parent.target !in foundSet }
         } else {
             items
         }
-    }
 
     val liveData: LiveData<List<DynalistItem>>
         get() = TransformedOBLiveData(query) { postQueryFilter(it) }
+
+    fun <T> transformedLiveData(transformer: (List<DynalistItem>) -> List<T>)
+        = TransformedOBLiveData(query) { transformer(postQueryFilter(it)) }
 }

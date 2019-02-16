@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.*
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.objectbox.TransformedOBLiveData
 import io.objectbox.Box
@@ -60,6 +61,16 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 order(DynalistItem_.position)
                 eager(100, DynalistItem_.children)
             }) { items ->
+                items.forEach { item -> item.children.sortBy { child -> child.position } }
+                items.map { CachedDynalistItem(it, getApplication()) }
+            }
+        }
+    }
+
+    val itemsFilter = MutableLiveData<DynalistItemFilter>()
+    val filteredItemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
+        Transformations.switchMap(itemsFilter) { filter ->
+            filter.transformedLiveData { items ->
                 items.forEach { item -> item.children.sortBy { child -> child.position } }
                 items.map { CachedDynalistItem(it, getApplication()) }
             }
