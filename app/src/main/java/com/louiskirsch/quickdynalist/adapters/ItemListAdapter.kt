@@ -228,8 +228,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         item.item.image?.also { image ->
             val picasso = Picasso.get()
             val imageCache = ImageCache(holder.itemView.context)
-            val request = imageCache.getFile(image)?.let { picasso.load(it) }
-                    ?: picasso.load(image)
+            val request = imageCache.getFile(image)?.let { picasso.load(it) } ?: picasso.load(image)
             request.apply {
                 into(holder.itemImage, object: Callback {
                     override fun onError(e: Exception?) {}
@@ -238,7 +237,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
                         holder.itemImage.visibility = View.VISIBLE
                     }
                 })
-                into(ImageCache(holder.itemView.context).getPutInCacheCallback(image))
+                into(imageCache.getPutInCacheCallback(image))
             }
         }
     }

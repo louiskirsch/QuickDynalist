@@ -47,7 +47,7 @@ class DetailsActivity : AppCompatActivity() {
                     override fun onSuccess() {
                         itemImage.visibility = View.VISIBLE
                         itemImage.setOnClickListener {
-                            imageCache.openInGallery(image, this@DetailsActivity)
+                            imageCache.openInGallery(image)
                         }
                     }
                 })

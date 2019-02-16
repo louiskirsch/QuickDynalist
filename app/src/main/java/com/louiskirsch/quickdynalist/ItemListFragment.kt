@@ -98,8 +98,7 @@ class ItemListFragment : Fragment() {
             when (menuItem.itemId) {
                 R.id.action_show_details -> showItemDetails(item)
                 R.id.action_edit -> editingItem = item
-                R.id.action_show_image -> ImageCache(context!!)
-                        .openInGallery(item.image!!, context!!)
+                R.id.action_show_image -> ImageCache(context!!).openInGallery(item.image!!)
             }
             true
         }

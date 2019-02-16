@@ -18,7 +18,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
 
-class ImageCache(context: Context) {
+class ImageCache(private val context: Context) {
 
     private val cachePath = File(context.cacheDir, "image-cache")
 
@@ -56,15 +56,15 @@ class ImageCache(context: Context) {
             null
     }
 
-    fun getUri(source: String, context: Context): Uri? {
+    fun getUri(source: String): Uri? {
         return getFile(source)?.let {
             FileProvider.getUriForFile(context,
                     "com.louiskirsch.quickdynalist.fileprovider", it)
         }
     }
 
-    fun openInGallery(source: String, context: Context) {
-        val uri = getUri(source, context)
+    fun openInGallery(source: String) {
+        val uri = getUri(source)
         if (uri == null) {
             Log.d("ImageCache", "Can not find: $source")
             context.toast(R.string.error_image_loading)
