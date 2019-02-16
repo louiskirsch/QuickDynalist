@@ -1,7 +1,10 @@
 package com.louiskirsch.quickdynalist.objectbox
 
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.lifecycle.LiveData
 import com.louiskirsch.quickdynalist.DynalistApp
+import com.louiskirsch.quickdynalist.utils.*
 import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
@@ -15,7 +18,7 @@ import io.objectbox.relation.ToOne
 import java.util.*
 
 @Entity
-class DynalistItemFilter {
+class DynalistItemFilter: Parcelable {
     enum class LogicMode { UNKNOWN, ALL, ANY }
     class LogicModeConverter: PropertyConverter<LogicMode, Int> {
         override fun convertToDatabaseValue(entityProperty: LogicMode?): Int
@@ -177,4 +180,54 @@ class DynalistItemFilter {
 
     fun <T> transformedLiveData(transformer: (List<DynalistItem>) -> List<T>)
         = TransformedOBLiveData(query) { transformer(postQueryFilter(it)) }
+
+    companion object {
+        @Suppress("unused")
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<DynalistItemFilter> {
+            override fun createFromParcel(parcel: Parcel): DynalistItemFilter {
+                with (parcel) {
+                    val tagBox = DynalistApp.instance.boxStore.boxFor<DynalistTag>()
+                    return DynalistItemFilter().apply {
+                        id = readLong()
+                        logicMode = LogicMode.values()[readInt()]
+                        minRelativeDate = readNullableLong()
+                        maxRelativeDate = readNullableLong()
+                        minRelativeModifiedDate = readNullableLong()
+                        maxRelativeModifiedDate = readNullableLong()
+                        tags.addAll(tagBox.get(createLongArray()!!))
+                        parent.targetId = readLong()
+                        searchDepth = readInt()
+                        containsText = readString()
+                        hideIfParentIncluded = readInt() > 0
+                        sortOrder = Order.values()[readInt()]
+                        isCompleted = readNullableBoolean()
+                        hasImage = readNullableBoolean()
+                    }
+                }
+            }
+            override fun newArray(size: Int) = arrayOfNulls<DynalistItemFilter>(size)
+        }
+    }
+
+    override fun describeContents(): Int = 0
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.apply {
+            writeLong(id)
+            writeInt(logicMode.ordinal)
+            writeNullableLong(minRelativeDate)
+            writeNullableLong(maxRelativeDate)
+            writeNullableLong(minRelativeModifiedDate)
+            writeNullableLong(maxRelativeModifiedDate)
+            writeLongArray(tags.map { it.id }.toLongArray())
+            writeLong(parent.targetId)
+            writeInt(searchDepth)
+            writeString(containsText)
+            writeInt(hideIfParentIncluded.int)
+            writeInt(sortOrder.ordinal)
+            writeNullableBoolean(isCompleted)
+            writeNullableBoolean(hasImage)
+        }
+    }
+
 }

@@ -16,6 +16,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
+import android.os.Parcel
 import android.text.SpannableStringBuilder
 import android.widget.TextView
 import kotlin.math.roundToInt
@@ -140,4 +141,37 @@ val RecyclerView.children: List<RecyclerView.ViewHolder> get() {
     return IntRange(0, layoutManager!!.childCount - 1).map {
         getChildViewHolder(layoutManager!!.getChildAt(it)!!)
     }
+}
+
+fun Parcel.writeNullableLong(value: Long?) {
+    writeInt((value == null).int)
+    if (value != null)
+        writeLong(value)
+}
+
+fun Parcel.readNullableLong(): Long? {
+    val isNull = readInt() > 0
+    return if (!isNull) readLong() else null
+}
+
+fun Parcel.writeNullableInt(value: Int?) {
+    writeInt((value == null).int)
+    if (value != null)
+        writeInt(value)
+}
+
+fun Parcel.readNullableInt(): Int? {
+    val isNull = readInt() > 0
+    return if (!isNull) readInt() else null
+}
+
+fun Parcel.writeNullableBoolean(value: Boolean?) {
+    writeInt((value == null).int)
+    if (value != null)
+        writeInt(value.int)
+}
+
+fun Parcel.readNullableBoolean(): Boolean? {
+    val isNull = readInt() > 0
+    return if (!isNull) readInt() > 0 else null
 }
