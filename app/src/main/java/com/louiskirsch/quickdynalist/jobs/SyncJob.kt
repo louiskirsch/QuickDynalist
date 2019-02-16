@@ -5,6 +5,7 @@ import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.AuthenticatedRequest
 import com.louiskirsch.quickdynalist.network.ReadDocumentRequest
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItemMetaData
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.utils.execRespectRateLimit
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
@@ -41,6 +42,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         val token = dynalist.token
         val service = DynalistApp.instance.dynalistService
         val box: Box<DynalistItem> = DynalistApp.instance.boxStore.boxFor()
+        val metaBox: Box<DynalistItemMetaData> = DynalistApp.instance.boxStore.boxFor()
 
         // Query from server
         val delayCallback = { _: Any, delay: Long ->
@@ -61,6 +63,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         val clientItemsById = clientItems.associateBy { it.serverAbsoluteId }
         val clientItemsByName = clientItems.associateBy { it.name }
         val notAssociatedClientItems = clientItems.toMutableSet()
+        val updatedMetaData = ArrayList<DynalistItemMetaData>()
 
         // Transform server data
         val serverItems = documents.zip(contents).flatMap {
@@ -84,8 +87,10 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                         note = it.note
                         parent.target = null
                         serverParentId = it.parent  // Currently this does nothing, bug in API
-                        if (hasChanged)
+                        if (hasChanged) {
                             notifyModified(syncTime)
+                            updatedMetaData.add(metaData.target)
+                        }
                     }
                     notAssociatedClientItems.remove(this)
                 } ?: DynalistItem(doc.id, it.parent, it.id, it.content, it.note,
@@ -123,10 +128,13 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         bookmarks.forEach { it.isBookmark = true }
 
         // Store new items in database
+        val itemsToRemove = (notAssociatedClientItems - newInbox).filter { it.syncJob == null }
         DynalistApp.instance.boxStore.runInTx {
-            box.remove((notAssociatedClientItems - newInbox).filter { it.syncJob == null })
+            box.remove(itemsToRemove)
+            metaBox.remove(itemsToRemove.map { it.metaData.target })
             box.put(serverItems)
             box.put(newInbox)
+            metaBox.put(updatedMetaData)
         }
         dynalist.lastFullSync = Date()
         EventBus.getDefault().apply {

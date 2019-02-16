@@ -17,6 +17,7 @@ class EditItemJob(val item: DynalistItem): ItemJob() {
         box.attach(item)
         item.notifyModified()
         box.put(item)
+        metaBox.put(item.metaData.target)
         ListAppWidget.notifyItemChanged(applicationContext, item)
     }
 

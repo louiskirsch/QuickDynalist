@@ -16,12 +16,13 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
 
     override fun addToDatabase() {
         DynalistApp.instance.boxStore.runInTx {
-            box.get(parent.clientId)?.let { parent ->
+            box.get(parent.clientId)?.also { parent ->
                 newItem.syncJob = id
                 newItem.position = parent.children.size
                 newItem.parent.target = parent
                 newItem.notifyModified()
                 box.put(newItem)
+                metaBox.put(newItem.metaData.target)
             }
         }
         ListAppWidget.notifyItemChanged(applicationContext, newItem)

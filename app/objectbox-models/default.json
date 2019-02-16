@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1068626277769387505",
-      "lastPropertyId": "17:8109775206210945534",
+      "lastPropertyId": "18:6618574385164320569",
       "name": "DynalistItem",
       "properties": [
         {
@@ -76,14 +76,141 @@
         {
           "id": "17:8109775206210945534",
           "name": "lastModified"
+        },
+        {
+          "id": "18:6618574385164320569",
+          "indexId": "11:6344156678285359920",
+          "name": "metaDataId"
         }
       ],
       "relations": []
+    },
+    {
+      "id": "2:5056814126734683383",
+      "lastPropertyId": "3:7312604431729496667",
+      "name": "DynalistTag",
+      "properties": [
+        {
+          "id": "1:6372659363812695608",
+          "name": "id"
+        },
+        {
+          "id": "2:321769488052989479",
+          "indexId": "8:1822839995269119635",
+          "name": "type"
+        },
+        {
+          "id": "3:7312604431729496667",
+          "indexId": "9:1365980571537462457",
+          "name": "name"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:5506379183492778079",
+      "lastPropertyId": "5:5787462089919488968",
+      "name": "DynalistItemMetaData",
+      "properties": [
+        {
+          "id": "1:3077561880490425395",
+          "name": "id"
+        },
+        {
+          "id": "2:1668074882448182758",
+          "name": "date"
+        },
+        {
+          "id": "3:6839576124294974094",
+          "name": "image"
+        },
+        {
+          "id": "4:618012291336628114",
+          "name": "symbol"
+        },
+        {
+          "id": "5:5787462089919488968",
+          "indexId": "10:7956760496414387173",
+          "name": "linkedItemId"
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:637745725968241197",
+          "name": "tags"
+        }
+      ]
+    },
+    {
+      "id": "4:9147073662366745146",
+      "lastPropertyId": "13:6868478242743686286",
+      "name": "DynalistItemFilter",
+      "properties": [
+        {
+          "id": "1:1271329371544958055",
+          "name": "id"
+        },
+        {
+          "id": "2:1273526004346376260",
+          "name": "logicMode"
+        },
+        {
+          "id": "3:767580563449512533",
+          "name": "minRelativeDate"
+        },
+        {
+          "id": "4:5742976311477929066",
+          "name": "maxRelativeDate"
+        },
+        {
+          "id": "5:5955759364150760767",
+          "name": "searchDepth"
+        },
+        {
+          "id": "6:805046689862737936",
+          "name": "containsText"
+        },
+        {
+          "id": "7:2938170548784130416",
+          "name": "hideIfParentIncluded"
+        },
+        {
+          "id": "8:5343532646031989264",
+          "name": "sortOrder"
+        },
+        {
+          "id": "9:2888931267130346003",
+          "name": "isCompleted"
+        },
+        {
+          "id": "10:1972878937208254303",
+          "indexId": "12:6494593317804018478",
+          "name": "parentId"
+        },
+        {
+          "id": "11:2271132081632424854",
+          "name": "minRelativeModifiedDate"
+        },
+        {
+          "id": "12:1129654456015514241",
+          "name": "maxRelativeModifiedDate"
+        },
+        {
+          "id": "13:6868478242743686286",
+          "name": "hasImage"
+        }
+      ],
+      "relations": [
+        {
+          "id": "2:3546086076133853641",
+          "name": "tags"
+        }
+      ]
     }
   ],
-  "lastEntityId": "1:1068626277769387505",
-  "lastIndexId": "7:3690015368248211183",
-  "lastRelationId": "0:0",
+  "lastEntityId": "4:9147073662366745146",
+  "lastIndexId": "12:6494593317804018478",
+  "lastRelationId": "2:3546086076133853641",
   "lastSequenceId": "0:0",
   "modelVersion": 4,
   "modelVersionParserMinimum": 4,

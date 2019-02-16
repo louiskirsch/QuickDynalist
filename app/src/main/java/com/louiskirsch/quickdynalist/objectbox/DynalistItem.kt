@@ -42,14 +42,24 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
     lateinit var parent: ToOne<DynalistItem>
+    lateinit var metaData: ToOne<DynalistItemMetaData>
 
     fun notifyModified(time: Long = Date().time) {
         lastModified = time
+        updateMetaData()
     }
 
-    fun List<DynalistItem>.notifyModified() {
-        val now = Date().time
-        forEach { it.notifyModified(now) }
+    fun updateMetaData() {
+        if (metaData.targetId > 0)
+            metaData.target.update(this)
+        else
+            metaData.target = DynalistItemMetaData(this)
+    }
+
+    fun hasParent(parentId: Long, maxDepth: Int = 1): Boolean {
+        if (maxDepth <= 1)
+            return parent.targetId == parentId
+        return parent.target?.hasParent(parentId, maxDepth - 1) ?: false
     }
 
     override fun toString() = shortenedName.toString()
@@ -203,7 +213,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 ?: imageRegex.find(note)?.groupValues?.get(2)
     }
 
-    private val tags: List<String> get() {
+    val tags: List<String> get() {
         return listOf(name, note).flatMap {
             tagRegex.findAll(it).map { m -> m.groupValues[2] } .toList()
         }

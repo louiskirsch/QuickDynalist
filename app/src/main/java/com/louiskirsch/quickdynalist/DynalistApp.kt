@@ -94,6 +94,11 @@ class DynalistApp : Application() {
                 val now = Date().time
                 box.put(box.all.apply { forEach { it.notifyModified(now) } })
             }, null)
+        } else if (version < 22) {
+            val box: Box<DynalistItem> = boxStore.boxFor()
+            boxStore.runInTxAsync({
+                box.put(box.all.apply { forEach { it.updateMetaData() } })
+            }, null)
         }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE
     }
