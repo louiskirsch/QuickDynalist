@@ -154,6 +154,7 @@ class ItemListFragment : Fragment() {
             val index = adapter.findPosition(item)
             if (index >= 0) {
                 itemList.scrollToPosition(index)
+                adapter.highlightPosition(index)
             }
         }
     }
@@ -272,7 +273,7 @@ class ItemListFragment : Fragment() {
         ItemTouchHelper(ItemTouchCallback(adapter)).attachToRecyclerView(itemList)
 
         itemListScrollButton.setOnClickListener {
-            itemList.smoothScrollToPosition(adapter.itemCount - 1)
+            itemList.scrollToPosition(adapter.itemCount - 1)
             itemListScrollButton.hide(ScrollFABBehavior.hideListener)
         }
         scrollToIntendedLocation()

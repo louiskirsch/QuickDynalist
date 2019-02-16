@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
 import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -94,6 +95,16 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
             }
             field = value
         }
+
+    private var highlightedPosition: Int? = null
+    fun highlightPosition(position: Int) {
+        highlightedPosition = position
+        notifyItemChanged(position)
+        Handler().postDelayed({
+            highlightedPosition = null
+            notifyItemChanged(position)
+        }, 500)
+    }
 
     init {
         setHasStableIds(true)
@@ -216,6 +227,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         holder.itemChildren.text = item.spannableChildren
         holder.itemView.setOnClickListener { onClickListener?.invoke(idToItem[clientId]!!.item) }
         holder.itemView.isActivated = selectedItem == item.item
+        holder.itemView.isPressed = highlightedPosition == position
 
         val popupListener = { menuItem: MenuItem ->
             onPopupItemClickListener?.invoke(idToItem[clientId]!!.item, menuItem) ?: false
