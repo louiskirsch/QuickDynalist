@@ -164,6 +164,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             }
         }
 
+        spannable.replaceAll(whitespaceRegex) { "" }
+
         tagRegex.findAll(spannable).forEach {
             val bg = BackgroundColorSpan(spanHighlight)
             val range = it.groups[2]!!.range
@@ -259,6 +261,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         private val linkRegex = Regex("""\[(.*?)]\((.*?)\)""")
         private val imageRegex = Regex("""!\[(.*?)]\((.*?)\)""")
         private val dynalistLinkRegex = Regex("""\[(.*?)]\(https://dynalist\.io/d/(.*?)#z=(.*?)\)""")
+        private val whitespaceRegex = Regex("""(^\s+)|(\s+$)""")
 
         @Suppress("unused")
         @JvmField
