@@ -133,6 +133,8 @@ class Dynalist(private val context: Context) {
 
     fun sync(isManual: Boolean = false) {
         val settings = PreferenceManager.getDefaultSharedPreferences(context)
+        if (!settings.getBoolean("sync_automatic", true))
+            return
         if (!isManual && !settings.contains("sync_mobile_data")) {
             context.alert {
                 isCancelable = false
