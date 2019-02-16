@@ -25,6 +25,17 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         })
     }
 
+    val recentItemsLiveData: ObjectBoxLiveData<DynalistItem> by lazy {
+        ObjectBoxLiveData(box.query {
+            notEqual(DynalistItem_.name, "")
+            and()
+            equal(DynalistItem_.hidden, false)
+            and()
+            equal(DynalistItem_.isChecked, false)
+            orderDesc(DynalistItem_.lastModified)
+            // TODO currently limiting number of items is not supported
+        })
+    }
 
     val documentsLiveData: ObjectBoxLiveData<DynalistItem> by lazy {
         ObjectBoxLiveData(box.query {

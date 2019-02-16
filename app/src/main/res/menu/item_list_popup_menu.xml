@@ -15,7 +15,7 @@
         android:visible="false"
         app:showAsAction="never" />
 
-    <item android:id="@+id/action_move_to_inbox"
+    <item android:id="@+id/action_move_to_bookmark"
         android:title="@string/action_move_to_inbox"
         app:showAsAction="never">
         <menu />

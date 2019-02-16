@@ -254,6 +254,27 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 null
         }
 
+    var linkedItem: DynalistItem?
+        get() = dynalistLinkRegex.find(name + note)?.groupValues?.let { values ->
+            val fileId = values[2]
+            val itemId = values[3]
+            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+            return box.query {
+                equal(DynalistItem_.serverFileId, fileId)
+                and()
+                equal(DynalistItem_.serverItemId, itemId)
+            }.findFirst()
+        }
+        set(value) {
+            val stripped = note.replace(dynalistLinkRegex, "").trim()
+            note = if (value != null) {
+                val link = "[${value.name}](https://dynalist.io/d/${value.serverFileId}#z=${value.serverItemId})"
+                "$link\n$stripped"
+            } else {
+                stripped
+            }
+        }
+
     val symbol: String?
         get() = EmojiFactory.emojis.firstOrNull { it in name }
 

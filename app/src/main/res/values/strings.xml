@@ -117,4 +117,6 @@
     <string name="action_add_date_mod">Modification date</string>
     <string name="action_add_date_choose">Choose …</string>
     <string name="action_change_date_remove">Remove</string>
+    <string name="move_item_success">Moved item</string>
+    <string name="goto_move_location">Go to location</string>
 </resources>

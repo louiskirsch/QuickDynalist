@@ -75,10 +75,9 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                     isInbox = false
                     isBookmark = false
                     if (syncJob == null) {
-                        val hasChanged = listOf(
-                                isChecked != it.checked,
-                                name != it.content,
-                                note != it.note).any()
+                        val hasChanged = (isChecked != it.checked ||
+                                            name != it.content ||
+                                            note != it.note)
                         isChecked = it.checked
                         position = 0
                         name = it.content

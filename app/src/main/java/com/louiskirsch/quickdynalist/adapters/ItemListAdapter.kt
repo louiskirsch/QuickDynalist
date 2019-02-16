@@ -41,6 +41,7 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         inflate(R.menu.item_list_popup_image_extension)
         itemImage.setOnClickListener { show() }
     }
+    val popupMenus = listOf(menuPopup.menu, imagePopup.menu)
 }
 
 class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
@@ -239,6 +240,10 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         holder.itemImage.visibility = View.GONE
         holder.itemNotes.isEllipsized {
             holder.menuPopup.menu.findItem(R.id.action_show_details).isVisible = it
+        }
+        holder.popupMenus.forEach {
+            it.findItem(R.id.action_change_date_remove).isVisible = item.item.date != null
+            it.findItem(R.id.action_move_to_bookmark).isVisible = !item.item.isBookmark
         }
 
         item.item.image?.also { image ->

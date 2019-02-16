@@ -13,7 +13,6 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.Fragment
@@ -32,6 +31,7 @@ import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
 import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import com.louiskirsch.quickdynalist.utils.prependIfNotBlank
@@ -40,6 +40,7 @@ import com.louiskirsch.quickdynalist.views.ScrollFABBehavior
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import com.louiskirsch.quickdynalist.widget.ListAppWidgetConfigurationReceiver
 import io.objectbox.kotlin.boxFor
+import io.objectbox.kotlin.query
 import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.jetbrains.anko.*
@@ -97,6 +98,18 @@ class ItemListFragment : Fragment() {
         }
         adapter.onClickListener = { openDynalistItem(it) }
         adapter.onPopupItemClickListener = { item, menuItem ->
+            val moveItemCallback: (DynalistItem) -> Boolean = { targetLocation ->
+                DynalistApp.instance.jobManager.addJobInBackground(
+                        MoveItemJob(item, targetLocation, -1)
+                )
+                Snackbar.make(view!!, R.string.move_item_success, Snackbar.LENGTH_LONG).apply {
+                    setAction(R.string.goto_move_location) {
+                        openDynalistItem(targetLocation, item)
+                    }
+                    show()
+                }
+                true
+            }
             when (menuItem.itemId) {
                 R.id.action_show_details -> showItemDetails(item)
                 R.id.action_edit -> editingItem = item
@@ -111,6 +124,18 @@ class ItemListFragment : Fragment() {
                 R.id.action_add_date_choose -> chooseItemDate(item)
                 R.id.action_change_date_remove -> {
                     DynalistItem.updateGlobally(item) { it.date = null }
+                }
+                R.id.action_move_to_bookmark -> {
+                    fillMenuBookmarks(menuItem.subMenu, moveItemCallback)
+                }
+                R.id.action_move_to_recent -> {
+                    fillMenuRecentItems(menuItem.subMenu, false, item, moveItemCallback)
+                }
+                R.id.action_link_to_recent -> {
+                    fillMenuRecentItems(menuItem.subMenu, true, item) { linkTarget ->
+                        DynalistItem.updateGlobally(item) { it.linkedItem = linkTarget }
+                        true
+                    }
                 }
             }
             true
@@ -160,6 +185,52 @@ class ItemListFragment : Fragment() {
             adapter.updateItems(newItems)
             if (initializing) scrollToIntendedLocation()
         })
+    }
+
+    private fun fillMenuRecentItems(menu: SubMenu, requireItemId: Boolean, exclude: DynalistItem,
+                                    onClick: (DynalistItem) -> Boolean) {
+        // TODO query this async
+        val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+        val recentItems = box.query {
+            notEqual(DynalistItem_.name, "")
+            and()
+            equal(DynalistItem_.hidden, false)
+            and()
+            equal(DynalistItem_.isChecked, false)
+            and()
+            equal(DynalistItem_.isBookmark, false)
+            and()
+            notEqual(DynalistItem_.clientId, exclude.clientId)
+            if (requireItemId) {
+                and()
+                notNull(DynalistItem_.serverFileId)
+                and()
+                notNull(DynalistItem_.serverItemId)
+            }
+            orderDesc(DynalistItem_.lastModified)
+        }.find(0, 10)
+        menu.clear()
+        recentItems.forEachIndexed { idx, item ->
+            menu.add(SubMenu.NONE, SubMenu.NONE, idx, item.strippedMarkersName).apply {
+                setOnMenuItemClickListener { onClick(item) }
+            }
+        }
+    }
+
+    private fun fillMenuBookmarks(menu: SubMenu, onClick: (DynalistItem) -> Boolean) {
+        // TODO query this async
+        val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+        val bookmarks = box.query {
+            equal(DynalistItem_.isBookmark, true)
+            orderDesc(DynalistItem_.isInbox)
+            order(DynalistItem_.name)
+        }.find()
+        menu.clear()
+        bookmarks.forEachIndexed { idx, item ->
+            menu.add(SubMenu.NONE, SubMenu.NONE, idx, item.strippedMarkersName).apply {
+                setOnMenuItemClickListener { onClick(item) }
+            }
+        }
     }
 
     private fun chooseItemDate(item: DynalistItem) {
@@ -227,9 +298,9 @@ class ItemListFragment : Fragment() {
         }
     }
 
-    private fun openDynalistItem(item: DynalistItem): Boolean {
-        val scrollTo = if (item == location.parent.target) location else null
-        val fragment = newInstance(item, itemContents.text, scrollTo)
+    private fun openDynalistItem(item: DynalistItem, scrollTo: DynalistItem? = null): Boolean {
+        val scrollToResolved = scrollTo ?: if (item == location.parent.target) location else null
+        val fragment = newInstance(item, itemContents.text, scrollToResolved)
         fragmentManager!!.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
