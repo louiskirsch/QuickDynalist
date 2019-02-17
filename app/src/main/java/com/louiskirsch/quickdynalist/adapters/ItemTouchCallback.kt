@@ -7,7 +7,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.utils.children
 
-class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouchHelper.Callback() {
+class ItemTouchCallback(private val adapter: ItemTouchHelperContract,
+                        private val allowDragging: Boolean): ItemTouchHelper.Callback() {
 
     private var dropIntoTarget: RecyclerView.ViewHolder? = null
     private var dragging: Boolean = false
@@ -17,8 +18,10 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract): ItemTouch
     override fun isItemViewSwipeEnabled(): Boolean = true
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-        val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN or
-                ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        val dragFlags = if (allowDragging) {
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN or
+                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        } else { 0 }
         val swipeFlags = ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
         return makeMovementFlags(dragFlags, swipeFlags)
     }
