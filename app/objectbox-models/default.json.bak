@@ -143,7 +143,7 @@
     },
     {
       "id": "4:9147073662366745146",
-      "lastPropertyId": "10:1972878937208254303",
+      "lastPropertyId": "13:6868478242743686286",
       "name": "DynalistItemFilter",
       "properties": [
         {
@@ -186,6 +186,18 @@
           "id": "10:1972878937208254303",
           "indexId": "12:6494593317804018478",
           "name": "parentId"
+        },
+        {
+          "id": "11:2271132081632424854",
+          "name": "minRelativeModifiedDate"
+        },
+        {
+          "id": "12:1129654456015514241",
+          "name": "maxRelativeModifiedDate"
+        },
+        {
+          "id": "13:6868478242743686286",
+          "name": "hasImage"
         }
       ],
       "relations": [

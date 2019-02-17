@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/goto_parent"
-        android:icon="@drawable/ic_action_goto_parent"
-        android:title="@string/goto_parent"
+    <item android:id="@+id/action_edit_filter"
+        android:icon="@drawable/ic_action_edit_filter"
+        android:title="@string/action_edit_filter"
         app:showAsAction="ifRoom" />
-
-    <item android:id="@+id/share"
-        android:icon="@drawable/ic_action_share"
-        android:title="@string/action_share"
-        app:showAsAction="ifRoom" />
-
-    <item android:id="@+id/open_in_dynalist"
-        android:icon="@drawable/ic_action_open_in_browser"
-        android:title="@string/open_in_dynalist"
-        app:showAsAction="never" />
 
     <item android:id="@+id/create_shortcut"
         android:icon="@drawable/ic_action_create_shortcut"
@@ -28,9 +17,9 @@
         app:showAsAction="never" />
 
     <group android:checkableBehavior="all">
-        <item android:id="@+id/toggle_bookmark"
+        <item android:id="@+id/toggle_saved"
             android:checkable="true"
-            android:title="@string/toggle_bookmark"
+            android:title="@string/toggle_saved"
             app:showAsAction="never" />
 
         <item android:id="@+id/toggle_checklist"
@@ -38,10 +27,6 @@
             android:title="@string/toggle_checklist"
             app:showAsAction="never" />
 
-        <item android:id="@+id/toggle_show_checked_items"
-            android:checkable="true"
-            android:title="@string/toggle_show_checked_items"
-            app:showAsAction="never" />
     </group>
 
 </menu>

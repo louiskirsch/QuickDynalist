@@ -119,4 +119,8 @@
     <string name="action_change_date_remove">Remove</string>
     <string name="move_item_success">Moved item</string>
     <string name="goto_move_location">Go to location</string>
+    <string name="toggle_saved">Save filter</string>
+    <string name="action_edit_filter">Edit filter</string>
+    <string name="filter_name_generic">Filter</string>
+    <string name="action_create_filter">Filter</string>
 </resources>

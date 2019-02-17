@@ -80,4 +80,5 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
 
 class ItemListFragmentViewModel: ViewModel() {
     val selectedDynalistItem = MutableLiveData<DynalistItem>()
+    val selectedDynalistFilter = MutableLiveData<DynalistItemFilter>()
 }

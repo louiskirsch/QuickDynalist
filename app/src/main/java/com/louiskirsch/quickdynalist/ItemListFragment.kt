@@ -81,6 +81,7 @@ class ItemListFragment : BaseItemListFragment() {
             super.onCreateOptionsMenu(menu, inflater)
             menu.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
             menu.findItem(R.id.toggle_bookmark).isChecked = location.isBookmark
+            menu.findItem(R.id.toggle_show_checked_items).isChecked = location.areCheckedItemsVisible
             if (location.serverItemId == null) {
                 menu.findItem(R.id.open_in_dynalist).isVisible = false
             }
@@ -126,14 +127,13 @@ class ItemListFragment : BaseItemListFragment() {
             R.id.goto_parent -> openDynalistItem(location.parent.target)
             R.id.share -> shareDynalistItem()
             R.id.toggle_bookmark -> toggleBookmark(item)
+            R.id.toggle_show_checked_items -> toggleShowChecked(item)
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     override val showAsChecklist: Boolean
         get() = location.isChecklist
-    override val areCheckedItemsVisible: Boolean
-        get() = location.areCheckedItemsVisible
     override val enableDragging: Boolean get() = true
 
     override val itemsLiveData: LiveData<List<CachedDynalistItem>> get() {
@@ -142,7 +142,7 @@ class ItemListFragment : BaseItemListFragment() {
         return model.itemsLiveData
     }
 
-    override fun toggleShowChecked(menuItem: MenuItem): Boolean {
+    private fun toggleShowChecked(menuItem: MenuItem): Boolean {
         val checked = !menuItem.isChecked
         menuItem.isChecked = checked
         location.areCheckedItemsVisible = checked

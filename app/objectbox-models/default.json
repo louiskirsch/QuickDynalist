@@ -143,7 +143,7 @@
     },
     {
       "id": "4:9147073662366745146",
-      "lastPropertyId": "13:6868478242743686286",
+      "lastPropertyId": "15:602879671462848965",
       "name": "DynalistItemFilter",
       "properties": [
         {
@@ -198,6 +198,14 @@
         {
           "id": "13:6868478242743686286",
           "name": "hasImage"
+        },
+        {
+          "id": "14:7099364184872745633",
+          "name": "name"
+        },
+        {
+          "id": "15:602879671462848965",
+          "name": "showAsChecklist"
         }
       ],
       "relations": [

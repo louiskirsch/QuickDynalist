@@ -350,12 +350,9 @@ abstract class BaseItemListFragment : Fragment() {
         submitButton.isEnabled = itemContents.text.isNotEmpty()
     }
 
-    protected abstract val areCheckedItemsVisible: Boolean
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         val shortcutsSupported = ShortcutManagerCompat.isRequestPinShortcutSupported(context!!)
         menu.findItem(R.id.create_shortcut).isVisible = shortcutsSupported
-        menu.findItem(R.id.toggle_show_checked_items).isChecked = areCheckedItemsVisible
         menu.findItem(R.id.toggle_checklist).isChecked = showAsChecklist
     }
 
@@ -386,13 +383,11 @@ abstract class BaseItemListFragment : Fragment() {
             R.id.create_shortcut -> createShortcut()
             R.id.create_widget -> createWidget()
             R.id.toggle_checklist -> toggleChecklist(item)
-            R.id.toggle_show_checked_items -> toggleShowChecked(item)
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    protected abstract fun toggleShowChecked(item: MenuItem): Boolean
-    protected abstract fun toggleChecklist(item: MenuItem): Boolean
+    protected abstract fun toggleChecklist(menuItem: MenuItem): Boolean
     protected abstract fun putWidgetExtras(intent: Intent)
     protected abstract fun putShortcutExtras(intent: Intent)
 

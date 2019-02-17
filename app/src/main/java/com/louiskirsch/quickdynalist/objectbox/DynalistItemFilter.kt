@@ -35,6 +35,7 @@ class DynalistItemFilter: Parcelable {
     }
 
     @Id var id: Long = 0
+    var name: String? = null
 
     @Convert(converter = LogicModeConverter::class, dbType = Integer::class)
     var logicMode: LogicMode = LogicMode.ALL
@@ -49,6 +50,7 @@ class DynalistItemFilter: Parcelable {
     var searchDepth: Int = 1
     var containsText: String? = null
     var hideIfParentIncluded: Boolean = false
+    var showAsChecklist: Boolean = false
     @Convert(converter = OrderConverter::class, dbType = Integer::class)
     var sortOrder: Order = Order.MANUAL
     var isCompleted: Boolean? = null
@@ -190,6 +192,7 @@ class DynalistItemFilter: Parcelable {
                     val tagBox = DynalistApp.instance.boxStore.boxFor<DynalistTag>()
                     return DynalistItemFilter().apply {
                         id = readLong()
+                        name = readString()
                         logicMode = LogicMode.values()[readInt()]
                         minRelativeDate = readNullableLong()
                         maxRelativeDate = readNullableLong()
@@ -200,6 +203,7 @@ class DynalistItemFilter: Parcelable {
                         searchDepth = readInt()
                         containsText = readString()
                         hideIfParentIncluded = readInt() > 0
+                        showAsChecklist = readInt() > 0
                         sortOrder = Order.values()[readInt()]
                         isCompleted = readNullableBoolean()
                         hasImage = readNullableBoolean()
@@ -214,6 +218,7 @@ class DynalistItemFilter: Parcelable {
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.apply {
             writeLong(id)
+            writeString(name)
             writeInt(logicMode.ordinal)
             writeNullableLong(minRelativeDate)
             writeNullableLong(maxRelativeDate)
@@ -224,6 +229,7 @@ class DynalistItemFilter: Parcelable {
             writeInt(searchDepth)
             writeString(containsText)
             writeInt(hideIfParentIncluded.int)
+            writeInt(showAsChecklist.int)
             writeInt(sortOrder.ordinal)
             writeNullableBoolean(isCompleted)
             writeNullableBoolean(hasImage)
