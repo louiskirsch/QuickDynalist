@@ -1,7 +1,6 @@
 package com.louiskirsch.quickdynalist
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.*
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.objectbox.*
@@ -73,6 +72,38 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
             }
         }
     }
+
+    private val filterBox: Box<DynalistItemFilter>
+        get() = DynalistApp.instance.boxStore.boxFor()
+
+    private val filtersLiveData: ObjectBoxLiveData<DynalistItemFilter> by lazy {
+        ObjectBoxLiveData(filterBox.query { })
+    }
+
+    val locationsLiveData: LiveData<List<Location>> by lazy {
+        val bookmarks = Transformations.map(bookmarksLiveData) {
+            it.map { bookmark -> ItemLocation(bookmark) }
+        }
+        val filters = Transformations.map(filtersLiveData) {
+            it.map { filter -> FilterLocation(filter, getApplication()) }
+        }
+        MediatorLiveData<List<Location>>().apply {
+            addSource(bookmarks) { bookmarks ->
+                value = filters.value?.let { bookmarks + it } ?: bookmarks }
+            addSource(filters) { filters ->
+                value = bookmarks.value?.let { it + filters } ?: filters }
+        }
+    }
+}
+
+class DynalistItemFilterViewModel(app: Application): AndroidViewModel(app) {
+
+    private val box: Box<DynalistItemFilter>
+        get() = DynalistApp.instance.boxStore.boxFor()
+
+    val filtersLiveData: ObjectBoxLiveData<DynalistItemFilter> by lazy {
+        ObjectBoxLiveData(box.query { })
+    }
 }
 
 class DynalistTagViewModel(app: Application): AndroidViewModel(app) {
@@ -89,6 +120,5 @@ class DynalistTagViewModel(app: Application): AndroidViewModel(app) {
 }
 
 class ItemListFragmentViewModel: ViewModel() {
-    val selectedDynalistItem = MutableLiveData<DynalistItem>()
-    val selectedDynalistFilter = MutableLiveData<DynalistItemFilter>()
+    val selectedDynalistObject = MutableLiveData<Location>()
 }

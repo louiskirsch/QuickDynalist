@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.DynalistItemViewModel
+import com.louiskirsch.quickdynalist.Location
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.list_app_widget_configure.*
@@ -43,13 +44,13 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
             return
         }
 
-        val adapter = ArrayAdapter<DynalistItem>(this,
+        val adapter = ArrayAdapter<Location>(this,
                 android.R.layout.simple_list_item_single_choice, ArrayList())
         widgetLocation.adapter = adapter
         widgetLocation.choiceMode = ListView.CHOICE_MODE_SINGLE
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {locations ->
+        model.locationsLiveData.observe(this, Observer { locations ->
             val initializing = adapter.isEmpty
             adapter.clear()
             adapter.addAll(locations)
@@ -59,10 +60,11 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
         })
     }
 
-    private fun initializeSelection(locations: List<DynalistItem>) {
+    private fun initializeSelection(locations: List<Location>) {
         if (hasWidgetInfo(this, widgetId)) {
-            val location = getLocation(this, widgetId)
-            val index = locations.indexOfFirst { it.clientId == location }
+            val locationId = getLocation(this, widgetId)
+            val type = getType(this, widgetId)
+            val index = locations.indexOfFirst { it.id == locationId && it.typeName == type }
             widgetLocation.setItemChecked(index, true)
         } else {
             widgetLocation.setItemChecked(0, true)
@@ -89,7 +91,7 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
 
     private fun createWidget(): Boolean {
         val selectedItem = widgetLocation.getItemAtPosition(widgetLocation.checkedItemPosition)
-        saveWidgetInfo(this, widgetId, selectedItem as DynalistItem)
+        saveWidgetInfo(this, widgetId, selectedItem as Location)
 
         val appWidgetManager = AppWidgetManager.getInstance(this)
         ListAppWidget.updateAppWidget(this, appWidgetManager, widgetId)
@@ -110,10 +112,12 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
             return context.getSharedPreferences(PREFS_NAME, 0)
         }
 
-        internal fun saveWidgetInfo(context: Context, appWidgetId: Int, item: DynalistItem) {
+        internal fun saveWidgetInfo(context: Context, appWidgetId: Int, item: Location) {
             val prefs = getPrefs(context).edit()
-            prefs.putString("${PREF_PREFIX_KEY}_${appWidgetId}_title", item.strippedMarkersName)
-            prefs.putLong("${PREF_PREFIX_KEY}_${appWidgetId}_location", item.clientId)
+            prefs.putString("${PREF_PREFIX_KEY}_${appWidgetId}_title", item.name)
+            prefs.putLong("${PREF_PREFIX_KEY}_${appWidgetId}_location", item.id)
+            prefs.putString("${PREF_PREFIX_KEY}_${appWidgetId}_type", item.typeName)
+            prefs.putString("${PREF_PREFIX_KEY}_${appWidgetId}_extraKey", item.extraIdKey)
             prefs.apply()
         }
 
@@ -124,6 +128,16 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
         internal fun getTitle(context: Context, appWidgetId: Int): String {
             val prefs = getPrefs(context)
             return prefs.getString("${PREF_PREFIX_KEY}_${appWidgetId}_title", "")!!
+        }
+
+        internal fun getType(context: Context, appWidgetId: Int): String {
+            val prefs = getPrefs(context)
+            return prefs.getString("${PREF_PREFIX_KEY}_${appWidgetId}_type", "")!!
+        }
+
+        internal fun getEtraKey(context: Context, appWidgetId: Int): String {
+            val prefs = getPrefs(context)
+            return prefs.getString("${PREF_PREFIX_KEY}_${appWidgetId}_extraKey", "")!!
         }
 
         internal fun getLocation(context: Context, appWidgetId: Int): Long {

@@ -49,13 +49,22 @@ class FilteredItemListFragment : BaseItemListFragment() {
     override fun onStart() {
         super.onStart()
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
-        model.selectedDynalistFilter.value = filter
+        model.selectedDynalistObject.value =
+                FilterLocation(filter, context!!)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.filter_item_list_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
         menu.findItem(R.id.toggle_saved).isChecked = saved
+    }
+
+    private fun ensureSaved() {
+        if (saved) return
+        saved = true
+        val box = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()
+        box.put(filter)
+        activity!!.invalidateOptionsMenu()
     }
 
     private fun toggleSaved(menuItem: MenuItem): Boolean {
@@ -127,11 +136,13 @@ class FilteredItemListFragment : BaseItemListFragment() {
     }
 
     override fun putWidgetExtras(intent: Intent) {
-        // TODO implement widget
+        ensureSaved()
+        intent.putExtra(DynalistApp.EXTRA_DISPLAY_FILTER_ID, filter.id)
     }
 
     override fun putShortcutExtras(intent: Intent) {
-        // TODO implement shortcut
+        ensureSaved()
+        intent.putExtra(ShortcutActivity.EXTRA_LOCATION, filter)
     }
 
     override fun onSetEditingItem(value: DynalistItem) {

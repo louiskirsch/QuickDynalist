@@ -10,6 +10,7 @@ import com.louiskirsch.quickdynalist.DynalistApp
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
@@ -40,9 +41,24 @@ class ListViewsFactory(private val context: Context, intent: Intent)
     override fun getViewTypeCount(): Int = 1
 
     override fun onDataSetChanged() {
-        val parentId = ListAppWidgetConfigureActivity.getLocation(context, widgetId)
+        val locationId = ListAppWidgetConfigureActivity.getLocation(context, widgetId)
+        val locationType = ListAppWidgetConfigureActivity.getType(context, widgetId)
+        val queryResult = when (locationType) {
+            "item" -> getDynalistItemChildren(locationId)
+            "filter" -> getDynalistFilterItems(locationId)
+            else -> throw Exception("Invalid location")
+        }
+        val newItems = queryResult.map { item ->
+            item.children.sortBy { child -> child.position }
+            CachedDynalistItem(item, context)
+        }
+        items.clear()
+        items.addAll(newItems)
+    }
+
+    private fun getDynalistItemChildren(parentId: Long): List<DynalistItem> {
         val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
-        val newItems = box.query {
+        return box.query {
             equal(DynalistItem_.parentId, parentId)
             and()
             notEqual(DynalistItem_.name, "")
@@ -52,12 +68,12 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             equal(DynalistItem_.isChecked, false)
             order(DynalistItem_.position)
             eager(100, DynalistItem_.children)
-        }.find().map { item ->
-            item.children.sortBy { child -> child.position }
-            CachedDynalistItem(item, context)
-        }
-        items.clear()
-        items.addAll(newItems)
+        }.find()
+    }
+
+    private fun getDynalistFilterItems(filterId: Long): List<DynalistItem> {
+        val box = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()
+        return box.get(filterId).items
     }
 
     override fun getViewAt(position: Int): RemoteViews {

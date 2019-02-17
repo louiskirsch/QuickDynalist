@@ -56,6 +56,21 @@ class DynalistItemFilter: Parcelable {
     var isCompleted: Boolean? = null
     var hasImage: Boolean? = null
 
+    override fun toString(): String = name ?: ""
+    override fun hashCode(): Int = (id % Int.MAX_VALUE).toInt()
+    override fun equals(other: Any?): Boolean {
+        return if (id > 0)
+            return id == (other as? DynalistItemFilter)?.id
+        else
+            false
+    }
+
+    val symbol: String?
+        get() = EmojiFactory.emojis.firstOrNull { name?.contains(it) ?: false }
+
+    val nameWithoutSymbol: String?
+        get() = symbol?.let { name?.replace(it, "")?.trim() } ?: name
+
     private val query: Query<DynalistItem> get() {
         val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
         val now = Calendar.getInstance().apply {
@@ -194,6 +209,7 @@ class DynalistItemFilter: Parcelable {
         val CREATOR = object : Parcelable.Creator<DynalistItemFilter> {
             override fun createFromParcel(parcel: Parcel): DynalistItemFilter {
                 with (parcel) {
+                    val filterBox = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()
                     val tagBox = DynalistApp.instance.boxStore.boxFor<DynalistTag>()
                     return DynalistItemFilter().apply {
                         id = readLong()
@@ -203,6 +219,7 @@ class DynalistItemFilter: Parcelable {
                         maxRelativeDate = readNullableLong()
                         minRelativeModifiedDate = readNullableLong()
                         maxRelativeModifiedDate = readNullableLong()
+                        filterBox.attach(this)
                         tags.addAll(tagBox.get(createLongArray()!!))
                         parent.targetId = readLong()
                         searchDepth = readInt()

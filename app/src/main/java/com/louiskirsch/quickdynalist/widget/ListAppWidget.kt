@@ -62,6 +62,7 @@ class ListAppWidget : AppWidgetProvider() {
 
             val title = ListAppWidgetConfigureActivity.getTitle(context, appWidgetId)
             val locationId = ListAppWidgetConfigureActivity.getLocation(context, appWidgetId)
+            val extraKey = ListAppWidgetConfigureActivity.getEtraKey(context, appWidgetId)
 
             val views = RemoteViews(context.packageName, R.layout.list_app_widget)
             val intent = Intent(context, ListAppWidgetService::class.java)
@@ -70,7 +71,8 @@ class ListAppWidget : AppWidgetProvider() {
             views.setRemoteAdapter(R.id.appwidget_list, intent)
             views.setTextViewText(R.id.appwidget_header, title)
 
-            val viewListIntent = createViewListPendingIntent(context, appWidgetId, locationId)
+            val viewListIntent = createViewListPendingIntent(
+                    context, appWidgetId, extraKey, locationId)
             views.setOnClickPendingIntent(R.id.appwidget_header, viewListIntent)
 
             val itemListIntent = createViewListPendingIntent(context, appWidgetId + 100000)
@@ -80,9 +82,10 @@ class ListAppWidget : AppWidgetProvider() {
         }
 
         private fun createViewListPendingIntent(context: Context, requestCode: Int,
+                                                extraKey: String? = null,
                                                 locationId: Long? = null): PendingIntent? {
             return Intent("com.louiskirsch.quickdynalist.SHOW_LIST").apply {
-                locationId?.let { putExtra(DynalistApp.EXTRA_DISPLAY_ITEM_ID, it) }
+                locationId?.let { putExtra(extraKey, it) }
                 putExtra(DynalistApp.EXTRA_FROM_SHORTCUT, true)
             }.let {
                 TaskStackBuilder.create(context).addNextIntentWithParentStack(it).intents

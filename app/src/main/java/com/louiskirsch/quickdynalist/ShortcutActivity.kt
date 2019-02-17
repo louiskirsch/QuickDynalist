@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -19,6 +20,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import com.louiskirsch.quickdynalist.adapters.EmojiAdapter
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 import com.louiskirsch.quickdynalist.utils.actionBarView
 import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
 import com.louiskirsch.quickdynalist.utils.toBitmap
@@ -28,7 +30,7 @@ class ShortcutActivity : AppCompatActivity() {
 
     private val shortcutIntent = Intent()
     private val emojiAdapter: EmojiAdapter = EmojiAdapter()
-    private var location: DynalistItem? = null
+    private var location: Location? = null
 
     companion object {
         const val EXTRA_LOCATION = "EXTRA_LOCATION"
@@ -48,12 +50,17 @@ class ShortcutActivity : AppCompatActivity() {
         shortcutIconList.adapter = emojiAdapter
 
         if (intent.hasExtra(EXTRA_LOCATION)) {
-            location = intent.getParcelableExtra(EXTRA_LOCATION) as DynalistItem
+            val parcelableLocation = intent.getParcelableExtra(EXTRA_LOCATION) as Parcelable
+            location = when (parcelableLocation) {
+                is DynalistItem -> ItemLocation(parcelableLocation)
+                is DynalistItemFilter -> FilterLocation(parcelableLocation, this)
+                else -> null
+            }
             shortcutLocation.visibility = View.GONE
             shortcutLocationHeader.visibility = View.GONE
             updateFromLocation()
         } else {
-            val adapter = ArrayAdapter<DynalistItem>(this,
+            val adapter = ArrayAdapter<Location>(this,
                     android.R.layout.simple_spinner_item, ArrayList())
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             shortcutLocation.adapter = adapter
@@ -67,7 +74,7 @@ class ShortcutActivity : AppCompatActivity() {
             }
 
             val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-            model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
+            model.locationsLiveData.observe(this, Observer {
                 if (location == null && it.isNotEmpty())
                     location = it[0]
                 adapter.clear()
@@ -81,6 +88,10 @@ class ShortcutActivity : AppCompatActivity() {
         location!!.symbol?.let {
             emojiAdapter.selectedValue = it
             shortcutIconList.smoothScrollToPosition(emojiAdapter.selectedPosition)
+        }
+        shortcutTypeQuickDialog.isEnabled = location!!.supportsInsertion
+        if (!location!!.supportsInsertion) {
+            shortcutTypeQuickList.isChecked = true
         }
     }
 
@@ -99,7 +110,7 @@ class ShortcutActivity : AppCompatActivity() {
 
     private fun createShortcut(): Boolean {
         shortcutIntent.apply {
-            putExtra(DynalistApp.EXTRA_DISPLAY_ITEM_ID, location!!.clientId)
+            putExtra(location!!.extraIdKey, location!!.id)
             putExtra(DynalistApp.EXTRA_FROM_SHORTCUT, true)
         }
 
@@ -117,7 +128,7 @@ class ShortcutActivity : AppCompatActivity() {
         }
 
         val shortcutType = if (shortcutTypeQuickDialog.isChecked) "dialog" else "list"
-        val id = "shortcut-${location!!.clientId}-$shortcutType"
+        val id = "shortcut-${location!!.typeName}-${location!!.id}-$shortcutType"
         val shortcutInfo = ShortcutInfoCompat.Builder(this, id).run {
             setAlwaysBadged()
             setIntents(shortcutIntents)

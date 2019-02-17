@@ -160,4 +160,6 @@
     <string name="filter_tags">Tags</string>
     <string name="filter_tags_hint">Search for tags</string>
     <string name="action_reset_filter">Reset filter</string>
+    <string name="title_filters_list">Your filters</string>
+    <string name="filter_name_tag">Tag filter</string>
 </resources>

@@ -188,9 +188,14 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         spannable.replaceAll(whitespaceRegex) { "" }
 
         tagRegex.findAll(spannable).forEach {
-            val bg = BackgroundColorSpan(spanHighlight)
+            val tag = DynalistTag.find(it.groupValues[2])
             val range = it.groups[2]!!.range
+
+            val bg = BackgroundColorSpan(spanHighlight)
             spannable.setSpan(bg, range.start, range.endInclusive + 1,
+                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            val tagSpan = DynalistTagSpan(tag, this)
+            spannable.setSpan(tagSpan, range.start, range.endInclusive + 1,
                     Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         }
         return spannable

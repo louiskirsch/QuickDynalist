@@ -37,8 +37,9 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private val dynalist: Dynalist = Dynalist(this)
 
-    private var inboxes: List<DynalistItem>? = null
-    private var documents: List<DynalistItem>? = null
+    private var inboxes: List<ItemLocation>? = null
+    private var documents: List<ItemLocation>? = null
+    private var filters: List<FilterLocation>? = null
 
     companion object {
         const val EXTRA_ITEM_TEXT = "EXTRA_ITEM_TEXT"
@@ -67,13 +68,15 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         nav_view.setNavigationItemSelectedListener(this)
 
         val itemsModel = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+        val filtersModel = ViewModelProviders.of(this).get(DynalistItemFilterViewModel::class.java)
         val fragmentModel = ViewModelProviders.of(this).get(ItemListFragmentViewModel::class.java)
 
-        itemsModel.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> { inboxes ->
-            this.inboxes = inboxes
+        itemsModel.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> { newInboxes ->
+            val entries = newInboxes.map { ItemLocation(it) }
+            this.inboxes = entries
             nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu.run {
-                fillMenuWithItems(inboxes, R.id.group_bookmarks_list, 0)
-                if (inboxes.size <= 1) {
+                fillMenuWithItems(entries, R.id.group_bookmarks_list, 0)
+                if (entries.size <= 1) {
                     add(Menu.NONE, R.id.menu_item_bookmarks_hint, 1, R.string.add_inbox).apply {
                         isCheckable = false
                     }
@@ -81,18 +84,30 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             }
         })
         itemsModel.documentsLiveData.observe(this, Observer<List<DynalistItem>> { docs ->
-            this.documents = docs
+            val entries = docs.map { ItemLocation(it) }
+            this.documents = entries
             nav_view.menu.findItem(R.id.submenu_documents_list).subMenu.run {
-                fillMenuWithItems(docs, R.id.group_documents_list, 1)
+                fillMenuWithItems(entries, R.id.group_documents_list, 1)
             }
         })
-        fragmentModel.selectedDynalistItem.observe(this, Observer { item ->
+        filtersModel.filtersLiveData.observe(this, Observer { filters ->
+            val entries = filters.map { FilterLocation(it, this) }
+            this.filters = entries
+            nav_view.menu.findItem(R.id.submenu_filters_list).subMenu.run {
+                fillMenuWithItems(entries, R.id.group_filters_list, 2)
+            }
+        })
+        fragmentModel.selectedDynalistObject.observe(this, Observer { item ->
             inboxes?.run {
                 val menu = nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu
                 updateCheckedBookmark(menu, item, this)
             }
             documents?.run {
                 val menu = nav_view.menu.findItem(R.id.submenu_documents_list).subMenu
+                updateCheckedBookmark(menu, item, this)
+            }
+            filters?.run {
+                val menu = nav_view.menu.findItem(R.id.submenu_filters_list).subMenu
                 updateCheckedBookmark(menu, item, this)
             }
         })
@@ -115,7 +130,8 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         return ItemListFragment.newInstance(parent, itemText)
     }
 
-    private fun SubMenu.fillMenuWithItems(items: List<DynalistItem>, groupId: Int, menuIndex: Int) {
+    private fun SubMenu.fillMenuWithItems(items: List<Location>,
+                                          groupId: Int, menuIndex: Int) {
         clear()
         items.forEachIndexed { i, item ->
             val itemId = i + menuIndex * MAX_SUBMENU_ITEMS
@@ -125,13 +141,14 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
         ViewModelProviders.of(this@NavigationActivity)
                 .get(ItemListFragmentViewModel::class.java).let { fragmentModel ->
-                    fragmentModel.selectedDynalistItem.value?.let {
+                    fragmentModel.selectedDynalistObject.value?.let {
                         updateCheckedBookmark(this, it, items)
                     }
                 }
     }
 
-    private fun updateCheckedBookmark(menu: Menu, item: DynalistItem, itemList: List<DynalistItem>) {
+    private fun updateCheckedBookmark(menu: Menu, item: Location,
+                                      itemList: List<Location>) {
         val itemIndex = itemList.indexOf(item)
         if (itemIndex >= 0)
             nav_view.setCheckedItem(menu.getItem(itemIndex))
@@ -163,12 +180,15 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        if (item.groupId == R.id.group_bookmarks_list) {
-            openDynalistItem(inboxes!![item.itemId])
-        } else if (item.groupId == R.id.group_documents_list) {
-            openDynalistItem(documents!![item.itemId % MAX_SUBMENU_ITEMS])
+        when (item.groupId) {
+            R.id.group_bookmarks_list ->
+                openDynalistItem(inboxes!![item.itemId].item)
+            R.id.group_documents_list ->
+                openDynalistItem(documents!![item.itemId % MAX_SUBMENU_ITEMS].item)
+            R.id.group_filters_list ->
+                openDynalistItemFilter(filters!![item.itemId % MAX_SUBMENU_ITEMS].filter)
         }
-        when(item.itemId) {
+        when (item.itemId) {
             R.id.open_quick_dialog -> fixedFinishAfterTransition()
             R.id.menu_item_bookmarks_hint -> alert {
                 messageResource = R.string.bookmark_hint
@@ -180,7 +200,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.share_quickdynalist -> shareQuickDynalist()
             R.id.rate_quickdynalist -> rateQuickDynalist()
             R.id.action_sync_now -> SyncJob.forceSync()
-            R.id.action_create_filter -> openDynalistItemFilter(DynalistItemFilter())
+            R.id.action_create_filter -> openDynalistItemFilter(DynalistItemFilter(), true)
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
@@ -250,8 +270,9 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         itemText.clear()
     }
 
-    private fun openDynalistItemFilter(filterToOpen: DynalistItemFilter) {
-        val fragment = FilteredItemListFragment.newInstance(filterToOpen, editFilter = true)
+    private fun openDynalistItemFilter(filterToOpen: DynalistItemFilter,
+                                       editFilter: Boolean = false) {
+        val fragment = FilteredItemListFragment.newInstance(filterToOpen, editFilter = editFilter)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
@@ -267,6 +288,11 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onDynalistLocateEvent(event: DynalistLocateEvent) {
         openDynalistItem(event.item)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onDynalistFilterEvent(event: DynalistFilterEvent) {
+        openDynalistItemFilter(event.filter)
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
