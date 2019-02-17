@@ -30,8 +30,8 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
 import android.content.ActivityNotFoundException
-
-
+import androidx.fragment.app.Fragment
+import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -98,12 +98,21 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         })
 
         if (savedInstanceState == null) {
-            val parent = intent.extras?.let { dynalist.resolveItemInBundle(it) } ?: dynalist.inbox
-            val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT) ?: ""
-            val fragment = ItemListFragment.newInstance(parent, itemText)
             supportFragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, fragment).commit()
+                    .add(R.id.fragment_container, createInitialFragment()).commit()
         }
+    }
+
+    private fun createInitialFragment(): Fragment {
+        if (intent.hasExtra(DynalistApp.EXTRA_DISPLAY_FILTER) ||
+                intent.hasExtra(DynalistApp.EXTRA_DISPLAY_FILTER_ID)) {
+            val filter = intent.extras?.let { dynalist.resolveFilterInBundle(it) }
+            if (filter != null)
+                return FilteredItemListFragment.newInstance(filter)
+        }
+        val parent = intent.extras?.let { dynalist.resolveItemInBundle(it) } ?: dynalist.inbox
+        val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT) ?: ""
+        return ItemListFragment.newInstance(parent, itemText)
     }
 
     private fun SubMenu.fillMenuWithItems(items: List<DynalistItem>, groupId: Int, menuIndex: Int) {
@@ -171,6 +180,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.share_quickdynalist -> shareQuickDynalist()
             R.id.rate_quickdynalist -> rateQuickDynalist()
             R.id.action_sync_now -> SyncJob.forceSync()
+            R.id.action_create_filter -> openDynalistItemFilter(DynalistItemFilter())
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
@@ -230,7 +240,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
     private fun openDynalistItem(itemToOpen: DynalistItem) {
         val currentFragment = supportFragmentManager
-                .findFragmentById(R.id.fragment_container) as ItemListFragment
+                .findFragmentById(R.id.fragment_container) as BaseItemListFragment
         val itemText = currentFragment.itemContents.text
         val fragment = ItemListFragment.newInstance(itemToOpen, itemText.toString())
         supportFragmentManager.beginTransaction()
@@ -238,6 +248,14 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 .addToBackStack(null)
                 .commit()
         itemText.clear()
+    }
+
+    private fun openDynalistItemFilter(filterToOpen: DynalistItemFilter) {
+        val fragment = FilteredItemListFragment.newInstance(filterToOpen, editFilter = true)
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

@@ -58,7 +58,12 @@ class DynalistItemFilter: Parcelable {
 
     private val query: Query<DynalistItem> get() {
         val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
-        val now = Date()
+        val now = Calendar.getInstance().apply {
+            clear(Calendar.HOUR_OF_DAY)
+            clear(Calendar.MINUTE)
+            clear(Calendar.SECOND)
+            clear(Calendar.MILLISECOND)
+        }.time
         return box.query {
             val filters = ArrayList<(DynalistItem) -> Boolean>()
             if (hasImage != null || minRelativeDate != null || maxRelativeDate != null) {
@@ -104,7 +109,7 @@ class DynalistItemFilter: Parcelable {
             applyFilters(filters)
             when (sortOrder) {
                 Order.MANUAL -> {
-                    order(DynalistItem_.parentId)
+                    order(DynalistItem_.serverParentId)
                     order(DynalistItem_.position)
                 }
                 Order.DATE -> {
@@ -141,11 +146,11 @@ class DynalistItemFilter: Parcelable {
     private fun QueryBuilder<DynalistItemMetaData>.applyDateConditions(now: Date) {
         if (minRelativeDate != null && maxRelativeDate != null) {
             between(DynalistItemMetaData_.date,
-                    now.time + minRelativeDate!!,
+                    now.time + minRelativeDate!! - 1,
                     now.time + maxRelativeDate!!)
             nextCondition()
         } else if (minRelativeDate != null) {
-            greater(DynalistItemMetaData_.date, now.time + minRelativeDate!!)
+            greater(DynalistItemMetaData_.date, now.time + minRelativeDate!! - 1)
             nextCondition()
         } else if (maxRelativeDate != null) {
             less(DynalistItemMetaData_.date, now.time + maxRelativeDate!!)
@@ -156,11 +161,11 @@ class DynalistItemFilter: Parcelable {
     private fun QueryBuilder<DynalistItem>.applyModifiedDateConditions(now: Date) {
         if (minRelativeModifiedDate != null && maxRelativeModifiedDate != null) {
             between(DynalistItem_.lastModified,
-                    now.time + minRelativeModifiedDate!!,
+                    now.time + minRelativeModifiedDate!! - 1,
                     now.time + maxRelativeModifiedDate!!)
             nextCondition()
         } else if (minRelativeModifiedDate != null) {
-            greater(DynalistItem_.lastModified, now.time + minRelativeModifiedDate!!)
+            greater(DynalistItem_.lastModified, now.time + minRelativeModifiedDate!! - 1)
             nextCondition()
         } else if (maxRelativeModifiedDate != null) {
             less(DynalistItem_.lastModified, now.time + maxRelativeModifiedDate!!)

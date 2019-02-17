@@ -5,4 +5,5 @@
     <item name="dropoff_duplicate" type="id" />
     <item name="view_type_item" type="id" />
     <item name="view_type_dropoff" type="id" />
+    <item name="tag_dynalist_tag" type="id" />
 </resources>

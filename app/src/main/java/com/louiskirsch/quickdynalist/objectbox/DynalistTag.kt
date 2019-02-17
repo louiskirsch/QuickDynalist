@@ -25,6 +25,20 @@ class DynalistTag() {
     var type: Type = Type.HASH_TAG
     @Index var name: String = ""
 
+    val fullName: String get() {
+        val prefix = if (type == Type.AT_TAG) '@' else '#'
+        return "$prefix$name"
+    }
+
+    override fun toString(): String = fullName
+    override fun hashCode(): Int = (id % Int.MAX_VALUE).toInt()
+    override fun equals(other: Any?): Boolean {
+        return if (id > 0)
+            return id == (other as? DynalistTag)?.id
+        else
+            false
+    }
+
     private constructor(fromString: String) : this() {
         type = when(fromString[0]) {
             '#' -> Type.HASH_TAG
@@ -36,13 +50,17 @@ class DynalistTag() {
 
     companion object {
         fun find(fromString: String): DynalistTag = find(DynalistTag(fromString))
-        fun find(tag: DynalistTag): DynalistTag {
+        private fun find(tag: DynalistTag): DynalistTag {
             val box = DynalistApp.instance.boxStore.boxFor<DynalistTag>()
-            return box.query {
-                equal(DynalistTag_.type, tag.type.ordinal.toLong())
-                and()
-                equal(DynalistTag_.name, tag.name)
-            }.findFirst() ?: tag
+            var foundTag: DynalistTag? = null
+            DynalistApp.instance.boxStore.runInTx {
+                foundTag = box.query {
+                    equal(DynalistTag_.type, tag.type.ordinal.toLong())
+                    and()
+                    equal(DynalistTag_.name, tag.name)
+                }.findFirst() ?: tag.also { box.put(it) }
+            }
+            return foundTag!!
         }
     }
 }

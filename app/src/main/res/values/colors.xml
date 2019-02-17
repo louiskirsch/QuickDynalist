@@ -8,4 +8,5 @@
 
     <color name="textColorPrimary">#de000000</color>
     <color name="textColorSecondary">#8a000000</color>
+    <color name="chipIconTint">#E0E0E0</color>
 </resources>

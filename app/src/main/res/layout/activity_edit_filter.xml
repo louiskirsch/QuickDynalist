@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".EditFilterActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_category_general"
+            android:layout_marginBottom="4dp"
+            style="?android:attr/listSeparatorTextViewStyle" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/filter_name_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/filterName"
+                android:inputType="text|textAutoCorrect"
+                android:importantForAutofill="no"
+                tools:targetApi="o"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Switch
+            android:id="@+id/filterShowAsChecklist"
+            android:layout_marginLeft="8dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="8dp"
+            android:text="@string/filter_show_as_checklist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <RadioGroup
+            android:id="@+id/filterLogicMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/filterMatchAll"
+                android:text="@string/filter_match_all"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/filterMatchAny"
+                android:text="@string/filter_match_any"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+        </RadioGroup>
+
+        <Switch
+            android:id="@+id/filterLocationEnabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_category_location"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            style="?android:attr/listSeparatorTextViewStyle" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Spinner
+                android:id="@+id/filterParent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="30dp" />
+
+            <Spinner
+                android:id="@+id/filterParentSearchDepth"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="30dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_category_date_filter"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            style="?android:attr/listSeparatorTextViewStyle" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_margin="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/filterDateDesc"
+                android:layout_width="100dp"
+                android:text="@string/filter_desc_date"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/filterDate"
+                android:layout_height="wrap_content" />
+
+            <Spinner
+                android:id="@+id/filterDate"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/filterDateDesc"
+                android:layout_width="200dp"
+                android:layout_height="30dp" />
+
+            <TextView
+                android:id="@+id/filterModifiedDateDesc"
+                android:layout_width="100dp"
+                android:text="@string/filter_desc_modified_date"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintTop_toBottomOf="@id/filterDate"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/filterModifiedDate"
+                android:layout_height="wrap_content" />
+
+            <Spinner
+                android:id="@+id/filterModifiedDate"
+                app:layout_constraintTop_toBottomOf="@id/filterDate"
+                app:layout_constraintStart_toEndOf="@id/filterModifiedDateDesc"
+                android:layout_width="200dp"
+                android:layout_height="30dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_category_tags"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            style="?android:attr/listSeparatorTextViewStyle" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/filterTagsChipGroup"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            app:chipSpacingVertical="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:id="@+id/filterTagsInputLayout"
+            android:hint="@string/filter_tags_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <AutoCompleteTextView
+                android:id="@+id/filterTagsInput"
+                android:layout_margin="6dp"
+                android:completionThreshold="1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:ignore="LabelFor" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/filter_category_item_properties"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            style="?android:attr/listSeparatorTextViewStyle" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/filter_contains_text_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/filterContainsText"
+                android:inputType="text|textAutoCorrect"
+                android:importantForAutofill="no"
+                tools:targetApi="o"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Switch
+            android:layout_marginLeft="8dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="8dp"
+            android:id="@+id/filterHideIfParentIncluded"
+            android:text="@string/filter_hide_if_parent_included"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <RadioGroup
+            android:id="@+id/filterIsCompleted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/filterIsCompletedAny"
+                android:text="@string/filter_is_completed_any"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/filterIsCompletedFalse"
+                android:text="@string/filter_is_completed_false"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/filterIsCompletedTrue"
+                android:text="@string/filter_is_completed_true"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/filterHasImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/filterHasImageAny"
+                android:text="@string/filter_has_image_any"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/filterHasImageFalse"
+                android:text="@string/filter_has_image_false"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/filterHasImageTrue"
+                android:text="@string/filter_has_image_true"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/filter_category_order"
+            style="?android:attr/listSeparatorTextViewStyle" />
+
+        <RadioGroup
+            android:id="@+id/filterSortOrder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/filterSortOrderManual"
+                android:text="@string/filter_sort_order_manual"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/filterSortOrderDate"
+                android:text="@string/filter_sort_order_date"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/filterSortOrderModifiedDate"
+                android:text="@string/filter_sort_order_modified_date"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="wrap_content" />
+
+        </RadioGroup>
+
+    </LinearLayout>
+
+</ScrollView>

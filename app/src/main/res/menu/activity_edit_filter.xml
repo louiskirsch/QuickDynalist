@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_apply_filter"
+        android:title="@string/action_apply_filter"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_reset_filter"
+        android:title="@string/action_reset_filter"
+        app:showAsAction="never" />
+</menu>

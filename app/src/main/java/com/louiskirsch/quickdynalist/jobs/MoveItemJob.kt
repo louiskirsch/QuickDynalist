@@ -24,8 +24,11 @@ class MoveItemJob(val item: DynalistItem, val parent: DynalistItem, val toPositi
                 }.find()
                 if (item.parent.target == parent)
                     currentChildren.remove(item)
-                else
+                else {
                     item.parent.target = parent
+                    item.serverParentId = parent.serverItemId
+                    item.serverFileId = parent.serverFileId
+                }
                 val resolvedPosition = if (toPosition == -1) currentChildren.size else toPosition
                 currentChildren.add(resolvedPosition, item)
                 currentChildren.forEachWithIndex { i, it ->

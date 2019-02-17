@@ -18,6 +18,7 @@ import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Parcel
 import android.text.SpannableStringBuilder
+import android.view.ViewGroup
 import android.widget.TextView
 import kotlin.math.roundToInt
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -141,6 +142,10 @@ val RecyclerView.children: List<RecyclerView.ViewHolder> get() {
     return IntRange(0, layoutManager!!.childCount - 1).map {
         getChildViewHolder(layoutManager!!.getChildAt(it)!!)
     }
+}
+
+val ViewGroup.children: List<View> get() {
+    return (0 until childCount).map { getChildAt(it) }
 }
 
 fun Parcel.writeNullableLong(value: Long?) {

@@ -32,6 +32,8 @@ class DynalistApp : Application() {
         lateinit var instance: DynalistApp
         const val EXTRA_DISPLAY_ITEM = "EXTRA_DISPLAY_ITEM"
         const val EXTRA_DISPLAY_ITEM_ID = "EXTRA_DISPLAY_ITEM_ID"
+        const val EXTRA_DISPLAY_FILTER = "EXTRA_DISPLAY_FILTER"
+        const val EXTRA_DISPLAY_FILTER_ID = "EXTRA_DISPLAY_FILTER_ID"
         const val EXTRA_FROM_SHORTCUT = "EXTRA_FROM_SHORTCUT"
     }
 

@@ -11,6 +11,7 @@ import com.louiskirsch.quickdynalist.jobs.AddItemJob
 import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.jobs.VerifyTokenJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
@@ -51,6 +52,9 @@ class Dynalist(private val context: Context) {
         set(value) = preferences.edit().putBoolean("IMAGE_SETTING_NOTIFICATION", value).apply()
 
     private val itemBox: Box<DynalistItem>
+        get() = DynalistApp.instance.boxStore.boxFor()
+
+    private val filterBox: Box<DynalistItemFilter>
         get() = DynalistApp.instance.boxStore.boxFor()
 
     val inbox: DynalistItem
@@ -195,11 +199,23 @@ class Dynalist(private val context: Context) {
         context.browse("https://dynalist.io/developer")
     }
 
+    fun resolveFilterInBundle(bundle: Bundle): DynalistItemFilter? {
+        if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_FILTER))
+            return bundle.getParcelable(DynalistApp.EXTRA_DISPLAY_FILTER) as DynalistItemFilter
+        if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_FILTER_ID)) {
+            val clientId = bundle.getLong(DynalistApp.EXTRA_DISPLAY_FILTER_ID)
+            val item = filterBox.get(clientId)
+            if (item == null && bundle.getBoolean(DynalistApp.EXTRA_FROM_SHORTCUT, false))
+                context.toast(R.string.error_invalid_shortcut)
+            return item
+        }
+        return null
+    }
+
     fun resolveItemInBundle(bundle: Bundle): DynalistItem? {
         if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_ITEM))
             return bundle.getParcelable(DynalistApp.EXTRA_DISPLAY_ITEM) as DynalistItem
         if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_ITEM_ID)) {
-            // TODO query this asynchronously
             val clientId = bundle.getLong(DynalistApp.EXTRA_DISPLAY_ITEM_ID)
             val item = itemBox.get(clientId)
             if (item == null && bundle.getBoolean(DynalistApp.EXTRA_FROM_SHORTCUT, false))

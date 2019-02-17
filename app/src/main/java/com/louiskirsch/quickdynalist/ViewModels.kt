@@ -4,10 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.*
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
-import com.louiskirsch.quickdynalist.objectbox.DynalistItem
-import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
-import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
-import com.louiskirsch.quickdynalist.objectbox.TransformedOBLiveData
+import com.louiskirsch.quickdynalist.objectbox.*
 import io.objectbox.Box
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
@@ -75,6 +72,19 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 items.map { CachedDynalistItem(it, getApplication()) }
             }
         }
+    }
+}
+
+class DynalistTagViewModel(app: Application): AndroidViewModel(app) {
+
+    private val box: Box<DynalistTag>
+        get() = DynalistApp.instance.boxStore.boxFor()
+
+    val tagsLiveData: ObjectBoxLiveData<DynalistTag> by lazy {
+        ObjectBoxLiveData(box.query {
+            order(DynalistTag_.type)
+            order(DynalistTag_.name)
+        })
     }
 }
 
