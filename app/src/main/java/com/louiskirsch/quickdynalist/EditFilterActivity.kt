@@ -194,6 +194,8 @@ class EditFilterActivity : AppCompatActivity() {
                 android.R.layout.simple_spinner_item, searchDepthOptions)
         searchDepthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         filterParentSearchDepth.adapter = searchDepthAdapter
+        filterParentSearchDepth.setSelection(
+                max(searchDepthOptions.indexOfFirst { it.searchDepth == filter.searchDepth }, 0))
 
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.bookmarksLiveData.observe(this, Observer {
