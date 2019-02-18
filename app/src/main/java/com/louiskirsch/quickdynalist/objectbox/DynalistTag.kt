@@ -1,6 +1,7 @@
 package com.louiskirsch.quickdynalist.objectbox
 
 import com.louiskirsch.quickdynalist.DynalistApp
+import io.objectbox.Box
 import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
@@ -49,9 +50,12 @@ class DynalistTag() {
     }
 
     companion object {
-        fun find(fromString: String): DynalistTag = find(DynalistTag(fromString))
+        val box: Box<DynalistTag> get() = DynalistApp.instance.boxStore.boxFor()
+        private val cache by lazy { box.all.associateBy { it.fullName }.toMutableMap() }
+
+        fun find(fromString: String): DynalistTag
+                = cache[fromString] ?: find(DynalistTag(fromString))
         private fun find(tag: DynalistTag): DynalistTag {
-            val box = DynalistApp.instance.boxStore.boxFor<DynalistTag>()
             var foundTag: DynalistTag? = null
             DynalistApp.instance.boxStore.runInTx {
                 foundTag = box.query {
@@ -60,6 +64,7 @@ class DynalistTag() {
                     equal(DynalistTag_.name, tag.name)
                 }.findFirst() ?: tag.also { box.put(it) }
             }
+            cache[foundTag!!.fullName] = foundTag
             return foundTag!!
         }
     }
