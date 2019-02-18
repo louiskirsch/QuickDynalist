@@ -156,6 +156,10 @@ abstract class BaseItemListFragment : Fragment() {
     }
 
     private fun moveItem(item: DynalistItem, targetLocation: DynalistItem) {
+        if (item == targetLocation) {
+            context!!.toast(R.string.error_move_same_item)
+            return
+        }
         DynalistApp.instance.jobManager.addJobInBackground(
                 MoveItemJob(item, targetLocation, -1)
         )
@@ -193,7 +197,11 @@ abstract class BaseItemListFragment : Fragment() {
                             .getParcelable<DynalistItem>(DynalistApp.EXTRA_DISPLAY_ITEM)!!
                     val linkTarget = data.getParcelableExtra<DynalistItem>(
                             DynalistApp.EXTRA_DISPLAY_ITEM)!!
-                    DynalistItem.updateGlobally(fromItem) { it.linkedItem = linkTarget }
+                    if (linkTarget.serverFileId != null && linkTarget.serverItemId != null) {
+                        DynalistItem.updateGlobally(fromItem) { it.linkedItem = linkTarget }
+                    } else {
+                        context!!.toast(R.string.error_link_offline)
+                    }
                 }
             }
         }

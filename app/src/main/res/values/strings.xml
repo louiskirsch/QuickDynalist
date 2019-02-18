@@ -163,4 +163,6 @@
     <string name="filter_name_tag">Tag filter</string>
     <string name="search_hint">Search</string>
     <string name="action_search">Search</string>
+    <string name="error_move_same_item">Can not move item into itself</string>
+    <string name="error_link_offline">This link can only be created after you have gone online</string>
 </resources>
