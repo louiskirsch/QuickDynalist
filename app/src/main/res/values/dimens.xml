@@ -5,4 +5,5 @@
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
     <dimen name="nav_header_height">70dp</dimen>
     <dimen name="widget_margin">0dp</dimen>
+    <dimen name="list_item_padding">8dp</dimen>
 </resources>
