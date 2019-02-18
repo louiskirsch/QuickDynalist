@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist
 
+import android.app.Activity
 import android.os.Bundle
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
@@ -32,6 +33,7 @@ import java.io.File
 import android.content.ActivityNotFoundException
 import androidx.fragment.app.Fragment
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
+import org.jetbrains.anko.startActivityForResult
 
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -201,9 +203,26 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.rate_quickdynalist -> rateQuickDynalist()
             R.id.action_sync_now -> SyncJob.forceSync()
             R.id.action_create_filter -> openDynalistItemFilter(DynalistItemFilter(), true)
+            R.id.action_search -> searchDynalistItem()
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val pickItemCode = resources.getInteger(R.integer.request_code_search)
+        if (requestCode == pickItemCode && resultCode == Activity.RESULT_OK) {
+            val item = data!!.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM) as DynalistItem
+            openDynalistItem(item)
+        }
+    }
+
+    private fun searchDynalistItem() {
+        Intent(this, SearchActivity::class.java).apply {
+            val requestCode = resources.getInteger(R.integer.request_code_search)
+            startActivityForResult(this, requestCode)
+        }
     }
 
     private fun openSettings() {

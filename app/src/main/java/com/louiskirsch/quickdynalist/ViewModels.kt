@@ -61,6 +61,25 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         }
     }
 
+    val searchTerm = MutableLiveData<String>()
+    val searchItemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
+        Transformations.switchMap(searchTerm) { search ->
+            TransformedOBLiveData(box.query {
+                if (search.isNotBlank()) {
+                    contains(DynalistItem_.name, search)
+                    or()
+                    contains(DynalistItem_.note, search)
+                }
+                notEqual(DynalistItem_.name, "")
+                equal(DynalistItem_.hidden, false)
+                order(DynalistItem_.lastModified)
+            }) { items ->
+                items.forEach { item -> item.children.sortBy { child -> child.position } }
+                items.map { CachedDynalistItem(it, getApplication()) }
+            }
+        }
+    }
+
     private val filterBox: Box<DynalistItemFilter>
         get() = DynalistApp.instance.boxStore.boxFor()
 

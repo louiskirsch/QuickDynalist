@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="request_code_edit_filter">1</integer>
+    <integer name="request_code_search">2</integer>
+    <integer name="request_code_move">3</integer>
+    <integer name="request_code_link">4</integer>
 </resources>
