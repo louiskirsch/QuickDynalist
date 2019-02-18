@@ -27,7 +27,7 @@ class VerifyTokenJob(private val token: String)
         val response = call.execute()
         val success = response.isSuccessful && response.body()!!.isOK
         if (!success)
-            throw BackendException()
+            throw BackendException(response.body()?.errorDesc ?: "")
         dynalist.token = token
         EventBus.getDefault().post(AuthenticatedEvent(success))
     }

@@ -26,18 +26,15 @@ abstract class ItemJob: Job(Params(1)
     protected val dynalistService: DynalistService
         get() = DynalistApp.instance.dynalistService
 
-    protected val jobManager: JobManager
-        get() = DynalistApp.instance.jobManager
-
     protected fun requireItemId(item: DynalistItem) {
         val updatedItem = box.get(item.clientId)
         if (updatedItem == null && item.serverItemId == null)
-            throw InvalidJobException()
+            throw InvalidJobException("Can not find item in database but requires the itemId")
         item.serverItemId = updatedItem?.serverItemId ?: item.serverItemId
         // TODO this should never happen as soon as the API is fixed
         if (item.serverItemId == null) {
             if (currentRunCount > 3)
-                throw InvalidJobException()
+                throw InvalidJobException("Can not retrieve itemId after 3 trials")
             SyncJob.forceSync(false)
             throw ItemIdUnavailableException()
         }
@@ -53,8 +50,8 @@ abstract class ItemJob: Job(Params(1)
                 EventBus.getDefault().post(NoInboxEvent())
                 throw NoInboxException()
             }
-            body.isRequestUnfulfillable -> throw InvalidJobException()
-            !body.isOK -> throw BackendException()
+            body.isRequestUnfulfillable -> throw InvalidJobException(body.errorDesc)
+            !body.isOK -> throw BackendException(body.errorDesc)
         }
     }
 

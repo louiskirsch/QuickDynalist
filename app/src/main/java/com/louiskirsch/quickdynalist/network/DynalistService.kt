@@ -81,6 +81,7 @@ class DeleteItemRequest(val file_id: String, node_id: String, val token: String)
 
 open class DynalistResponse {
     val _code: String? = null
+    val _msg: String? = null
 
     val isRateLimitExceeded: Boolean
         get() = _code == "TooManyRequests"
@@ -96,6 +97,9 @@ open class DynalistResponse {
 
     val isOK: Boolean
         get() = _code == "Ok"
+
+    val errorDesc: String
+        get() = "Code: $_code; Message: $_msg"
 }
 
 class File {
