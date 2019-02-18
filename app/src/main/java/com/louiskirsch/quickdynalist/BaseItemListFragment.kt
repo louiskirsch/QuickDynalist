@@ -101,7 +101,7 @@ abstract class BaseItemListFragment : Fragment() {
                 DynalistApp.instance.jobManager.addJobInBackground(
                         MoveItemJob(item, targetLocation, -1)
                 )
-                Snackbar.make(view!!, R.string.move_item_success, Snackbar.LENGTH_LONG).apply {
+                Snackbar.make(insertBarCoordinator, R.string.move_item_success, Snackbar.LENGTH_LONG).apply {
                     setAction(R.string.goto_move_location) {
                         openDynalistItem(targetLocation, item)
                     }
@@ -234,7 +234,7 @@ abstract class BaseItemListFragment : Fragment() {
         boxStore.runInTxAsync({
             box.put(box.get(item.clientId).apply { hidden = true })
         }, null)
-        Snackbar.make(view!!, R.string.delete_item_success, Snackbar.LENGTH_LONG).apply {
+        Snackbar.make(insertBarCoordinator, R.string.delete_item_success, Snackbar.LENGTH_LONG).apply {
             setAction(R.string.undo) {
                 boxStore.runInTxAsync({
                     box.put(box.get(item.clientId).apply { hidden = false })
