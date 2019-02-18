@@ -1,6 +1,7 @@
 package com.louiskirsch.quickdynalist.adapters
 
 import android.annotation.SuppressLint
+import android.graphics.Canvas
 import android.util.Log
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -8,7 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.utils.children
 
 class ItemTouchCallback(private val adapter: ItemTouchHelperContract,
-                        private val allowDragging: Boolean): ItemTouchHelper.Callback() {
+                        private val allowDragging: Boolean,
+                        private val swipeBackgroundDrawer: SwipeBackgroundDrawer)
+    : ItemTouchHelper.Callback() {
 
     private var dropIntoTarget: RecyclerView.ViewHolder? = null
     private var dragging: Boolean = false
@@ -39,7 +42,7 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract,
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        adapter.onRowSwiped(viewHolder.adapterPosition)
+        adapter.onRowSwiped(viewHolder.adapterPosition, direction)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -90,6 +93,14 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract,
         }
     }
 
+    override fun onChildDraw(c: Canvas, recyclerView: RecyclerView,
+                             viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float,
+                             actionState: Int, isCurrentlyActive: Boolean) {
+        if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE)
+            swipeBackgroundDrawer.draw(c, viewHolder, dX, isCurrentlyActive)
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+    }
+
     interface ItemTouchHelperContract {
         fun canDropOver(position: Int): Boolean
         fun onMoveStart(position: Int)
@@ -97,7 +108,7 @@ class ItemTouchCallback(private val adapter: ItemTouchHelperContract,
         fun onRowMoved(fromPosition: Int, toPosition: Int)
         fun onRowMovedToDestination(toPosition: Int)
         fun onRowMovedInto(fromPosition: Int, intoPosition: Int)
-        fun onRowSwiped(position: Int)
+        fun onRowSwiped(position: Int, direction: Int)
         fun onLongClick(position: Int)
     }
 }

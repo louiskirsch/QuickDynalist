@@ -24,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
 import com.louiskirsch.quickdynalist.adapters.ItemTouchCallback
+import com.louiskirsch.quickdynalist.adapters.SwipeBackgroundDrawer
 import com.louiskirsch.quickdynalist.jobs.CloneItemJob
 import com.louiskirsch.quickdynalist.jobs.DeleteItemJob
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
@@ -141,7 +142,15 @@ abstract class BaseItemListFragment : Fragment() {
             }
             true
         }
-        adapter.onRowSwipedListener = { deleteItem(it) }
+        adapter.onRowSwipedListener = { item, direction ->
+            if (direction == ItemTouchHelper.RIGHT) {
+                deleteItem(item)
+                true
+            } else {
+                editingItem = item
+                false
+            }
+        }
         adapter.onCheckedStatusChangedListener = { item, checked ->
             item.isChecked = checked
             DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(item))
@@ -333,7 +342,10 @@ abstract class BaseItemListFragment : Fragment() {
 
         itemList.layoutManager = LinearLayoutManager(context)
         itemList.adapter = adapter
-        ItemTouchHelper(ItemTouchCallback(adapter, enableDragging)).attachToRecyclerView(itemList)
+        val swipeBackgroundDrawer = SwipeBackgroundDrawer(context!!, R.drawable.ic_swipe_edit,
+                R.drawable.ic_swipe_delete, R.color.editColor, R.color.deleteColor)
+        ItemTouchHelper(ItemTouchCallback(adapter, enableDragging, swipeBackgroundDrawer))
+                .attachToRecyclerView(itemList)
 
         itemListScrollButton.setOnClickListener {
             itemList.scrollToPosition(adapter.itemCount - 1)

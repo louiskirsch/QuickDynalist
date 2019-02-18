@@ -81,7 +81,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     var onRowMovedListener: ((DynalistItem, Int) -> Unit)? = null
     var onRowMovedOnDropoffListener: ((DynalistItem, Int) -> Boolean)? = null
     var onRowMovedIntoListener: ((DynalistItem, DynalistItem) -> Unit)? = null
-    var onRowSwipedListener: ((DynalistItem) -> Unit)? = null
+    var onRowSwipedListener: ((DynalistItem, Int) -> Boolean)? = null
     var onCheckedStatusChangedListener: ((DynalistItem, Boolean) -> Unit)? = null
     var onMoveStartListener: (() -> Unit)? = null
 
@@ -293,11 +293,12 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         onRowMovedListener?.invoke(item, item.position)
     }
 
-    override fun onRowSwiped(position: Int) {
+    override fun onRowSwiped(position: Int, direction: Int) {
         val item = items[position].item
-        items.removeAt(position)
-        notifyItemRemoved(position)
-        onRowSwipedListener?.invoke(item)
+        if (onRowSwipedListener?.invoke(item, direction) == true) {
+            items.removeAt(position)
+            notifyItemRemoved(position)
+        }
     }
 
     override fun onMoveStart(position: Int) {
