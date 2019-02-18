@@ -15,6 +15,7 @@ import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.louiskirsch.quickdynalist.DynalistApp
 import com.louiskirsch.quickdynalist.DynalistItemViewModel
 import com.louiskirsch.quickdynalist.Location
 import com.louiskirsch.quickdynalist.R
@@ -132,12 +133,14 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
 
         internal fun getType(context: Context, appWidgetId: Int): String {
             val prefs = getPrefs(context)
-            return prefs.getString("${PREF_PREFIX_KEY}_${appWidgetId}_type", "")!!
+            return prefs.getString("${PREF_PREFIX_KEY}_${appWidgetId}_type",
+                    "item")!!
         }
 
         internal fun getEtraKey(context: Context, appWidgetId: Int): String {
             val prefs = getPrefs(context)
-            return prefs.getString("${PREF_PREFIX_KEY}_${appWidgetId}_extraKey", "")!!
+            return prefs.getString("${PREF_PREFIX_KEY}_${appWidgetId}_extraKey",
+                    DynalistApp.EXTRA_DISPLAY_ITEM_ID)!!
         }
 
         internal fun getLocation(context: Context, appWidgetId: Int): Long {
