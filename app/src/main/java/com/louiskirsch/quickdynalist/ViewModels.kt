@@ -72,7 +72,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 }
                 notEqual(DynalistItem_.name, "")
                 equal(DynalistItem_.hidden, false)
-                order(DynalistItem_.lastModified)
+                orderDesc(DynalistItem_.lastModified)
             }) { items ->
                 val limitedItems = items.take(100)
                 limitedItems.forEach { item -> item.children.sortBy { child -> child.position } }
