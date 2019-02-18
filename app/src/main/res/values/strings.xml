@@ -109,8 +109,8 @@
     <string name="pref_title_sync_automatic">Auto sync</string>
     <string name="action_duplicate">Duplicate</string>
     <string name="action_move_to_inbox">Move to an inbox</string>
-    <string name="action_move_to_recent">Move to</string>
-    <string name="action_link_to_recent">Link to</string>
+    <string name="action_move_to">Move to …</string>
+    <string name="action_link_to">Link to …</string>
     <string name="action_change_date">Change date</string>
     <string name="action_add_date_today">Today</string>
     <string name="action_add_date_mod">Modification date</string>

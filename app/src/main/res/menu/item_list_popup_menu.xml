@@ -20,17 +20,13 @@
         <menu />
     </item>
 
-    <item android:id="@+id/action_move_to_recent"
-        android:title="@string/action_move_to_recent"
-        app:showAsAction="never">
-        <menu />
-    </item>
+    <item android:id="@+id/action_move_to"
+        android:title="@string/action_move_to"
+        app:showAsAction="never" />
 
-    <item android:id="@+id/action_link_to_recent"
-        android:title="@string/action_link_to_recent"
-        app:showAsAction="never">
-        <menu />
-    </item>
+    <item android:id="@+id/action_link_to"
+        android:title="@string/action_link_to"
+        app:showAsAction="never" />
 
     <item android:id="@+id/action_change_date"
         android:title="@string/action_change_date"

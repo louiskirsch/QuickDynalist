@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist
 
+import android.app.Activity
 import android.app.ActivityOptions
 import android.app.DatePickerDialog
 import android.app.PendingIntent
@@ -98,18 +99,6 @@ abstract class BaseItemListFragment : Fragment() {
         }
         adapter.onClickListener = { openDynalistItem(it) }
         adapter.onPopupItemClickListener = { item, menuItem ->
-            val moveItemCallback: (DynalistItem) -> Boolean = { targetLocation ->
-                DynalistApp.instance.jobManager.addJobInBackground(
-                        MoveItemJob(item, targetLocation, -1)
-                )
-                Snackbar.make(insertBarCoordinator, R.string.move_item_success, Snackbar.LENGTH_LONG).apply {
-                    setAction(R.string.goto_move_location) {
-                        openDynalistItem(targetLocation, item)
-                    }
-                    show()
-                }
-                true
-            }
             when (menuItem.itemId) {
                 R.id.action_show_details -> showItemDetails(item)
                 R.id.action_edit -> editingItem = item
@@ -128,16 +117,18 @@ abstract class BaseItemListFragment : Fragment() {
                     DynalistItem.updateGlobally(item) { it.date = null }
                 }
                 R.id.action_move_to_bookmark -> {
-                    fillMenuBookmarks(menuItem.subMenu, moveItemCallback)
-                }
-                R.id.action_move_to_recent -> {
-                    fillMenuRecentItems(menuItem.subMenu, false, item, moveItemCallback)
-                }
-                R.id.action_link_to_recent -> {
-                    fillMenuRecentItems(menuItem.subMenu, true, item) { linkTarget ->
-                        DynalistItem.updateGlobally(item) { it.linkedItem = linkTarget }
+                    fillMenuBookmarks(menuItem.subMenu) { targetLocation ->
+                        moveItem(item, targetLocation)
                         true
                     }
+                }
+                R.id.action_move_to -> {
+                    val requestCode = resources.getInteger(R.integer.request_code_move)
+                    showItemPicker(requestCode, item)
+                }
+                R.id.action_link_to -> {
+                    val requestCode = resources.getInteger(R.integer.request_code_link)
+                    showItemPicker(requestCode, item)
                 }
             }
             true
@@ -164,37 +155,51 @@ abstract class BaseItemListFragment : Fragment() {
         })
     }
 
-    protected abstract val itemsLiveData: LiveData<List<CachedDynalistItem>>
-
-    private fun fillMenuRecentItems(menu: SubMenu, requireItemId: Boolean, exclude: DynalistItem,
-                                    onClick: (DynalistItem) -> Boolean) {
-        // TODO query this async
-        val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
-        val recentItems = box.query {
-            notEqual(DynalistItem_.name, "")
-            and()
-            equal(DynalistItem_.hidden, false)
-            and()
-            equal(DynalistItem_.isChecked, false)
-            and()
-            equal(DynalistItem_.isBookmark, false)
-            and()
-            notEqual(DynalistItem_.clientId, exclude.clientId)
-            if (requireItemId) {
-                and()
-                notNull(DynalistItem_.serverFileId)
-                and()
-                notNull(DynalistItem_.serverItemId)
+    private fun moveItem(item: DynalistItem, targetLocation: DynalistItem) {
+        DynalistApp.instance.jobManager.addJobInBackground(
+                MoveItemJob(item, targetLocation, -1)
+        )
+        Snackbar.make(insertBarCoordinator, R.string.move_item_success,
+                Snackbar.LENGTH_LONG).apply {
+            setAction(R.string.goto_move_location) {
+                openDynalistItem(targetLocation, item)
             }
-            orderDesc(DynalistItem_.lastModified)
-        }.find(0, 10)
-        menu.clear()
-        recentItems.forEachIndexed { idx, item ->
-            menu.add(SubMenu.NONE, SubMenu.NONE, idx, item.strippedMarkersName).apply {
-                setOnMenuItemClickListener { onClick(item) }
+            show()
+        }
+    }
+
+    private fun showItemPicker(requestCode: Int, payloadItem: DynalistItem) {
+        Intent(context!!, SearchActivity::class.java).apply {
+            putExtra("payload", Bundle().apply {
+                putParcelable(DynalistApp.EXTRA_DISPLAY_ITEM, payloadItem)
+            })
+            startActivityForResult(this, requestCode)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                resources.getInteger(R.integer.request_code_move) -> {
+                    val item = data!!.getBundleExtra("payload")
+                            .getParcelable<DynalistItem>(DynalistApp.EXTRA_DISPLAY_ITEM)!!
+                    val targetLocation = data.getParcelableExtra<DynalistItem>(
+                            DynalistApp.EXTRA_DISPLAY_ITEM)!!
+                    moveItem(item, targetLocation)
+                }
+                resources.getInteger(R.integer.request_code_link) -> {
+                    val fromItem = data!!.getBundleExtra("payload")
+                            .getParcelable<DynalistItem>(DynalistApp.EXTRA_DISPLAY_ITEM)!!
+                    val linkTarget = data.getParcelableExtra<DynalistItem>(
+                            DynalistApp.EXTRA_DISPLAY_ITEM)!!
+                    DynalistItem.updateGlobally(fromItem) { it.linkedItem = linkTarget }
+                }
             }
         }
     }
+
+    protected abstract val itemsLiveData: LiveData<List<CachedDynalistItem>>
 
     private fun fillMenuBookmarks(menu: SubMenu, onClick: (DynalistItem) -> Boolean) {
         // TODO query this async

@@ -47,6 +47,9 @@ class SearchActivity : AppCompatActivity() {
     private fun finishWithSelectedItem(item: DynalistItem) {
         val result = Intent().apply {
             putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, item as Parcelable)
+            if (intent != null && intent.hasExtra("payload")) {
+                putExtra("payload", intent.getBundleExtra("payload"))
+            }
         }
         setResult(Activity.RESULT_OK, result)
         fixedFinishAfterTransition()
