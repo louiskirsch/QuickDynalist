@@ -1,11 +1,12 @@
 package com.louiskirsch.quickdynalist.jobs
 
 import com.louiskirsch.quickdynalist.*
-import com.louiskirsch.quickdynalist.network.DynalistResponse
-import com.louiskirsch.quickdynalist.network.InboxRequest
-import com.louiskirsch.quickdynalist.network.InsertItemRequest
+import com.louiskirsch.quickdynalist.network.*
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
+import io.objectbox.kotlin.query
+import okhttp3.internal.Util.equal
 import retrofit2.Response
 
 
@@ -28,25 +29,35 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
         ListAppWidget.notifyItemChanged(applicationContext, newItem)
     }
 
-    private fun insertAPIRequest(): Response<DynalistResponse> {
+    private fun insertAPIRequest(): DynalistResponse {
         val token = Dynalist(applicationContext).token
         return if (parent.isInbox) {
-            dynalistService.addToInbox(InboxRequest(newItem.name, newItem.note, token!!)).execute()
+            dynalistService.addToInbox(InboxRequest(newItem.name, newItem.note, token!!))
+                    .execute().body()!!
         } else {
             requireItemId(parent)
             val request = InsertItemRequest(parent.serverFileId!!, parent.serverItemId!!,
                     newItem.name, newItem.note, token!!)
-            val call = dynalistService.addToDocument(request)
-            call.execute()
+            dynalistService.addToDocument(request).execute().body()!!
         }
     }
 
     @Throws(Throwable::class)
     override fun onRun() {
         val response = insertAPIRequest()
-        val body = response.body()!!
-        requireSuccess(body)
-        markItemsCompleted()
+        val newItemId = when (response) {
+            is InboxItemResponse -> response.node_id
+            is InsertedItemsResponse -> response.new_node_ids!![0]
+            else -> throw BackendException("Invalid response - no itemId included")
+        }
+        requireSuccess(response)
+        DynalistApp.instance.boxStore.runInTx {
+            val updatedItem = box.query { equal(DynalistItem_.syncJob, id) }.findFirst()?.apply {
+                syncJob = null
+                newItem.serverItemId = newItemId
+            }
+            updatedItem?.let { box.put(it) }
+        }
     }
 
 }

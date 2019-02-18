@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist.jobs
 
+import android.util.Log
 import com.birbit.android.jobqueue.*
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.DynalistResponse
@@ -31,11 +32,11 @@ abstract class ItemJob: Job(Params(1)
         if (updatedItem == null && item.serverItemId == null)
             throw InvalidJobException("Can not find item in database but requires the itemId")
         item.serverItemId = updatedItem?.serverItemId ?: item.serverItemId
-        // TODO this should never happen as soon as the API is fixed
         if (item.serverItemId == null) {
             if (currentRunCount > 3)
                 throw InvalidJobException("Can not retrieve itemId after 3 trials")
             SyncJob.forceSync(false)
+            Log.e("ItemJob", "Had to trigger force sync to retrieve itemId!")
             throw ItemIdUnavailableException()
         }
     }

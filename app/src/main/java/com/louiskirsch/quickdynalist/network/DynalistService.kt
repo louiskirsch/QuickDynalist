@@ -10,16 +10,16 @@ interface DynalistService {
     fun listFiles(@Body request: AuthenticatedRequest): Call<FilesResponse>
 
     @POST("inbox/add")
-    fun addToInbox(@Body request: InboxRequest): Call<DynalistResponse>
+    fun addToInbox(@Body request: InboxRequest): Call<InboxItemResponse>
 
     @POST("doc/read")
     fun readDocument(@Body request: ReadDocumentRequest): Call<DocumentResponse>
 
     @POST("doc/edit")
-    fun addToDocument(@Body request: InsertItemRequest): Call<DynalistResponse>
+    fun addToDocument(@Body request: InsertItemRequest): Call<InsertedItemsResponse>
 
     @POST("doc/edit")
-    fun addToDocument(@Body request: BulkInsertItemRequest): Call<DynalistResponse>
+    fun addToDocument(@Body request: BulkInsertItemRequest): Call<InsertedItemsResponse>
 
     @POST("doc/edit")
     fun moveItem(@Body request: MoveItemRequest): Call<DynalistResponse>
@@ -100,6 +100,14 @@ open class DynalistResponse {
 
     val errorDesc: String
         get() = "Code: $_code; Message: $_msg"
+}
+
+class InboxItemResponse: DynalistResponse() {
+    val node_id: String? = null
+}
+
+class InsertedItemsResponse: DynalistResponse() {
+    val new_node_ids: List<String>? = null
 }
 
 class File {
