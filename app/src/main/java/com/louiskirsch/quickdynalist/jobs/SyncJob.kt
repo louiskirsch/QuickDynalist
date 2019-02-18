@@ -24,10 +24,10 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
     companion object {
         const val TAG = "syncJob"
 
-        fun forceSync() {
+        fun forceSync(isManual: Boolean = true) {
             DynalistApp.instance.jobManager.run {
                 cancelJobsInBackground({
-                    addJobInBackground(SyncJob(requireUnmeteredNetwork = false, isManual = true))
+                    addJobInBackground(SyncJob(false, isManual))
                 }, TagConstraint.ALL, arrayOf(SyncJob.TAG))
             }
         }
