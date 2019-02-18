@@ -63,10 +63,12 @@ abstract class ItemJob: Job(Params(1)
         doAsync { addToDatabase() }
     }
 
+    protected val jobItems: List<DynalistItem>
+        get() = box.query { equal(DynalistItem_.syncJob, id) }.find()
+
     protected fun markItemsCompleted() {
         DynalistApp.instance.boxStore.runInTx {
-            box.put(box.query { equal(DynalistItem_.syncJob, id) }.find()
-                    .apply { forEach { it.syncJob = null } } )
+            box.put(jobItems.apply { forEach { it.syncJob = null } } )
         }
     }
 

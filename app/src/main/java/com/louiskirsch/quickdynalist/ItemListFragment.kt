@@ -11,6 +11,7 @@ import android.view.MenuItem
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
+import com.louiskirsch.quickdynalist.jobs.CloneItemJob
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.prependIfNotBlank
@@ -53,8 +54,7 @@ class ItemListFragment : BaseItemListFragment() {
                     }
                 }
                 R.id.dropoff_duplicate -> {
-                    // TODO implement
-                    context!!.toast(R.string.error_not_implemented_duplicate)
+                    DynalistApp.instance.jobManager.addJobInBackground(CloneItemJob(item))
                     false
                 }
                 else -> false

@@ -24,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.adapters.ItemListAdapter
 import com.louiskirsch.quickdynalist.adapters.ItemTouchCallback
+import com.louiskirsch.quickdynalist.jobs.CloneItemJob
 import com.louiskirsch.quickdynalist.jobs.DeleteItemJob
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
@@ -112,7 +113,9 @@ abstract class BaseItemListFragment : Fragment() {
                 R.id.action_show_details -> showItemDetails(item)
                 R.id.action_edit -> editingItem = item
                 R.id.action_show_image -> ImageCache(context!!).openInGallery(item.image!!)
-                R.id.action_clone -> context!!.toast(R.string.error_not_implemented_duplicate)
+                R.id.action_duplicate -> {
+                    DynalistApp.instance.jobManager.addJobInBackground(CloneItemJob(item))
+                }
                 R.id.action_add_date_today -> {
                     DynalistItem.updateGlobally(item) { it.date = Date() }
                 }

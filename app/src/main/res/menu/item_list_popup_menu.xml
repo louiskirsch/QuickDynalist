@@ -10,9 +10,8 @@
         android:title="@string/action_edit"
         app:showAsAction="never" />
 
-    <item android:id="@+id/action_clone"
-        android:title="@string/action_clone"
-        android:visible="false"
+    <item android:id="@+id/action_duplicate"
+        android:title="@string/action_duplicate"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_move_to_bookmark"
