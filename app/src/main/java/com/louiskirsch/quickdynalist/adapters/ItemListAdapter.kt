@@ -112,6 +112,11 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         setHasStableIds(true)
     }
 
+    companion object {
+        private val startDropOffs = intArrayOf()
+        private val endDropOffs = intArrayOf(R.id.dropoff_parent, R.id.dropoff_duplicate)
+    }
+
     var showChecklist: Boolean = showChecklist
         set(value) {
             if (value != field) {
@@ -146,7 +151,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
 
     override fun getItemCount(): Int {
         if (moveInProgress)
-            return items.size + 2
+            return items.size + (startDropOffs.size + endDropOffs.size)
         return items.size
     }
 
@@ -167,7 +172,8 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (moveInProgress && (position == 0 || position == itemCount - 1))
+        if (moveInProgress && (position < startDropOffs.size
+                        || position >= itemCount - endDropOffs.size))
             return R.id.view_type_dropoff
         return R.id.view_type_item
     }
@@ -175,10 +181,10 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     private fun getItemId(item: CachedDynalistItem): Long = item.item.clientId
     override fun getItemId(position: Int): Long {
         return correctPositionForDropOffs(position)?.let { getItemId(items[it]) } ?: run {
-            return if (position == 0)
-                R.id.dropoff_parent.toLong()
+            return if (position < startDropOffs.size)
+                startDropOffs[position].toLong()
             else
-                R.id.dropoff_duplicate.toLong()
+                endDropOffs[position - itemCount + endDropOffs.size].toLong()
         }
     }
 
@@ -187,7 +193,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
             return position
         if (getItemViewType(position) == R.id.view_type_dropoff)
             return null
-        return position - 1
+        return position - startDropOffs.size
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -304,13 +310,17 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     override fun onMoveStart(position: Int) {
         onMoveStartListener?.invoke()
         moveInProgress = true
-        notifyItemInserted(0)
-        notifyItemInserted(itemCount - 1)
+        if (startDropOffs.isNotEmpty())
+            notifyItemRangeInserted(0, startDropOffs.size)
+        if (endDropOffs.isNotEmpty())
+            notifyItemRangeInserted(itemCount - endDropOffs.size, endDropOffs.size)
     }
 
     override fun onMoveEnd(position: Int) {
-        notifyItemRemoved(0)
-        notifyItemRemoved(itemCount - 1)
+        if (startDropOffs.isNotEmpty())
+            notifyItemRangeRemoved(0, startDropOffs.size)
+        if (endDropOffs.isNotEmpty())
+            notifyItemRangeRemoved(itemCount - endDropOffs.size, endDropOffs.size)
         moveInProgress = false
     }
 
@@ -320,7 +330,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
         if (getItemViewType(intoPosition) == R.id.view_type_dropoff) {
             val itemId = getItemId(intoPosition).toInt()
             val result = onRowMovedOnDropoffListener?.invoke(fromItem, itemId) ?: false
-            if (itemId != R.id.dropoff_duplicate && result) {
+            if (result) {
                 items.removeAt(fromIndex)
                 notifyItemRemoved(fromPosition)
             }
@@ -334,7 +344,7 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
     }
 
     override fun canDropOver(position: Int): Boolean {
-        return position in 1..(itemCount - 2)
+        return position in startDropOffs.size until (itemCount - endDropOffs.size)
     }
 
     override fun onLongClick(position: Int) {
