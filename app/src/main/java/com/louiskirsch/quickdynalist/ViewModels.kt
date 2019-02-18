@@ -74,8 +74,9 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 equal(DynalistItem_.hidden, false)
                 order(DynalistItem_.lastModified)
             }) { items ->
-                items.forEach { item -> item.children.sortBy { child -> child.position } }
-                items.map { CachedDynalistItem(it, getApplication()) }
+                val limitedItems = items.take(100)
+                limitedItems.forEach { item -> item.children.sortBy { child -> child.position } }
+                limitedItems.map { CachedDynalistItem(it, getApplication()) }
             }
         }
     }
