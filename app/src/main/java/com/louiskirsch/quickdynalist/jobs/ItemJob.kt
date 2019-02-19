@@ -28,10 +28,11 @@ abstract class ItemJob: Job(Params(1)
         get() = DynalistApp.instance.dynalistService
 
     protected fun requireItemId(item: DynalistItem) {
+        if (item.serverItemId != null)
+            return
         val updatedItem = box.get(item.clientId)
-        if (updatedItem == null && item.serverItemId == null)
-            throw InvalidJobException("Can not find item in database but requires the itemId")
-        item.serverItemId = updatedItem?.serverItemId ?: item.serverItemId
+                ?: throw InvalidJobException("Can not find item in database but requires the itemId")
+        item.serverItemId = updatedItem.serverItemId
         if (item.serverItemId == null) {
             if (currentRunCount > 3)
                 throw InvalidJobException("Can not retrieve itemId after 3 trials")
