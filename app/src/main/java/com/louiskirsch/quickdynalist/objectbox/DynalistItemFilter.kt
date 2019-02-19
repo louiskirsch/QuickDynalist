@@ -74,13 +74,15 @@ class DynalistItemFilter: Parcelable {
     private val query: Query<DynalistItem> get() {
         val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
         val now = Calendar.getInstance().apply {
-            clear(Calendar.HOUR_OF_DAY)
-            clear(Calendar.MINUTE)
-            clear(Calendar.SECOND)
-            clear(Calendar.MILLISECOND)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.time
         return box.query {
             val filters = ArrayList<(DynalistItem) -> Boolean>()
+            notEqual(DynalistItem_.name, "")
+            equal(DynalistItem_.hidden, false)
             if (hasImage != null || minRelativeDate != null || maxRelativeDate != null) {
                 link(DynalistItem_.metaData).run {
                     applyDateConditions(now)
@@ -191,8 +193,8 @@ class DynalistItemFilter: Parcelable {
     val items: List<DynalistItem> get() = postQueryFilter(query.find())
 
     private fun postQueryFilter(items: List<DynalistItem>) = if (hideIfParentIncluded) {
-            val foundSet = items.toSet()
-            items.filter { it.parent.target !in foundSet }
+            val foundSet = items.map { it.clientId }.toSet()
+            items.filter { it.parent.targetId !in foundSet }
         } else {
             items
         }

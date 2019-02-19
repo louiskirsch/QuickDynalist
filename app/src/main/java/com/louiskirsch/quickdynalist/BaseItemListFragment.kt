@@ -347,12 +347,16 @@ abstract class BaseItemListFragment : Fragment() {
                 intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, addItemLocation as Parcelable)
                 intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
             }
-            val activity = activity as AppCompatActivity
-            val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
-                    UtilPair.create(activity.appBar as View, "toolbar"),
-                    UtilPair.create(itemContents as View, "itemContents"))
-            startActivity(intent, transition.toBundle())
             clearItemContents()
+            val activity = activity as AppCompatActivity
+            val transitionBundle = if (insertBar.visibility == View.VISIBLE) {
+                ActivityOptions.makeSceneTransitionAnimation(activity,
+                        UtilPair.create(activity.appBar as View, "toolbar"),
+                        UtilPair.create(itemContents as View, "itemContents")).toBundle()
+            } else {
+                transitionBundle
+            }
+            startActivity(intent, transitionBundle)
         }
 
         itemList.layoutManager = LinearLayoutManager(context)

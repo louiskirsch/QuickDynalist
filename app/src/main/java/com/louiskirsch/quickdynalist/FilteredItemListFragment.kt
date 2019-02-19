@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
+import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import io.objectbox.kotlin.boxFor
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.jetbrains.anko.*
@@ -54,6 +55,11 @@ class FilteredItemListFragment : BaseItemListFragment() {
         inflater.inflate(R.menu.filter_item_list_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
         menu.findItem(R.id.toggle_saved).isChecked = saved
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        insertBar.visibility = View.GONE
     }
 
     private fun ensureSaved() {
