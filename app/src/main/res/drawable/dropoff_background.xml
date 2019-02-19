@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <selector>
-            <item android:state_activated="true">
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true">
+        <layer-list>
+            <item>
                 <color android:color="#BDBDBD"/>
             </item>
+            <item android:drawable="@drawable/dashed_border_darker" android:top="4dp"
+                android:bottom="4dp" android:left="4dp" android:right="4dp"/>
+            <item android:drawable="?attr/selectableItemBackground"/>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
             <item>
                 <color android:color="#FAFAFA"/>
             </item>
-        </selector>
+            <item android:drawable="@drawable/dashed_border" android:top="4dp" android:bottom="4dp"
+                android:left="4dp" android:right="4dp"/>
+            <item android:drawable="?attr/selectableItemBackground"/>
+        </layer-list>
     </item>
-    <item android:drawable="@drawable/dashed_border" android:top="4dp" android:bottom="4dp"
-        android:left="4dp" android:right="4dp"/>
-    <item android:drawable="?attr/selectableItemBackground"/>
-</layer-list>
+</selector>
