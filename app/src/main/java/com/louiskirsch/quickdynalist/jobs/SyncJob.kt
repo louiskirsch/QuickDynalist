@@ -131,7 +131,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         val itemsToRemove = (notAssociatedClientItems - newInbox).filter { it.syncJob == null }
         DynalistApp.instance.boxStore.runInTx {
             box.remove(itemsToRemove)
-            metaBox.remove(itemsToRemove.map { it.metaData.target })
+            metaBox.removeByKeys(itemsToRemove.map { it.metaData.targetId }.filter { it > 0 })
             box.put(serverItems)
             box.put(newInbox)
             metaBox.put(updatedMetaData)
