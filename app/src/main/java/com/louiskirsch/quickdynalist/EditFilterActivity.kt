@@ -36,7 +36,7 @@ class EditFilterActivity : AppCompatActivity() {
     private val searchDepthOptions = arrayOf(
             SearchDepth(R.string.filter_search_depth_child, 1),
             SearchDepth(R.string.filter_search_depth_2, 2),
-            SearchDepth(R.string.filter_search_depth_any, Int.MAX_VALUE)
+            SearchDepth(R.string.filter_search_depth_any, 20)
     )
 
     private val dateFilters = arrayOf(
@@ -74,6 +74,7 @@ class EditFilterActivity : AppCompatActivity() {
             intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_FILTER)
         else
             savedInstanceState.getParcelable(DynalistApp.EXTRA_DISPLAY_FILTER)!!
+        DynalistItemFilter.box.attach(filter)
 
         updateFromFilter()
     }
@@ -82,6 +83,7 @@ class EditFilterActivity : AppCompatActivity() {
         filter = DynalistItemFilter().apply {
             id = filter.id
             name = filterName.text.toString()
+            DynalistItemFilter.box.attach(this)
         }
         updateFromFilter()
         return true

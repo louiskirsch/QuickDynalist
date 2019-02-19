@@ -9,9 +9,10 @@ import io.objectbox.annotation.Index
 import io.objectbox.converter.PropertyConverter
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import java.io.Serializable
 
 @Entity
-class DynalistTag() {
+class DynalistTag(): Serializable {
     enum class Type { UNKNOWN, HASH_TAG, AT_TAG }
     class TypeConverter: PropertyConverter<Type, Int> {
         override fun convertToDatabaseValue(entityProperty: Type?): Int

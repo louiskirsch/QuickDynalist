@@ -71,79 +71,111 @@ class DynalistItemFilter: Parcelable {
     val nameWithoutSymbol: String?
         get() = symbol?.let { name?.replace(it, "")?.trim() } ?: name
 
+    private val today get() = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.time
+
+    private class QueryState { var hasPrecedingCondition: Boolean = false }
     private val query: Query<DynalistItem> get() {
         val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
-        val now = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time
         return box.query {
-            val filters = ArrayList<(DynalistItem) -> Boolean>()
-            notEqual(DynalistItem_.name, "")
-            equal(DynalistItem_.hidden, false)
-            if (hasImage != null || minRelativeDate != null || maxRelativeDate != null) {
-                link(DynalistItem_.metaData).run {
-                    applyDateConditions(now)
-                    if (hasImage != null) {
-                        if (hasImage!!)
-                            notNull(DynalistItemMetaData_.image)
-                        else
-                            isNull(DynalistItemMetaData_.image)
-                    }
-                }
-                nextCondition()
-            }
-            applyModifiedDateConditions(now)
-            if (containsText != null) {
-                contains(DynalistItem_.name, containsText!!)
-                or()
-                contains(DynalistItem_.note, containsText!!)
-                nextCondition()
-            }
-            if (isCompleted != null) {
-                equal(DynalistItem_.isChecked, isCompleted!!)
-                nextCondition()
-            }
-            if (parent.targetId > 0 && searchDepth == 1) {
-                equal(DynalistItem_.parentId, parent.targetId)
-                nextCondition()
-            }
-            if (parent.targetId > 0 && searchDepth > 1) {
-                filters.add { it.hasParent(parent.targetId, searchDepth) }
-            }
-            if (tags.isNotEmpty()) {
-                filters.add { candidate ->
-                    val metaData = candidate.metaData.target
-                    when (logicMode) {
-                        LogicMode.ALL -> tags.all { metaData.tags.contains(it) }
-                        LogicMode.ANY -> tags.any { metaData.tags.contains(it) }
-                        else -> false
-                    }
-                }
-            }
-            applyFilters(filters)
-            when (sortOrder) {
-                Order.MANUAL -> {
-                    order(DynalistItem_.serverParentId)
-                    order(DynalistItem_.position)
-                }
-                Order.DATE -> {
-                    link(DynalistItem_.metaData).run {
-                        // Not sure this order is applied correctly
-                        order(DynalistItemMetaData_.date)
-                    }
-                }
-                Order.MODIFIED_DATE -> {
-                    order(DynalistItem_.lastModified)
-                }
-                else -> Unit
+            applyBasicConditions()
+            applyNativeConditions()
+            // We can not run filters in ANY mode,
+            // in that case we need to run the filters on all the data
+            if (logicMode == LogicMode.ALL) {
+                queryApplyFilters(createFilters())
+                applySortOrder()
             }
         }
     }
 
-    private fun <T> QueryBuilder<T>.applyFilters(filters: List<(T) -> Boolean>) = {
+    private fun QueryBuilder<DynalistItem>.applyNativeConditions() {
+        val state = QueryState()
+        if (hasImage != null || minRelativeDate != null || maxRelativeDate != null) {
+            link(DynalistItem_.metaData).run {
+                applyDateConditions(state)
+                if (hasImage != null) {
+                    startCondition(state)
+                    if (hasImage!!) notNull(DynalistItemMetaData_.image)
+                    else isNull(DynalistItemMetaData_.image)
+                }
+            }
+        }
+        applyModifiedDateConditions(state)
+        if (containsText != null) {
+            startCondition(state)
+            contains(DynalistItem_.name, containsText!!)
+            or()
+            contains(DynalistItem_.note, containsText!!)
+        }
+        if (isCompleted != null) {
+            startCondition(state)
+            equal(DynalistItem_.isChecked, isCompleted!!)
+        }
+        if (parent.targetId > 0 && searchDepth == 1) {
+            startCondition(state)
+            equal(DynalistItem_.parentId, parent.targetId)
+        }
+        if (!state.hasPrecedingCondition && logicMode == LogicMode.ANY) {
+            // If no conditions were applied, return no elements
+            equal(DynalistItem_.clientId, 0)
+        }
+    }
+
+    private fun QueryBuilder<DynalistItem>.applySortOrder() {
+        when (sortOrder) {
+            Order.MANUAL -> {
+                order(DynalistItem_.serverParentId)
+                order(DynalistItem_.position)
+            }
+            Order.MODIFIED_DATE -> {
+                order(DynalistItem_.lastModified)
+            }
+            else -> Unit
+        }
+    }
+
+    private fun applySortOrder(items: List<DynalistItem>): List<DynalistItem> {
+        return when {
+            sortOrder == Order.MANUAL && logicMode == LogicMode.ANY ->
+                items.sortedWith(compareBy({ it.parent.targetId }, { it.position }))
+            sortOrder == Order.DATE -> items.sortedBy { it.metaData.target.date }
+            sortOrder == Order.MODIFIED_DATE && logicMode == LogicMode.ANY ->
+                items.sortedBy { it.lastModified }
+            else -> items
+        }
+    }
+
+    private fun QueryBuilder<DynalistItem>.applyBasicConditions() {
+        notEqual(DynalistItem_.name, "")
+        equal(DynalistItem_.hidden, false)
+        eager(DynalistItem_.metaData)
+    }
+
+    private fun createFilters(): MutableList<(DynalistItem) -> Boolean> {
+        val filters = ArrayList<(DynalistItem) -> Boolean>()
+        if (parent.targetId > 0 && searchDepth > 1) {
+            filters.add { it.hasParent(parent.targetId, searchDepth) }
+        }
+        if (tags.isNotEmpty()) {
+            filters.add { candidate ->
+                val metaData = candidate.metaData.target
+                when (logicMode) {
+                    LogicMode.ALL -> tags.all { metaData.tags.contains(it) }
+                    LogicMode.ANY -> tags.any { metaData.tags.contains(it) }
+                    else -> false
+                }
+            }
+        }
+        return filters
+    }
+
+    private fun QueryBuilder<DynalistItem>.queryApplyFilters(
+            filters: List<(DynalistItem) -> Boolean>) {
         if (filters.isNotEmpty()) {
             filter { item ->
                 when (logicMode) {
@@ -155,49 +187,79 @@ class DynalistItemFilter: Parcelable {
         }
     }
 
-    private fun <T> QueryBuilder<T>.nextCondition() = {
-        // No need to call and(), because it is the default
-        if (logicMode == LogicMode.ANY) or()
-    }
-
-    private fun QueryBuilder<DynalistItemMetaData>.applyDateConditions(now: Date) {
-        if (minRelativeDate != null && maxRelativeDate != null) {
-            between(DynalistItemMetaData_.date,
-                    now.time + minRelativeDate!! - 1,
-                    now.time + maxRelativeDate!!)
-            nextCondition()
-        } else if (minRelativeDate != null) {
-            greater(DynalistItemMetaData_.date, now.time + minRelativeDate!! - 1)
-            nextCondition()
-        } else if (maxRelativeDate != null) {
-            less(DynalistItemMetaData_.date, now.time + maxRelativeDate!!)
-            nextCondition()
+    private fun dataApplyFilters(filters: List<(DynalistItem) -> Boolean>): List<DynalistItem> {
+        return if (filters.isNotEmpty()) {
+            DynalistItem.box.query { applyBasicConditions() }.find().filter { item ->
+                when (logicMode) {
+                    LogicMode.ALL -> filters.all { it(item) }
+                    LogicMode.ANY -> filters.any { it(item) }
+                    else -> false
+                }
+            }
+        } else {
+            emptyList()
         }
     }
 
-    private fun QueryBuilder<DynalistItem>.applyModifiedDateConditions(now: Date) {
+    private fun <T> QueryBuilder<T>.startCondition(state: QueryState) {
+        // No need to call and(), because it is the default
+        //if (state.hasPrecedingCondition && logicMode == LogicMode.ANY) or()
+        if (state.hasPrecedingCondition) {
+            if (logicMode == LogicMode.ANY) or() else and()
+        }
+        state.hasPrecedingCondition = true
+    }
+
+    private fun QueryBuilder<DynalistItemMetaData>.applyDateConditions(state: QueryState) {
+        if (minRelativeDate != null && maxRelativeDate != null) {
+            startCondition(state)
+            val today = today
+            between(DynalistItemMetaData_.date,
+                    today.time + minRelativeDate!! - 1,
+                    today.time + maxRelativeDate!!)
+        } else if (minRelativeDate != null) {
+            startCondition(state)
+            greater(DynalistItemMetaData_.date, today.time + minRelativeDate!! - 1)
+        } else if (maxRelativeDate != null) {
+            startCondition(state)
+            less(DynalistItemMetaData_.date, today.time + maxRelativeDate!!)
+        }
+    }
+
+    private fun QueryBuilder<DynalistItem>.applyModifiedDateConditions(state: QueryState) {
         if (minRelativeModifiedDate != null && maxRelativeModifiedDate != null) {
+            startCondition(state)
+            val today = today
             between(DynalistItem_.lastModified,
-                    now.time + minRelativeModifiedDate!! - 1,
-                    now.time + maxRelativeModifiedDate!!)
-            nextCondition()
+                    today.time + minRelativeModifiedDate!! - 1,
+                    today.time + maxRelativeModifiedDate!!)
         } else if (minRelativeModifiedDate != null) {
-            greater(DynalistItem_.lastModified, now.time + minRelativeModifiedDate!! - 1)
-            nextCondition()
+            startCondition(state)
+            greater(DynalistItem_.lastModified, today.time + minRelativeModifiedDate!! - 1)
         } else if (maxRelativeModifiedDate != null) {
-            less(DynalistItem_.lastModified, now.time + maxRelativeModifiedDate!!)
-            nextCondition()
+            startCondition(state)
+            less(DynalistItem_.lastModified, today.time + maxRelativeModifiedDate!!)
         }
     }
 
     val items: List<DynalistItem> get() = postQueryFilter(query.find())
 
-    private fun postQueryFilter(items: List<DynalistItem>) = if (hideIfParentIncluded) {
-            val foundSet = items.map { it.clientId }.toSet()
-            items.filter { it.parent.targetId !in foundSet }
-        } else {
-            items
-        }
+    private fun postQueryFilter(origItems: List<DynalistItem>): List<DynalistItem> {
+        return origItems.let { items ->
+            if (logicMode == LogicMode.ANY) {
+                items.union(dataApplyFilters(createFilters())).toList()
+            } else {
+                items
+            }
+        }.let { items ->
+            if (hideIfParentIncluded) {
+                val foundSet = items.map { it.clientId }.toSet()
+                items.filter { it.parent.targetId !in foundSet }
+            } else {
+                items
+            }
+        }.let { applySortOrder(it) }
+    }
 
     val liveData: LiveData<List<DynalistItem>>
         get() = TransformedOBLiveData(query) { postQueryFilter(it) }
@@ -206,6 +268,8 @@ class DynalistItemFilter: Parcelable {
         = TransformedOBLiveData(query) { transformer(postQueryFilter(it)) }
 
     companion object {
+        val box get() = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()
+
         @Suppress("unused")
         @JvmField
         val CREATOR = object : Parcelable.Creator<DynalistItemFilter> {
@@ -222,6 +286,7 @@ class DynalistItemFilter: Parcelable {
                         minRelativeModifiedDate = readNullableLong()
                         maxRelativeModifiedDate = readNullableLong()
                         filterBox.attach(this)
+                        tags.clear()
                         tags.addAll(tagBox.get(createLongArray()!!))
                         parent.targetId = readLong()
                         searchDepth = readInt()

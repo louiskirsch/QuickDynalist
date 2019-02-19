@@ -57,8 +57,10 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     }
 
     fun hasParent(parentId: Long, maxDepth: Int = 1): Boolean {
-        if (maxDepth <= 1)
-            return parent.targetId == parentId
+        if (maxDepth < 1)
+            return false
+        if (parent.targetId == parentId)
+            return true
         return parent.target?.hasParent(parentId, maxDepth - 1) ?: false
     }
 
@@ -301,6 +303,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         get() = name.replace(dateTimeRegex, "").trim()
 
     companion object {
+        val box get() = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+
         fun newInbox() = DynalistItem(null, null, "inbox",
                 "\uD83D\uDCE5 Inbox", "", emptyList(), isInbox = true, isBookmark = true)
         private val tagMarkers = listOf("#inbox", "#quickdynalist")

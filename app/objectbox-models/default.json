@@ -143,7 +143,7 @@
     },
     {
       "id": "4:9147073662366745146",
-      "lastPropertyId": "15:602879671462848965",
+      "lastPropertyId": "16:7236153048786427648",
       "name": "DynalistItemFilter",
       "properties": [
         {
@@ -228,7 +228,8 @@
     4834341726663538161
   ],
   "retiredPropertyUids": [
-    8027434694088666144
+    8027434694088666144,
+    7236153048786427648
   ],
   "retiredRelationUids": [],
   "version": 1

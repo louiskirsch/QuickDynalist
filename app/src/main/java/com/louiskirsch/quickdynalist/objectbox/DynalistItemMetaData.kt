@@ -1,13 +1,16 @@
 package com.louiskirsch.quickdynalist.objectbox
 
+import com.louiskirsch.quickdynalist.DynalistApp
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
+import io.objectbox.kotlin.boxFor
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
+import java.io.Serializable
 import java.util.*
 
 @Entity
-class DynalistItemMetaData() {
+class DynalistItemMetaData(): Serializable {
 
     @Id var id: Long = 0
 
@@ -28,5 +31,9 @@ class DynalistItemMetaData() {
         tags.clear()
         tags.addAll(fromItem.tags.map { DynalistTag.find(it) })
         linkedItem.target = fromItem.linkedItem
+    }
+
+    companion object {
+        val box get() = DynalistApp.instance.boxStore.boxFor<DynalistItemMetaData>()
     }
 }
