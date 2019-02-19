@@ -20,7 +20,7 @@ class FilterItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView
 class FilterItemListAdapter(context: Context): RecyclerView.Adapter<FilterItemListViewHolder>() {
 
     private val items = ArrayList<CachedDynalistItem>()
-    private val highlightColor = context.getColor(R.color.colorAccent)
+    private val highlightColor = context.getColor(R.color.searchHighlight)
 
     var searchTerm: String = ""
         set(value) {
