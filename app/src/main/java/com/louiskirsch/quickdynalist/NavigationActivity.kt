@@ -193,7 +193,6 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 openDynalistItemFilter(filters!![item.itemId % MAX_SUBMENU_ITEMS].filter)
         }
         when (item.itemId) {
-            R.id.open_quick_dialog -> fixedFinishAfterTransition()
             R.id.menu_item_bookmarks_hint -> alert {
                 messageResource = R.string.bookmark_hint
                 okButton { dynalist.sync() }

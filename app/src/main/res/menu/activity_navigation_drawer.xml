@@ -15,10 +15,6 @@
         android:title="@string/action_sync_now"
         android:icon="@drawable/ic_action_sync" />
 
-    <item android:id="@+id/open_quick_dialog"
-        android:title="@string/open_quick_dialog"
-        android:icon="@drawable/ic_action_quick_dialog" />
-
     <item
         android:id="@+id/submenu_bookmarks_list"
         android:title="@string/title_bookmark_list">
