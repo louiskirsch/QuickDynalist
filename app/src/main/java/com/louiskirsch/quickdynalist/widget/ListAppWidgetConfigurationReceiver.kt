@@ -28,4 +28,6 @@ class ListAppWidgetConfigurationReceiver : BroadcastReceiver() {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         ListAppWidget.updateAppWidget(context, appWidgetManager, widgetId)
     }
+
+
 }

@@ -5,4 +5,5 @@
     <integer name="request_code_move">3</integer>
     <integer name="request_code_link">4</integer>
     <integer name="request_code_create_filter">5</integer>
+    <integer name="request_code_create_widget">6</integer>
 </resources>

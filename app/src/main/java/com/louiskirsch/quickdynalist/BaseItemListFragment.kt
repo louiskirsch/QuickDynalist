@@ -426,8 +426,10 @@ abstract class BaseItemListFragment : Fragment() {
                 val widgetProvider = ComponentName(context!!, ListAppWidget::class.java)
                 val callback = Intent(context!!, ListAppWidgetConfigurationReceiver::class.java)
                         .also { putWidgetExtras(it) }
+                val requestCode = resources.getInteger(R.integer.request_code_create_widget)
+                val flags = PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_CANCEL_CURRENT
                 val pendingCallback = PendingIntent.getBroadcast(
-                        context!!, 0,callback, 0)
+                        context!!, requestCode, callback, flags)
                 widgetManager.requestPinAppWidget(widgetProvider, null, pendingCallback)
                 return true
             }

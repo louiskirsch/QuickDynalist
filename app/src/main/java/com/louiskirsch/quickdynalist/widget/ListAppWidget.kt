@@ -79,6 +79,7 @@ class ListAppWidget : AppWidgetProvider() {
             views.setPendingIntentTemplate(R.id.appwidget_list, itemListIntent)
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
+            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.appwidget_list)
         }
 
         private fun createViewListPendingIntent(context: Context, requestCode: Int,
