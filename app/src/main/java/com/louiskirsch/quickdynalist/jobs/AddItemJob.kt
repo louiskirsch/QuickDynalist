@@ -6,8 +6,6 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
-import okhttp3.internal.Util.equal
-import retrofit2.Response
 
 
 class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob() {
@@ -54,7 +52,7 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
         DynalistApp.instance.boxStore.runInTx {
             val updatedItem = box.query { equal(DynalistItem_.syncJob, id) }.findFirst()?.apply {
                 syncJob = null
-                newItem.serverItemId = newItemId
+                serverItemId = newItemId
             }
             updatedItem?.let { box.put(it) }
         }
