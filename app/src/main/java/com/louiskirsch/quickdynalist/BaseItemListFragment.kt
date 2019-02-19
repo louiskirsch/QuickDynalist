@@ -183,7 +183,7 @@ abstract class BaseItemListFragment : Fragment() {
 
     private val transitionBundle: Bundle
         get() = ActivityOptions.makeSceneTransitionAnimation(
-                activity, activity!!.toolbar, "toolbar").toBundle()
+                activity, activity!!.appBar, "toolbar").toBundle()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -349,7 +349,7 @@ abstract class BaseItemListFragment : Fragment() {
             }
             val activity = activity as AppCompatActivity
             val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
-                    UtilPair.create(activity.toolbar as View, "toolbar"),
+                    UtilPair.create(activity.appBar as View, "toolbar"),
                     UtilPair.create(itemContents as View, "itemContents"))
             startActivity(intent, transition.toBundle())
             clearItemContents()

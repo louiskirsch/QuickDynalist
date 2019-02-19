@@ -235,7 +235,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     private fun searchDynalistItem() {
         val searchIntent = Intent(SearchActivity.ACTION_SEARCH_DISPLAY_ITEM)
         val transition = ActivityOptions.makeSceneTransitionAnimation(
-                this, toolbar as View, "toolbar")
+                this, appBar, "toolbar")
         startActivity(searchIntent, transition.toBundle())
     }
 
