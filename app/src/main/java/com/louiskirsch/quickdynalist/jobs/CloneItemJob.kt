@@ -27,16 +27,19 @@ class CloneItemJob(val item: DynalistItem): ItemJob() {
     }
 
     private fun cloneRecursively(item: DynalistItem, time: Date): DynalistItem {
-        val children = item.children.map {
+        val newChildren = item.children.map {
             cloneRecursively(it, time).apply { it.parent.targetId = 0 }
         }
-        item.clientId = 0
-        item.serverItemId = null
-        item.syncJob = id
-        item.children.clear()
-        item.children.addAll(children)
-        item.metaData.targetId = 0
-        item.notifyModified(time.time)
+        item.apply {
+            clientId = 0
+            serverItemId = null
+            syncJob = id
+            isChecked = false
+            children.clear()
+            children.addAll(newChildren)
+            metaData.targetId = 0
+            notifyModified(time.time)
+        }
         return item
     }
 
