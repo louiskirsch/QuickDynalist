@@ -63,7 +63,7 @@ class Dynalist(private val context: Context) {
     fun subscribe() {
         EventBus.getDefault().register(this)
 
-        val bookmarksOutdated = lastFullSync.time < Date().time - 60 * 1000L
+        val bookmarksOutdated = lastFullSync.time < Date().time - 5 * 60 * 1000L
         if (isAuthenticated && bookmarksOutdated) {
             sync()
         }
