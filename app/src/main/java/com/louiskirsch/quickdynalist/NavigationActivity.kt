@@ -202,19 +202,36 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.share_quickdynalist -> shareQuickDynalist()
             R.id.rate_quickdynalist -> rateQuickDynalist()
             R.id.action_sync_now -> SyncJob.forceSync()
-            R.id.action_create_filter -> openDynalistItemFilter(DynalistItemFilter(), true)
+            R.id.action_create_filter -> createDynalistItemFilter()
             R.id.action_search -> searchDynalistItem()
         }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 
+    private fun createDynalistItemFilter() {
+        Intent(this, EditFilterActivity::class.java).apply {
+            val requestCode = resources.getInteger(R.integer.request_code_create_filter)
+            putExtra(DynalistApp.EXTRA_DISPLAY_FILTER, DynalistItemFilter())
+            startActivityForResult(this, requestCode)
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val pickItemCode = resources.getInteger(R.integer.request_code_search)
-        if (requestCode == pickItemCode && resultCode == Activity.RESULT_OK) {
-            val item = data!!.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM) as DynalistItem
-            openDynalistItem(item)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                resources.getInteger(R.integer.request_code_search) -> {
+                    val item = data!!.getParcelableExtra<DynalistItem>(
+                            DynalistApp.EXTRA_DISPLAY_ITEM)
+                    openDynalistItem(item)
+                }
+                resources.getInteger(R.integer.request_code_create_filter) -> {
+                    val filter = data!!.getParcelableExtra<DynalistItemFilter>(
+                            DynalistApp.EXTRA_DISPLAY_FILTER)
+                    openDynalistItemFilter(filter)
+                }
+            }
         }
     }
 
@@ -289,9 +306,8 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         itemText.clear()
     }
 
-    private fun openDynalistItemFilter(filterToOpen: DynalistItemFilter,
-                                       editFilter: Boolean = false) {
-        val fragment = FilteredItemListFragment.newInstance(filterToOpen, editFilter = editFilter)
+    private fun openDynalistItemFilter(filterToOpen: DynalistItemFilter) {
+        val fragment = FilteredItemListFragment.newInstance(filterToOpen)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)

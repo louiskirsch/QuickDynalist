@@ -41,6 +41,7 @@ class DeleteItemJob(val item: DynalistItem): ItemJob() {
         val body = response.body()!!
         requireSuccess(body)
         DynalistApp.instance.boxStore.runInTx {
+            // TODO also delete meta data
             box.remove(*box.query { equal(DynalistItem_.syncJob, id) }.findIds())
         }
     }

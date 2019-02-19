@@ -29,9 +29,6 @@ class FilteredItemListFragment : BaseItemListFragment() {
                 filter = it.getParcelable(ARG_FILTER)!!
                 val box = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()
                 saved = filter.id > 0 && box.get(filter.id) != null
-                if (it.getBoolean(ARG_EDIT_FILTER, false)) {
-                    editFilter()
-                }
             }
         } else {
             filter = savedInstanceState.getParcelable("filter")!!
@@ -161,14 +158,12 @@ class FilteredItemListFragment : BaseItemListFragment() {
 
     companion object {
         private const val ARG_FILTER = "EXTRA_FILTER"
-        private const val ARG_EDIT_FILTER = "EXTRA_EDIT_FILTER"
 
-        fun newInstance(filter: DynalistItemFilter, scrollTo: DynalistItem? = null,
-                        editFilter: Boolean = false): FilteredItemListFragment {
+        fun newInstance(filter: DynalistItemFilter,
+                        scrollTo: DynalistItem? = null): FilteredItemListFragment {
             return FilteredItemListFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(ARG_FILTER, filter)
-                    putBoolean(ARG_EDIT_FILTER, editFilter)
                     scrollTo?.let { putParcelable(BaseItemListFragment.ARG_SCROLL_TO, it) }
                 }
             }
