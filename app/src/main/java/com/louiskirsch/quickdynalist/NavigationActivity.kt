@@ -1,6 +1,8 @@
 package com.louiskirsch.quickdynalist
 
 import android.app.Activity
+import android.app.ActivityOptions
+import android.app.PendingIntent
 import android.os.Bundle
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
@@ -221,11 +223,6 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
-                resources.getInteger(R.integer.request_code_search) -> {
-                    val item = data!!.getParcelableExtra<DynalistItem>(
-                            DynalistApp.EXTRA_DISPLAY_ITEM)
-                    openDynalistItem(item)
-                }
                 resources.getInteger(R.integer.request_code_create_filter) -> {
                     val filter = data!!.getParcelableExtra<DynalistItemFilter>(
                             DynalistApp.EXTRA_DISPLAY_FILTER)
@@ -236,10 +233,10 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     private fun searchDynalistItem() {
-        Intent(this, SearchActivity::class.java).apply {
-            val requestCode = resources.getInteger(R.integer.request_code_search)
-            startActivityForResult(this, requestCode)
-        }
+        val searchIntent = Intent(SearchActivity.ACTION_SEARCH_DISPLAY_ITEM)
+        val transition = ActivityOptions.makeSceneTransitionAnimation(
+                this, toolbar as View, "toolbar")
+        startActivity(searchIntent, transition.toBundle())
     }
 
     private fun openSettings() {

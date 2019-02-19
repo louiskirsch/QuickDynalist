@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shortcuts xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
     <shortcut
         android:shortcutId="sync_now"
         android:enabled="true"
@@ -15,4 +16,19 @@
             android:targetClass="com.louiskirsch.quickdynalist.SyncShortcutActivity" />
         <categories android:name="android.shortcut.network" />
     </shortcut>
+
+    <shortcut
+        android:shortcutId="search_item"
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_search_item"
+        android:roundIcon="@mipmap/ic_shortcut_search_item"
+        android:shortcutShortLabel="@string/action_search"
+        tools:targetApi="n_mr1">
+        <intent
+            android:action="com.louiskirsch.quickdynalist.SEARCH_DISPLAY_ITEM"
+            android:targetPackage="com.louiskirsch.quickdynalist"
+            android:targetClass="com.louiskirsch.quickdynalist.SearchActivity" />
+        <categories android:name="android.shortcut.search" />
+    </shortcut>
+
 </shortcuts>

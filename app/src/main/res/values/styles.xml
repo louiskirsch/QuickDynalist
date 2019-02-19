@@ -56,9 +56,8 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="AppTheme.Fullscreen" parent="AppTheme.NoActionBar">
-        <item name="android:statusBarColor">#E0E0E0</item>
-        <item name="android:windowLightStatusBar">true</item>
+    <style name="AppTheme.CustomActionBar" parent="AppTheme.NoActionBar">
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

@@ -177,9 +177,13 @@ abstract class BaseItemListFragment : Fragment() {
             putExtra("payload", Bundle().apply {
                 putParcelable(DynalistApp.EXTRA_DISPLAY_ITEM, payloadItem)
             })
-            startActivityForResult(this, requestCode)
+            startActivityForResult(this, requestCode, transitionBundle)
         }
     }
+
+    private val transitionBundle: Bundle
+        get() = ActivityOptions.makeSceneTransitionAnimation(
+                activity, activity!!.toolbar, "toolbar").toBundle()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -277,9 +281,7 @@ abstract class BaseItemListFragment : Fragment() {
         val intent = Intent(context, DetailsActivity::class.java)
         intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, item as Parcelable)
         val activity = activity as AppCompatActivity
-        val transition = ActivityOptions.makeSceneTransitionAnimation(
-                activity, activity.toolbar, "toolbar")
-        startActivity(intent, transition.toBundle())
+        startActivity(intent, transitionBundle)
         return true
     }
 
@@ -443,9 +445,7 @@ abstract class BaseItemListFragment : Fragment() {
             return true
         val intent = Intent(context!!, ShortcutActivity::class.java)
         putShortcutExtras(intent)
-        val transition = ActivityOptions.makeSceneTransitionAnimation(activity,
-                UtilPair.create(activity!!.toolbar as View, "toolbar"))
-        startActivity(intent, transition.toBundle())
+        startActivity(intent, transitionBundle)
         return true
     }
 
