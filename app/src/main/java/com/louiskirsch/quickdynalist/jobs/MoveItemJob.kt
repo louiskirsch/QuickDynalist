@@ -1,10 +1,7 @@
 package com.louiskirsch.quickdynalist.jobs
 
 import com.louiskirsch.quickdynalist.*
-import com.louiskirsch.quickdynalist.network.DynalistResponse
-import com.louiskirsch.quickdynalist.network.InboxRequest
-import com.louiskirsch.quickdynalist.network.InsertItemRequest
-import com.louiskirsch.quickdynalist.network.MoveItemRequest
+import com.louiskirsch.quickdynalist.network.*
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
@@ -47,11 +44,23 @@ class MoveItemJob(val item: DynalistItem, val parent: DynalistItem, val toPositi
         requireItemId(parent)
         requireItemId(item)
         val token = Dynalist(applicationContext).token
-        val request = MoveItemRequest(parent.serverFileId!!, parent.serverItemId!!,
-                item.serverItemId!!, toPosition, token!!)
-        val response = dynalistService.moveItem(request).execute()
-        val body = response.body()!!
-        requireSuccess(body)
+        if (item.serverFileId == parent.serverFileId) {
+            val request = MoveItemRequest(parent.serverFileId!!, parent.serverItemId!!,
+                    item.serverItemId!!, toPosition, token!!)
+            val response = dynalistService.moveItem(request).execute()
+            val body = response.body()!!
+            requireSuccess(body)
+        } else {
+            // TODO Can't move into different document with current API. Cloning required.
+            box.get(item.clientId)?.also { movedItem ->
+                val request = DeleteItemRequest(item.serverFileId!!, item.serverItemId!!, token!!)
+                val response = dynalistService.deleteItem(request).execute().body()!!
+                requireSuccess(response)
+                val treeService = AddItemTreeService(this)
+                val updatedItems = treeService.insert(movedItem)
+                box.put(updatedItems)
+            }
+        }
         markItemsCompleted()
     }
 
