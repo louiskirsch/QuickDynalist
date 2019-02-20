@@ -16,7 +16,7 @@ class DynalistTagSpan(private val tag: DynalistTag,
             name = widget.context.getString(R.string.filter_name_tag)
             tags.add(tag)
             tagParent?.let { parent.target = it }
-            searchDepth = Int.MAX_VALUE
+            searchDepth = DynalistItemFilter.MAX_SEARCH_DEPTH
         }
         EventBus.getDefault().post(DynalistFilterEvent(filter))
     }

@@ -36,7 +36,7 @@ class EditFilterActivity : AppCompatActivity() {
     private val searchDepthOptions = arrayOf(
             SearchDepth(R.string.filter_search_depth_child, 1),
             SearchDepth(R.string.filter_search_depth_2, 2),
-            SearchDepth(R.string.filter_search_depth_any, 20)
+            SearchDepth(R.string.filter_search_depth_any, DynalistItemFilter.MAX_SEARCH_DEPTH)
     )
 
     private val dateFilters = arrayOf(
