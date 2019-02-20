@@ -152,6 +152,8 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
             val prefs = getPrefs(context).edit()
             prefs.remove("${PREF_PREFIX_KEY}_${appWidgetId}_title")
             prefs.remove("${PREF_PREFIX_KEY}_${appWidgetId}_location")
+            prefs.remove("${PREF_PREFIX_KEY}_${appWidgetId}_type")
+            prefs.remove("${PREF_PREFIX_KEY}_${appWidgetId}_extraKey")
             prefs.apply()
         }
     }
