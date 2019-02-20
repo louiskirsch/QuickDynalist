@@ -25,7 +25,7 @@ class ItemLocation(val item: DynalistItem): Location {
     override val extraKey: String get() = DynalistApp.EXTRA_DISPLAY_ITEM
     override val extraIdKey: String get() = DynalistApp.EXTRA_DISPLAY_ITEM_ID
     override val supportsInsertion: Boolean get() = true
-    override val typeName: String get() = "item"
+    override val typeName: String get() = DynalistItem.LOCATION_TYPE
 
     override fun toString() = item.toString()
     override fun hashCode(): Int = item.hashCode()
@@ -45,7 +45,7 @@ class FilterLocation(val filter: DynalistItemFilter,
     override val extraKey: String get() = DynalistApp.EXTRA_DISPLAY_FILTER
     override val extraIdKey: String get() = DynalistApp.EXTRA_DISPLAY_FILTER_ID
     override val supportsInsertion: Boolean get() = false
-    override val typeName: String get() = "filter"
+    override val typeName: String get() = DynalistItemFilter.LOCATION_TYPE
 
     override fun toString() = shortenedName.toString()
     override fun hashCode(): Int = filter.hashCode()

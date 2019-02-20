@@ -265,6 +265,7 @@ class DynalistItemFilter: Parcelable {
         = TransformedOBLiveData(query) { transformer(postQueryFilter(it)) }
 
     companion object {
+        const val LOCATION_TYPE = "filter"
         val box get() = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()
 
         @Suppress("unused")

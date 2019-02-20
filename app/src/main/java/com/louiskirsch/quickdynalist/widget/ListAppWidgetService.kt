@@ -44,8 +44,8 @@ class ListViewsFactory(private val context: Context, intent: Intent)
         val locationId = ListAppWidgetConfigureActivity.getLocation(context, widgetId)
         val locationType = ListAppWidgetConfigureActivity.getType(context, widgetId)
         val queryResult = when (locationType) {
-            "item" -> getDynalistItemChildren(locationId)
-            "filter" -> getDynalistFilterItems(locationId)
+            DynalistItem.LOCATION_TYPE -> getDynalistItemChildren(locationId)
+            DynalistItemFilter.LOCATION_TYPE -> getDynalistFilterItems(locationId)
             else -> throw Exception("Invalid location")
         }
         val newItems = queryResult.map { item ->

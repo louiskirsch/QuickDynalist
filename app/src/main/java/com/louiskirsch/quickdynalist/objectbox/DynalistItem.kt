@@ -303,6 +303,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         get() = name.replace(dateTimeRegex, "").trim()
 
     companion object {
+        const val LOCATION_TYPE = "item"
         val box get() = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
 
         fun newInbox() = DynalistItem(null, null, "inbox",

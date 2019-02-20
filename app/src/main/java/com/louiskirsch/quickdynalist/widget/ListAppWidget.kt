@@ -12,6 +12,7 @@ import android.content.Intent
 import android.net.Uri
 import com.louiskirsch.quickdynalist.DynalistApp
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 
 
 /**
@@ -53,7 +54,7 @@ class ListAppWidget : AppWidgetProvider() {
                 val changedWidgets = getAppWidgetIds(component).filter {
                     val type = ListAppWidgetConfigureActivity.getType(context, it)
                     // Can we do something smarter here instead of refreshing them all?
-                    if (type == "filter") {
+                    if (type == DynalistItemFilter.LOCATION_TYPE) {
                         true
                     } else {
                         val location = ListAppWidgetConfigureActivity.getLocation(context, it)
