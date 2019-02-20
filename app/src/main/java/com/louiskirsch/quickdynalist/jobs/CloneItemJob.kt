@@ -43,24 +43,6 @@ class CloneItemJob(val item: DynalistItem): ItemJob() {
         return item
     }
 
-    private fun insertRecursively(item: DynalistItem, token: String): List<DynalistItem> {
-        if (item.children.isEmpty())
-            return emptyList()
-        // TODO API has weird bug that items are inserted in reverse order
-        val children = item.children.sortedBy { it.position }.reversed()
-        val changes = children.mapIndexed { i: Int, it ->
-            // TODO we could define the index here, but the API is bugged
-            InsertItemRequest.InsertSpec(item.serverItemId!!, it.name, it.note)
-        }.toTypedArray()
-        val request = BulkInsertItemRequest(item.serverFileId!!, token, changes)
-        val response = dynalistService.addToDocument(request).execute().body()!!
-        requireSuccess(response)
-        response.new_node_ids!!.zip(children).forEach { (newItemId, child) ->
-            child.serverItemId = newItemId
-        }
-        return item.children + item.children.flatMap { insertRecursively(it, token) }
-    }
-
     private fun waitForItem(query: Query<DynalistItem>, timeout: Long = 10000): DynalistItem? {
         val start = System.currentTimeMillis()
         while (System.currentTimeMillis() < start + timeout) {
@@ -73,18 +55,13 @@ class CloneItemJob(val item: DynalistItem): ItemJob() {
 
     @Throws(Throwable::class)
     override fun onRun() {
-        val token = Dynalist(applicationContext).token
         // need to wait for db operations to complete
         val item = waitForItem(box.query { equal(DynalistItem_.syncJob, "$id-root") })
                 ?: throw InvalidJobException("Item to clone has vanished")
 
-        val request = InsertItemRequest(item.serverFileId!!, item.serverParentId!!, item.name,
-                item.note, token!!)
-        val response = dynalistService.addToDocument(request).execute().body()!!
-        requireSuccess(response)
-        item.serverItemId = response.new_node_ids!![0]
-        val children = insertRecursively(item, token)
-        box.put((children + item).apply { forEach { it.syncJob = null } })
+        val treeService = AddItemTreeService( this)
+        val updatedItems = treeService.insert(item)
+        box.put(updatedItems.apply { forEach { it.syncJob = null } })
     }
 
 }

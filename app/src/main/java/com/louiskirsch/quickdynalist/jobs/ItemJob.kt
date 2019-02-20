@@ -42,7 +42,7 @@ abstract class ItemJob: Job(Params(1)
         }
     }
 
-    protected fun requireSuccess(body: DynalistResponse) {
+    fun requireSuccess(body: DynalistResponse) {
         when {
             body.isInvalidToken -> {
                 EventBus.getDefault().post(AuthenticatedEvent(false))
