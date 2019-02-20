@@ -51,7 +51,14 @@ class ListAppWidget : AppWidgetProvider() {
             AppWidgetManager.getInstance(context).apply {
                 val component = ComponentName(context, ListAppWidget::class.java)
                 val changedWidgets = getAppWidgetIds(component).filter {
-                    ListAppWidgetConfigureActivity.getLocation(context, it) in affectedItems
+                    val type = ListAppWidgetConfigureActivity.getType(context, it)
+                    // Can we do something smarter here instead of refreshing them all?
+                    if (type == "filter") {
+                        true
+                    } else {
+                        val location = ListAppWidgetConfigureActivity.getLocation(context, it)
+                        location in affectedItems
+                    }
                 }.toIntArray()
                 notifyAppWidgetViewDataChanged(changedWidgets, R.id.appwidget_list)
             }

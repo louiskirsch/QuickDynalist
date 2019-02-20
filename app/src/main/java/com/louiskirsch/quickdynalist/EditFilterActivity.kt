@@ -84,6 +84,7 @@ class EditFilterActivity : AppCompatActivity() {
             id = filter.id
             name = filterName.text.toString()
             DynalistItemFilter.box.attach(this)
+            tags.clear()
         }
         updateFromFilter()
         return true
@@ -257,6 +258,7 @@ class EditFilterActivity : AppCompatActivity() {
             val selected = parent.getItemAtPosition(position) as DynalistTag
             addTag(selected, tagsAdapter)
         }
+        filterTagsChipGroup.removeAllViews()
         filter.tags.forEach { addTag(it, tagsAdapter) }
 
         val model = ViewModelProviders.of(this).get(DynalistTagViewModel::class.java)
