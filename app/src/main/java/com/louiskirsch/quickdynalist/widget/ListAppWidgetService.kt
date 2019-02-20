@@ -73,7 +73,7 @@ class ListViewsFactory(private val context: Context, intent: Intent)
 
     private fun getDynalistFilterItems(filterId: Long): List<DynalistItem> {
         val box = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()
-        return box.get(filterId).items
+        return box.get(filterId)?.items ?: emptyList()
     }
 
     override fun getViewAt(position: Int): RemoteViews {
