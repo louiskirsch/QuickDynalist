@@ -288,6 +288,7 @@ class DynalistItemFilter: Parcelable {
                         filterBox.attach(this)
                         tags.clear()
                         tags.addAll(tagBox.get(createLongArray()!!))
+                        tagsLogicMode = LogicMode.values()[readInt()]
                         parent.targetId = readLong()
                         searchDepth = readInt()
                         containsText = readString()
@@ -314,6 +315,7 @@ class DynalistItemFilter: Parcelable {
             writeNullableLong(minRelativeModifiedDate)
             writeNullableLong(maxRelativeModifiedDate)
             writeLongArray(tags.map { it.id }.toLongArray())
+            writeInt(tagsLogicMode.ordinal)
             writeLong(parent.targetId)
             writeInt(searchDepth)
             writeString(containsText)
