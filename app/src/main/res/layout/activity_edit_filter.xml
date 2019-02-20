@@ -178,6 +178,28 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <RadioGroup
+            android:id="@+id/filterTagsLogicMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/filterTagsMatchAll"
+                android:text="@string/filter_tags_match_all"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/filterTagsMatchAny"
+                android:text="@string/filter_tags_match_any"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+        </RadioGroup>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

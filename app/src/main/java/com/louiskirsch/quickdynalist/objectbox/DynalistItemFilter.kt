@@ -46,6 +46,8 @@ class DynalistItemFilter: Parcelable {
     var maxRelativeModifiedDate: Long? = null
 
     lateinit var tags: ToMany<DynalistTag>
+    @Convert(converter = LogicModeConverter::class, dbType = Integer::class)
+    var tagsLogicMode: LogicMode = LogicMode.ALL
     lateinit var parent: ToOne<DynalistItem>
     var searchDepth: Int = 1
     var containsText: String? = null
@@ -163,7 +165,7 @@ class DynalistItemFilter: Parcelable {
         if (tags.isNotEmpty()) {
             filters.add { candidate ->
                 val metaData = candidate.metaData.target
-                when (logicMode) {
+                when (tagsLogicMode) {
                     LogicMode.ALL -> tags.all { metaData.tags.contains(it) }
                     LogicMode.ANY -> tags.any { metaData.tags.contains(it) }
                     else -> false

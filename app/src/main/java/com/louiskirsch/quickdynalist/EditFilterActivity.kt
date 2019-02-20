@@ -150,6 +150,10 @@ class EditFilterActivity : AppCompatActivity() {
             tags.addAll(filterTagsChipGroup.children.map {
                 it.getTag(R.id.tag_dynalist_tag) as DynalistTag
             })
+            tagsLogicMode = if (filterTagsMatchAny.isChecked)
+                DynalistItemFilter.LogicMode.ANY
+            else
+                DynalistItemFilter.LogicMode.ALL
             parent.target = if (filterLocationEnabled.isChecked)
                 filterParent.selectedItem as DynalistItem
             else
@@ -265,6 +269,12 @@ class EditFilterActivity : AppCompatActivity() {
         model.tagsLiveData.observe(this, Observer {
             tagsAdapter.updateFilterableItems(it)
         })
+
+        when (filter.tagsLogicMode) {
+            DynalistItemFilter.LogicMode.UNKNOWN -> filterTagsMatchAll.isChecked = true
+            DynalistItemFilter.LogicMode.ALL -> filterTagsMatchAll.isChecked = true
+            DynalistItemFilter.LogicMode.ANY -> filterTagsMatchAny.isChecked = true
+        }
     }
 
     private fun addTag(tag: DynalistTag, adapter: FilterAdapter<DynalistTag>) {
