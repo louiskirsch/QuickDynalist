@@ -95,16 +95,6 @@ class DynalistItemFilter: Parcelable {
 
     private fun QueryBuilder<DynalistItem>.applyNativeConditions() {
         val state = QueryState()
-        if (hasImage != null || minRelativeDate != null || maxRelativeDate != null) {
-            link(DynalistItem_.metaData).run {
-                applyDateConditions(state)
-                if (hasImage != null) {
-                    startCondition(state)
-                    if (hasImage!!) notNull(DynalistItemMetaData_.image)
-                    else isNull(DynalistItemMetaData_.image)
-                }
-            }
-        }
         applyModifiedDateConditions(state)
         if (containsText != null) {
             startCondition(state)
@@ -158,6 +148,15 @@ class DynalistItemFilter: Parcelable {
 
     private fun createFilters(): MutableList<(DynalistItem) -> Boolean> {
         val filters = ArrayList<(DynalistItem) -> Boolean>()
+        createDateFilter()?.let { filter -> filters.add {
+            it.metaData.target.date?.let { date -> filter(date) } ?: false
+        }}
+        if (hasImage != null) {
+            filters.add {
+                if (hasImage!!) it.image != null
+                else it.image == null
+            }
+        }
         if (parent.targetId > 0 && searchDepth > 1) {
             filters.add { it.hasParent(parent.targetId, searchDepth) }
         }
@@ -210,19 +209,17 @@ class DynalistItemFilter: Parcelable {
         state.hasPrecedingCondition = true
     }
 
-    private fun QueryBuilder<DynalistItemMetaData>.applyDateConditions(state: QueryState) {
+    private fun createDateFilter(): ((Date) -> Boolean)? {
         if (minRelativeDate != null && maxRelativeDate != null) {
-            startCondition(state)
             val today = today
-            between(DynalistItemMetaData_.date,
-                    today.time + minRelativeDate!! - 1,
-                    today.time + maxRelativeDate!!)
+            return { date -> date.time in
+                    (today.time + minRelativeDate!!) until (today.time + maxRelativeDate!!) }
         } else if (minRelativeDate != null) {
-            startCondition(state)
-            greater(DynalistItemMetaData_.date, today.time + minRelativeDate!! - 1)
+            return { date -> date.time >= today.time + minRelativeDate!! }
         } else if (maxRelativeDate != null) {
-            startCondition(state)
-            less(DynalistItemMetaData_.date, today.time + maxRelativeDate!!)
+            return { date -> date.time < today.time + maxRelativeDate!! }
+        } else {
+            return null
         }
     }
 
