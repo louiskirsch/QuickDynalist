@@ -135,7 +135,7 @@ class DynalistItemFilter: Parcelable {
         return when {
             sortOrder == Order.MANUAL && logicMode == LogicMode.ANY ->
                 items.sortedWith(compareBy({ it.parent.targetId }, { it.position }))
-            sortOrder == Order.DATE -> items.sortedBy { it.metaData.target.date }
+            sortOrder == Order.DATE -> items.sortedBy { it.date }
             sortOrder == Order.MODIFIED_DATE && logicMode == LogicMode.ANY ->
                 items.sortedBy { it.lastModified }
             else -> items
@@ -145,13 +145,12 @@ class DynalistItemFilter: Parcelable {
     private fun QueryBuilder<DynalistItem>.applyBasicConditions() {
         notEqual(DynalistItem_.name, "")
         equal(DynalistItem_.hidden, false)
-        eager(DynalistItem_.metaData)
     }
 
     private fun createFilters(): MutableList<(DynalistItem) -> Boolean> {
         val filters = ArrayList<(DynalistItem) -> Boolean>()
         createDateFilter()?.let { filter -> filters.add {
-            it.metaData.target.date?.let { date -> filter(date) } ?: false
+            it.date?.let { date -> filter(date) } ?: false
         }}
         if (hasImage != null) {
             filters.add {
@@ -212,32 +211,32 @@ class DynalistItemFilter: Parcelable {
     }
 
     private fun createDateFilter(): ((Date) -> Boolean)? {
+        val today = today.time
         if (minRelativeDate != null && maxRelativeDate != null) {
-            val today = today
             return { date -> date.time in
-                    (today.time + minRelativeDate!!) until (today.time + maxRelativeDate!!) }
+                    (today + minRelativeDate!!) until (today + maxRelativeDate!!) }
         } else if (minRelativeDate != null) {
-            return { date -> date.time >= today.time + minRelativeDate!! }
+            return { date -> date.time >= today + minRelativeDate!! }
         } else if (maxRelativeDate != null) {
-            return { date -> date.time < today.time + maxRelativeDate!! }
+            return { date -> date.time < today + maxRelativeDate!! }
         } else {
             return null
         }
     }
 
     private fun QueryBuilder<DynalistItem>.applyModifiedDateConditions(state: QueryState) {
+        val today = today.time
         if (minRelativeModifiedDate != null && maxRelativeModifiedDate != null) {
             startCondition(state)
-            val today = today
             between(DynalistItem_.lastModified,
-                    today.time + minRelativeModifiedDate!! - 1,
-                    today.time + maxRelativeModifiedDate!!)
+                    today + minRelativeModifiedDate!! - 1,
+                    today + maxRelativeModifiedDate!!)
         } else if (minRelativeModifiedDate != null) {
             startCondition(state)
-            greater(DynalistItem_.lastModified, today.time + minRelativeModifiedDate!! - 1)
+            greater(DynalistItem_.lastModified, today + minRelativeModifiedDate!! - 1)
         } else if (maxRelativeModifiedDate != null) {
             startCondition(state)
-            less(DynalistItem_.lastModified, today.time + maxRelativeModifiedDate!!)
+            less(DynalistItem_.lastModified, today + maxRelativeModifiedDate!!)
         }
     }
 
