@@ -70,7 +70,7 @@ class ItemListFragment : BaseItemListFragment() {
     override fun onStart() {
         super.onStart()
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
-        model.selectedDynalistObject.value = ItemLocation(location)
+        model.selectedLocation.value = ItemLocation(location)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

@@ -128,5 +128,5 @@ class DynalistTagViewModel(app: Application): AndroidViewModel(app) {
 }
 
 class ItemListFragmentViewModel: ViewModel() {
-    val selectedDynalistObject = MutableLiveData<Location>()
+    val selectedLocation = MutableLiveData<Location>()
 }

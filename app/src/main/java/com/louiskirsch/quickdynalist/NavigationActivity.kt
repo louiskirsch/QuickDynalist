@@ -2,7 +2,6 @@ package com.louiskirsch.quickdynalist
 
 import android.app.Activity
 import android.app.ActivityOptions
-import android.app.PendingIntent
 import android.os.Bundle
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
@@ -17,7 +16,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
-import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
 import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.android.synthetic.main.app_bar_navigation.*
@@ -35,7 +33,6 @@ import java.io.File
 import android.content.ActivityNotFoundException
 import androidx.fragment.app.Fragment
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
-import org.jetbrains.anko.startActivityForResult
 
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -101,7 +98,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 fillMenuWithItems(entries, R.id.group_filters_list, 2)
             }
         })
-        fragmentModel.selectedDynalistObject.observe(this, Observer { item ->
+        fragmentModel.selectedLocation.observe(this, Observer { item ->
             inboxes?.run {
                 val menu = nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu
                 updateCheckedBookmark(menu, item, this)
@@ -145,7 +142,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
         ViewModelProviders.of(this@NavigationActivity)
                 .get(ItemListFragmentViewModel::class.java).let { fragmentModel ->
-                    fragmentModel.selectedDynalistObject.value?.let {
+                    fragmentModel.selectedLocation.value?.let {
                         updateCheckedBookmark(this, it, items)
                     }
                 }
@@ -323,6 +320,12 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onDynalistFilterEvent(event: DynalistFilterEvent) {
+        val fragmentModel = ViewModelProviders.of(this)
+                .get(ItemListFragmentViewModel::class.java)
+        fragmentModel.selectedLocation.value?.let {
+            if (it is ItemLocation)
+                event.filter.parent.target = it.item
+        }
         openDynalistItemFilter(event.filter)
     }
 

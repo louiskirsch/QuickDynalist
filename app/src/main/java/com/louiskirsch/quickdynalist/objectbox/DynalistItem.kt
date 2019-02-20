@@ -196,7 +196,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             val bg = BackgroundColorSpan(spanHighlight)
             spannable.setSpan(bg, range.start, range.endInclusive + 1,
                     Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-            val tagSpan = DynalistTagSpan(tag, this)
+            val tagSpan = DynalistTagSpan(tag)
             spannable.setSpan(tagSpan, range.start + 1, range.endInclusive + 1,
                     Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         }

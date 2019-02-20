@@ -8,14 +8,12 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistTag
 import io.objectbox.kotlin.boxFor
 import org.greenrobot.eventbus.EventBus
 
-class DynalistTagSpan(private val tag: DynalistTag,
-                      private val tagParent: DynalistItem?): ClickableSpan() {
+class DynalistTagSpan(private val tag: DynalistTag): ClickableSpan() {
 
     override fun onClick(widget: View) {
         val filter = DynalistItemFilter().apply {
-            name = widget.context.getString(R.string.filter_name_tag)
+            name = widget.context.getString(R.string.filter_name_tag, tag.fullName)
             tags.add(tag)
-            tagParent?.let { parent.target = it }
             searchDepth = DynalistItemFilter.MAX_SEARCH_DEPTH
         }
         EventBus.getDefault().post(DynalistFilterEvent(filter))
