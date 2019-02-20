@@ -151,10 +151,14 @@ abstract class BaseItemListFragment : Fragment() {
         itemsLiveData.observe(this, Observer<List<CachedDynalistItem>> { newItems ->
             val initializing = adapter.itemCount == 0
             adapter.updateItems(newItems)
-            itemListNoItems.visibility = if (newItems.isEmpty())
-                View.VISIBLE
-            else
-                View.GONE
+             if (newItems.isEmpty()) {
+                 itemListNoItems.visibility = View.VISIBLE
+                 itemListNoItems.alpha = 0.0f
+                 itemListNoItems.animate().alpha(1.0f)
+                         .setStartDelay(200).setDuration(200).start()
+             } else {
+                 itemListNoItems.visibility = View.GONE
+             }
             itemListProgress.hide()
             if (initializing) scrollToIntendedLocation()
         })
