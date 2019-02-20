@@ -370,7 +370,8 @@ abstract class BaseItemListFragment : Fragment() {
 
         itemList.layoutManager = LinearLayoutManager(context)
         itemList.adapter = adapter
-        itemListProgress.show()
+        if (adapter.itemCount == 0)
+            itemListProgress.show()
         val swipeBackgroundDrawer = SwipeBackgroundDrawer(context!!, R.drawable.ic_swipe_edit,
                 R.drawable.ic_swipe_delete, R.color.editColor, R.color.deleteColor)
         ItemTouchHelper(ItemTouchCallback(adapter, enableDragging, swipeBackgroundDrawer))
