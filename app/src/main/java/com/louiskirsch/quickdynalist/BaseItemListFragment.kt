@@ -152,10 +152,13 @@ abstract class BaseItemListFragment : Fragment() {
             val initializing = adapter.itemCount == 0
             adapter.updateItems(newItems)
              if (newItems.isEmpty()) {
-                 itemListNoItems.visibility = View.VISIBLE
-                 itemListNoItems.alpha = 0.0f
-                 itemListNoItems.animate().alpha(1.0f)
-                         .setStartDelay(200).setDuration(200).start()
+                 itemListNoItems.apply {
+                     if (visibility != View.VISIBLE) {
+                         visibility = View.VISIBLE
+                         alpha = 0.0f
+                         animate().alpha(1.0f).setStartDelay(200).setDuration(200).start()
+                     }
+                 }
              } else {
                  itemListNoItems.visibility = View.GONE
              }
