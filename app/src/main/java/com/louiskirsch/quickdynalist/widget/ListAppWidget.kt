@@ -65,6 +65,19 @@ class ListAppWidget : AppWidgetProvider() {
             }
         }
 
+        fun notifyFilterChanged(context: Context, filter: DynalistItemFilter) {
+            AppWidgetManager.getInstance(context).apply {
+                val component = ComponentName(context, ListAppWidget::class.java)
+                val changedWidgets = getAppWidgetIds(component).filter {
+                    val type = ListAppWidgetConfigureActivity.getType(context, it)
+                    val location = ListAppWidgetConfigureActivity.getLocation(context, it)
+                    type == DynalistItemFilter.LOCATION_TYPE  &&
+                            location == filter.id
+                }.toIntArray()
+                notifyAppWidgetViewDataChanged(changedWidgets, R.id.appwidget_list)
+            }
+        }
+
         internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager,
                                      appWidgetId: Int) {
 

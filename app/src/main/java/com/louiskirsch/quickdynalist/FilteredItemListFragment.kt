@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.boxFor
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.jetbrains.anko.*
@@ -125,6 +126,7 @@ class FilteredItemListFragment : BaseItemListFragment() {
         itemListNoItems.visibility = View.GONE
         itemListProgress.show()
         activity!!.invalidateOptionsMenu()
+        ListAppWidget.notifyFilterChanged(context!!, filter)
         doAsync {
             val box = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()
             if (saved) box.put(filter)
