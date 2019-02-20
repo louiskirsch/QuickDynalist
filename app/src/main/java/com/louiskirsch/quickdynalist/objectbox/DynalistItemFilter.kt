@@ -205,7 +205,7 @@ class DynalistItemFilter: Parcelable {
         // No need to call and(), because it is the default
         //if (state.hasPrecedingCondition && logicMode == LogicMode.ANY) or()
         if (state.hasPrecedingCondition) {
-            if (logicMode == LogicMode.ANY) or() else and()
+            if (logicMode == LogicMode.ANY) or()
         }
         state.hasPrecedingCondition = true
     }
