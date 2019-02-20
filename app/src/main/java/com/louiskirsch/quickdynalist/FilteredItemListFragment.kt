@@ -122,6 +122,9 @@ class FilteredItemListFragment : BaseItemListFragment() {
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.itemsFilter.value = filter
         adapter.showChecklist = filter.showAsChecklist
+        adapter.updateItems(emptyList())
+        itemListNoItems.visibility = View.GONE
+        itemListProgress.show()
         activity!!.invalidateOptionsMenu()
         doAsync {
             val box = DynalistApp.instance.boxStore.boxFor<DynalistItemFilter>()

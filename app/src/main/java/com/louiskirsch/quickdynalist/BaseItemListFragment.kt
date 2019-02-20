@@ -151,6 +151,11 @@ abstract class BaseItemListFragment : Fragment() {
         itemsLiveData.observe(this, Observer<List<CachedDynalistItem>> { newItems ->
             val initializing = adapter.itemCount == 0
             adapter.updateItems(newItems)
+            itemListNoItems.visibility = if (newItems.isEmpty())
+                View.VISIBLE
+            else
+                View.GONE
+            itemListProgress.hide()
             if (initializing) scrollToIntendedLocation()
         })
     }
@@ -361,6 +366,7 @@ abstract class BaseItemListFragment : Fragment() {
 
         itemList.layoutManager = LinearLayoutManager(context)
         itemList.adapter = adapter
+        itemListProgress.show()
         val swipeBackgroundDrawer = SwipeBackgroundDrawer(context!!, R.drawable.ic_swipe_edit,
                 R.drawable.ic_swipe_delete, R.color.editColor, R.color.deleteColor)
         ItemTouchHelper(ItemTouchCallback(adapter, enableDragging, swipeBackgroundDrawer))

@@ -167,4 +167,5 @@
     <string name="error_link_offline">This link can only be created after you have gone online</string>
     <string name="filter_tags_match_all">Match all tags</string>
     <string name="filter_tags_match_any">Match any tag</string>
+    <string name="item_list_no_items">No items</string>
 </resources>

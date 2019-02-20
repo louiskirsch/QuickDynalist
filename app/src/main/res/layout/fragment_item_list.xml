@@ -19,6 +19,24 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/itemListProgress"
+            style="?android:attr/progressBarStyle"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            app:layout_anchorGravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/itemListNoItems"
+            android:text="@string/item_list_no_items"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            app:layout_anchorGravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/itemListScrollButton"
             android:visibility="invisible"
