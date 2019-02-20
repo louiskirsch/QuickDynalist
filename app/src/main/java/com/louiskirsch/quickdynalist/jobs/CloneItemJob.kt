@@ -46,13 +46,16 @@ class CloneItemJob(val item: DynalistItem): ItemJob() {
     private fun insertRecursively(item: DynalistItem, token: String): List<DynalistItem> {
         if (item.children.isEmpty())
             return emptyList()
-        val changes = item.children.mapIndexed { i: Int, it ->
-            InsertItemRequest.InsertSpec(item.serverItemId!!, it.name, it.note, i)
+        // TODO API has weird bug that items are inserted in reverse order
+        val children = item.children.sortedBy { it.position }.reversed()
+        val changes = children.mapIndexed { i: Int, it ->
+            // TODO we could define the index here, but the API is bugged
+            InsertItemRequest.InsertSpec(item.serverItemId!!, it.name, it.note)
         }.toTypedArray()
         val request = BulkInsertItemRequest(item.serverFileId!!, token, changes)
         val response = dynalistService.addToDocument(request).execute().body()!!
         requireSuccess(response)
-        response.new_node_ids!!.zip(item.children).forEach { (newItemId, child) ->
+        response.new_node_ids!!.zip(children).forEach { (newItemId, child) ->
             child.serverItemId = newItemId
         }
         return item.children + item.children.flatMap { insertRecursively(it, token) }
