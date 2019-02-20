@@ -164,10 +164,10 @@ class DynalistItemFilter: Parcelable {
         }
         if (tags.isNotEmpty()) {
             filters.add { candidate ->
-                val metaData = candidate.metaData.target
+                // TODO I can't use metadata here because I can't only access the ids
                 when (tagsLogicMode) {
-                    LogicMode.ALL -> tags.all { metaData.tags.contains(it) }
-                    LogicMode.ANY -> tags.any { metaData.tags.contains(it) }
+                    LogicMode.ALL -> tags.all { candidate.tags.contains(it.fullName) }
+                    LogicMode.ANY -> tags.any { candidate.tags.contains(it.fullName) }
                     else -> false
                 }
             }
