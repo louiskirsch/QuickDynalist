@@ -43,22 +43,21 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                     equal(DynalistItem_.isChecked, false)
                 }
                 order(DynalistItem_.position)
-                eager(100, DynalistItem_.children)
-            }) { items ->
-                items.forEach { item -> item.children.sortBy { child -> child.position } }
-                items.map { CachedDynalistItem(it, getApplication()) }
-            }
+                eager(DynalistItem_.children)
+            }) { createCachedDynalistItems(it) }
         }
     }
 
     val itemsFilter = MutableLiveData<DynalistItemFilter>()
     val filteredItemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
         Transformations.switchMap(itemsFilter) { filter ->
-            filter.transformedLiveData { items ->
-                items.forEach { item -> item.children.sortBy { child -> child.position } }
-                items.map { CachedDynalistItem(it, getApplication()) }
-            }
+            filter.transformedLiveData { createCachedDynalistItems(it) }
         }
+    }
+
+    private fun createCachedDynalistItems(items: List<DynalistItem>): List<CachedDynalistItem> {
+        items.forEach { item -> item.children.sortBy { child -> child.position } }
+        return items.map { CachedDynalistItem(it, getApplication()) }
     }
 
     val searchTerm = MutableLiveData<String>()
@@ -73,11 +72,8 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 notEqual(DynalistItem_.name, "")
                 equal(DynalistItem_.hidden, false)
                 orderDesc(DynalistItem_.lastModified)
-            }) { items ->
-                val limitedItems = items.take(100)
-                limitedItems.forEach { item -> item.children.sortBy { child -> child.position } }
-                limitedItems.map { CachedDynalistItem(it, getApplication()) }
-            }
+                eager(DynalistItem_.children)
+            }) { createCachedDynalistItems(it.take(100)) }
         }
     }
 
