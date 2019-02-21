@@ -32,11 +32,19 @@ class MoveItemJob(val item: DynalistItem, val parent: DynalistItem, val toPositi
                     it.position = i
                     it.syncJob = id
                 }
-                box.put(currentChildren)
+                box.put(currentChildren + updateLocationRecursively(item))
             }
         }
         ListAppWidget.notifyItemChanged(applicationContext, item)
         ListAppWidget.notifyItemChanged(applicationContext, parent)
+    }
+
+    private fun updateLocationRecursively(item: DynalistItem): List<DynalistItem> {
+        item.children.forEach {
+            it.syncJob = id
+            it.serverFileId = parent.serverFileId
+        }
+        return item.children + item.children.flatMap { updateLocationRecursively(it) }
     }
 
     @Throws(Throwable::class)
