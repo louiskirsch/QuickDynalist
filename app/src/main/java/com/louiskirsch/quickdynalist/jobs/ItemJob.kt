@@ -95,4 +95,8 @@ abstract class ItemJob: Job(Params(1)
         constraint.setApplyNewDelayToGroup(true)
         return constraint
     }
+
+    companion object {
+        const val TAG = "ItemJob"
+    }
 }
