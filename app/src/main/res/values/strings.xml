@@ -128,12 +128,12 @@
     <string name="filter_show_as_checklist">Show as checklist</string>
     <string name="filter_match_all">Match all conditions</string>
     <string name="filter_match_any">Match any condition</string>
-    <string name="filter_category_date_filter">Date filter</string>
+    <string name="filter_category_date_filter">Date</string>
     <string name="filter_desc_date">Date</string>
     <string name="filter_desc_modified_date">Modified date</string>
-    <string name="filter_category_tags">Filter tags</string>
-    <string name="filter_category_location">Filter location</string>
-    <string name="filter_category_item_properties">Item properties</string>
+    <string name="filter_category_tags">Tags</string>
+    <string name="filter_category_location">Location</string>
+    <string name="filter_category_item_properties">Properties</string>
     <string name="filter_contains_text_hint">Contains text</string>
     <string name="filter_is_completed_any">Off</string>
     <string name="filter_is_completed_false">Not checked</string>
