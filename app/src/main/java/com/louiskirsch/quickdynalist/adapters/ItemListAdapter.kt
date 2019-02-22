@@ -47,23 +47,31 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
 
 class CachedDynalistItem(val item: DynalistItem, context: Context) {
-    val spannableText = item.getSpannableText(context).run {
-        if (isBlank() && item.image != null)
-            SpannableString(context.getString(R.string.placeholder_image))
-        else
-            this
+    val spannableText by lazy {
+        item.getSpannableText(context).run {
+            if (isBlank() && item.image != null)
+                SpannableString(context.getString(R.string.placeholder_image))
+            else
+                this
+        }
     }
-    val spannableNotes = item.getSpannableNotes(context)
-    val spannableChildren = item.getSpannableChildren(context, 5)
+    val spannableNotes by lazy { item.getSpannableNotes(context) }
+    val spannableChildren by lazy { item.getSpannableChildren(context, 5) }
+
+    private val identifier = hashKode(item.lastModified, item.children.map { it.lastModified })
+
+    fun eagerInitialize() {
+        spannableText
+        spannableNotes
+        spannableChildren
+    }
 
     override fun equals(other: Any?) = compareFields(other) {
-        one.spannableText.toString() correspondsTo two.spannableText.toString()
-        one.spannableChildren.toString() correspondsTo two.spannableChildren.toString()
-        one.spannableNotes.toString() correspondsTo two.spannableNotes.toString()
+        one.identifier correspondsTo two.identifier
         one.item correspondsTo two.item
     }
 
-    override fun hashCode() = hashKode(spannableText, spannableNotes, spannableChildren, item)
+    override fun hashCode() = hashKode(identifier, item)
 }
 
 class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView.ViewHolder>(),

@@ -8,6 +8,7 @@ import io.objectbox.Box
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import org.jetbrains.anko.doAsync
 
 class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
 
@@ -57,7 +58,9 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
 
     private fun createCachedDynalistItems(items: List<DynalistItem>): List<CachedDynalistItem> {
         items.forEach { item -> item.children.sortBy { child -> child.position } }
-        return items.map { CachedDynalistItem(it, getApplication()) }
+        return items.map { CachedDynalistItem(it, getApplication()) } .apply {
+            doAsync { forEach { it.eagerInitialize() } }
+        }
     }
 
     val searchTerm = MutableLiveData<String>()

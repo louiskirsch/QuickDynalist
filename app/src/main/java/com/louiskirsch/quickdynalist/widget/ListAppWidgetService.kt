@@ -50,7 +50,7 @@ class ListViewsFactory(private val context: Context, intent: Intent)
         }
         val newItems = queryResult.map { item ->
             item.children.sortBy { child -> child.position }
-            CachedDynalistItem(item, context)
+            CachedDynalistItem(item, context).apply { eagerInitialize() }
         }
         items.clear()
         items.addAll(newItems)
