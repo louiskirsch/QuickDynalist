@@ -25,6 +25,7 @@ import java.util.*
 class Dynalist(private val context: Context) {
     var authDialog: AlertDialog? = null
     var errorDialogShown: Boolean = false
+    private var isSyncing: Boolean = false
 
     private val preferences: SharedPreferences
         get() = context.getSharedPreferences("PREFERENCES", Context.MODE_PRIVATE)
@@ -101,13 +102,15 @@ class Dynalist(private val context: Context) {
         }.show()
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onSyncEvent(event: SyncEvent) {
-        if (event.status == SyncStatus.SUCCESS && event.isManual) {
-            context.toast(R.string.alert_sync_success)
-        }
-        if (event.status == SyncStatus.NO_SUCCESS) {
-            context.toast(R.string.alert_sync_no_success)
+        when (event.status) {
+            SyncStatus.RUNNING -> isSyncing = true
+            SyncStatus.NOT_RUNNING -> isSyncing = false
+            SyncStatus.SUCCESS -> if (event.isManual) {
+                context.toast(R.string.alert_sync_success)
+            }
+            SyncStatus.NO_SUCCESS -> context.toast(R.string.alert_sync_no_success)
         }
     }
 
@@ -156,6 +159,7 @@ class Dynalist(private val context: Context) {
             }
             return
         }
+        if (isSyncing) return
         val syncMobileData = settings.getBoolean("sync_mobile_data", false)
         val job = SyncJob(!syncMobileData, isManual)
         DynalistApp.instance.jobManager.addJobInBackground(job)
