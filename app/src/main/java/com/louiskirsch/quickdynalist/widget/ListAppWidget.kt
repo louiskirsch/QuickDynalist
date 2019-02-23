@@ -117,7 +117,7 @@ class ListAppWidget : AppWidgetProvider() {
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 }
                 PendingIntent.getActivities(context, requestCode, it,
-                        PendingIntent.FLAG_UPDATE_CURRENT)
+                        PendingIntent.FLAG_CANCEL_CURRENT)
             }
         }
     }
