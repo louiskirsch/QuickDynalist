@@ -98,7 +98,7 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             val visibility = if (item.spannableParent.isNotBlank())
                 View.VISIBLE else View.GONE
             rv.setViewVisibility(R.id.itemParent, visibility)
-            rv.setTextViewText(R.id.itemText, item.spannableParent)
+            rv.setTextViewText(R.id.itemParent, item.spannableParent)
         }
 
         rv.setTextViewText(R.id.itemText, item.spannableText)
