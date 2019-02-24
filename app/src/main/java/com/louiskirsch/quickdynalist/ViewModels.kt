@@ -45,22 +45,23 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 }
                 order(DynalistItem_.position)
                 eager(DynalistItem_.children)
-            }) { createCachedDynalistItems(it) }
+            }) { createCachedDynalistItems(it, false) }
         }
     }
 
     val itemsFilter = MutableLiveData<DynalistItemFilter>()
     val filteredItemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
         Transformations.switchMap(itemsFilter) { filter ->
-            filter.transformedLiveData { createCachedDynalistItems(it) }
+            filter.transformedLiveData { createCachedDynalistItems(it, true) }
         }
     }
 
-    private fun createCachedDynalistItems(items: List<DynalistItem>): List<CachedDynalistItem> {
+    private fun createCachedDynalistItems(items: List<DynalistItem>,
+                                          includeParent: Boolean): List<CachedDynalistItem> {
         val maxChildren = Dynalist(getApplication()).displayChildrenCount
         items.forEach { item -> item.children.sortBy { child -> child.position } }
         return items.map { CachedDynalistItem(it, getApplication(), maxChildren) }.apply {
-            doAsync { forEach { it.eagerInitialize() } }
+            doAsync { forEach { it.eagerInitialize(includeParent) } }
         }
     }
 
@@ -76,8 +77,8 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 notEqual(DynalistItem_.name, "")
                 equal(DynalistItem_.hidden, false)
                 orderDesc(DynalistItem_.lastModified)
-                eager(DynalistItem_.children)
-            }) { createCachedDynalistItems(it.take(100)) }
+                eager(DynalistItem_.children, DynalistItem_.parent)
+            }) { createCachedDynalistItems(it.take(100), true) }
         }
     }
 

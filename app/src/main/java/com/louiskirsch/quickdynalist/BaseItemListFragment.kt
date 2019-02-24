@@ -64,6 +64,8 @@ abstract class BaseItemListFragment : Fragment() {
         }
 
     protected abstract val showAsChecklist: Boolean
+    protected abstract val showItemParentText: Boolean
+
     protected open fun onClearEditingItem() {
         itemContents.text.clear()
     }
@@ -90,7 +92,7 @@ abstract class BaseItemListFragment : Fragment() {
         dynalist = Dynalist(context!!)
         setHasOptionsMenu(true)
 
-        adapter = ItemListAdapter(showAsChecklist).apply {
+        adapter = ItemListAdapter(showAsChecklist, showItemParentText).apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (itemCount == 1 && !adapter.moveInProgress)

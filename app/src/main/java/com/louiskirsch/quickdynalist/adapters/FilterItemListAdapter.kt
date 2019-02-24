@@ -12,6 +12,7 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.search_list_item.view.*
 
 class FilterItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    val itemParent = itemView.itemParent!!
     val itemText = itemView.itemText!!
     val itemNotes = itemView.itemNotes!!
     val itemChildren = itemView.itemChildren!!
@@ -55,11 +56,13 @@ class FilterItemListAdapter(context: Context): RecyclerView.Adapter<FilterItemLi
         }
 
         val item = items[position]
+        val parentText = item.spannableParent
         val text = item.spannableText.apply { higlightSearchTerm(this) }
         val notes = item.spannableNotes.apply { higlightSearchTerm(this) }
         val children = item.spannableChildren
 
         holder.apply {
+            itemParent.text = parentText
             itemText.text = text
             itemNotes.visibility = if (notes.isBlank()) View.GONE else View.VISIBLE
             itemNotes.text = notes

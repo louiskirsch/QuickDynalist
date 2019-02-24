@@ -33,6 +33,8 @@ class ListViewsFactory(private val context: Context, intent: Intent)
     private val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID)
 
+    private var displayParentText = false
+
     override fun onCreate() {}
     override fun onDestroy() {}
     override fun getLoadingView(): RemoteViews? = null
@@ -49,10 +51,17 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             DynalistItemFilter.LOCATION_TYPE -> getDynalistFilterItems(locationId)
             else -> throw Exception("Invalid location")
         }
+        displayParentText = when (locationType) {
+            DynalistItem.LOCATION_TYPE -> false
+            DynalistItemFilter.LOCATION_TYPE -> true
+            else -> throw Exception("Invalid location")
+        }
         val maxChildren = Dynalist(context).displayChildrenCount
         val newItems = queryResult.map { item ->
             item.children.sortBy { child -> child.position }
-            CachedDynalistItem(item, context, maxChildren).apply { eagerInitialize() }
+            CachedDynalistItem(item, context, maxChildren).apply {
+                eagerInitialize(displayParentText)
+            }
         }
         items.clear()
         items.addAll(newItems)
@@ -69,7 +78,10 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             and()
             equal(DynalistItem_.isChecked, false)
             order(DynalistItem_.position)
-            eager(100, DynalistItem_.children)
+            if (displayParentText)
+                eager(DynalistItem_.children, DynalistItem_.parent)
+            else
+                eager(DynalistItem_.children)
         }.find()
     }
 
@@ -81,6 +93,13 @@ class ListViewsFactory(private val context: Context, intent: Intent)
     override fun getViewAt(position: Int): RemoteViews {
         val item = items[position]
         val rv = RemoteViews(context.packageName, R.layout.list_app_widget_item)
+
+        if (displayParentText) {
+            val visibility = if (item.spannableParent.isNotBlank())
+                View.VISIBLE else View.GONE
+            rv.setViewVisibility(R.id.itemParent, visibility)
+            rv.setTextViewText(R.id.itemText, item.spannableParent)
+        }
 
         rv.setTextViewText(R.id.itemText, item.spannableText)
 

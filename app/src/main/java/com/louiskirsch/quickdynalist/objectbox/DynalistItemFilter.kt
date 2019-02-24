@@ -145,7 +145,7 @@ class DynalistItemFilter: Parcelable {
     private fun QueryBuilder<DynalistItem>.applyBasicConditions() {
         notEqual(DynalistItem_.name, "")
         equal(DynalistItem_.hidden, false)
-        eager(DynalistItem_.children)
+        eager(DynalistItem_.children, DynalistItem_.parent)
     }
 
     private fun createFilters(): MutableList<(DynalistItem) -> Boolean> {

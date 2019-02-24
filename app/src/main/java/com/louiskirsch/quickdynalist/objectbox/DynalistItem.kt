@@ -119,7 +119,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         }
     }
 
-    private fun parseText(text: String, context: Context): Spannable {
+    private fun parseText(text: String, context: Context): SpannableStringBuilder {
         val spannable = SpannableStringBuilder(text).linkify()
         val dateFormat = DateFormat.getDateFormat(context)
         val timeFormat = DateFormat.getTimeFormat(context)

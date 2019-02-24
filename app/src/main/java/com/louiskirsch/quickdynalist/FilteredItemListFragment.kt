@@ -20,7 +20,6 @@ import org.jetbrains.anko.*
 import android.util.Pair as UtilPair
 
 class FilteredItemListFragment : BaseItemListFragment() {
-
     private lateinit var filter: DynalistItemFilter
     private var saved: Boolean = false
 
@@ -111,6 +110,7 @@ class FilteredItemListFragment : BaseItemListFragment() {
 
     override val showAsChecklist: Boolean get() = filter.showAsChecklist
     override val enableDragging: Boolean get() = false
+    override val showItemParentText: Boolean get() = true
 
     override val itemsLiveData: LiveData<List<CachedDynalistItem>> get() {
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)

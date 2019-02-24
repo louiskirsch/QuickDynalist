@@ -21,7 +21,6 @@ import org.jetbrains.anko.*
 import android.util.Pair as UtilPair
 
 class ItemListFragment : BaseItemListFragment() {
-
     private lateinit var location: DynalistItem
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,8 +131,8 @@ class ItemListFragment : BaseItemListFragment() {
         }
     }
 
-    override val showAsChecklist: Boolean
-        get() = location.isChecklist
+    override val showAsChecklist: Boolean get() = location.isChecklist
+    override val showItemParentText: Boolean get() = false
     override val enableDragging: Boolean get() = true
 
     override val itemsLiveData: LiveData<List<CachedDynalistItem>> get() {

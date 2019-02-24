@@ -3,6 +3,7 @@ package com.louiskirsch.quickdynalist.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
+import android.text.Spannable
 import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -27,6 +28,7 @@ import java.util.*
 
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemCheckedStatus = itemView.itemCheckedStatus!!
+    val itemParent = itemView.itemParent!!
     val itemText = itemView.itemText!!
     val itemNotes = itemView.itemNotes!!
     val itemChildren = itemView.itemChildren!!
@@ -47,12 +49,15 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
 
 class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChildren: Int) {
-    val spannableText by lazy {
+    val spannableParent by lazy {
+        item.parent.target?.getSpannableText(context)?.append(" >") ?: ""
+    }
+    val spannableText: Spannable by lazy {
         item.getSpannableText(context).run {
             if (isBlank() && item.image != null)
                 SpannableString(context.getString(R.string.placeholder_image))
             else
-                this
+                this as Spannable
         }
     }
     val spannableNotes by lazy { item.getSpannableNotes(context) }
@@ -60,7 +65,9 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
 
     private val identifier = hashKode(item.lastModified, item.children.map { it.lastModified })
 
-    fun eagerInitialize() {
+    fun eagerInitialize(includeParent: Boolean = false) {
+        if (includeParent)
+            spannableParent
         spannableText
         spannableNotes
         spannableChildren
@@ -74,8 +81,8 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
     override fun hashCode() = hashKode(identifier, item)
 }
 
-class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView.ViewHolder>(),
-        ItemTouchCallback.ItemTouchHelperContract {
+class ItemListAdapter(showChecklist: Boolean, private val displayParentText: Boolean)
+    : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchCallback.ItemTouchHelperContract {
 
     private val items = ArrayList<CachedDynalistItem>()
     private val idToItem = HashMap<Long, CachedDynalistItem>()
@@ -234,6 +241,12 @@ class ItemListAdapter(showChecklist: Boolean): RecyclerView.Adapter<RecyclerView
             setOnCheckedChangeListener { _, isChecked ->
                 onCheckedStatusChangedListener?.invoke(idToItem[clientId]!!.item, isChecked)
             }
+        }
+
+        if (displayParentText) {
+            holder.itemParent.visibility = if (item.spannableParent.isNotBlank())
+                View.VISIBLE else View.GONE
+            holder.itemParent.text = item.spannableParent
         }
 
         holder.itemText.text = item.spannableText
