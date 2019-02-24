@@ -47,7 +47,7 @@ class DynalistTag(): Serializable {
             '@' -> Type.AT_TAG
             else -> throw InvalidTagException()
         }
-        name = fromString.substring(1)
+        name = fromString.substring(1).toLowerCase()
     }
 
     companion object {
@@ -55,7 +55,8 @@ class DynalistTag(): Serializable {
         private val cache by lazy { box.all.associateBy { it.fullName }.toMutableMap() }
 
         fun find(fromString: String): DynalistTag
-                = cache[fromString] ?: find(DynalistTag(fromString))
+                = cache[fromString.toLowerCase()] ?: find(DynalistTag(fromString))
+
         private fun find(tag: DynalistTag): DynalistTag {
             var foundTag: DynalistTag? = null
             DynalistApp.instance.boxStore.runInTx {
@@ -67,6 +68,15 @@ class DynalistTag(): Serializable {
             }
             cache[foundTag!!.fullName] = foundTag
             return foundTag!!
+        }
+
+        fun detectTags(text: String): String {
+            val words = text.toLowerCase().split(' ')
+            return words.fold(text) { acc, word ->
+                val tag = cache["#$word"] ?: cache["@$word"]
+                tag?.let { acc.replace(word, it.fullName) }
+                        ?: acc
+            }
         }
     }
 }

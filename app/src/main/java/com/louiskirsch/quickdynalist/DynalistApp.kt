@@ -7,6 +7,7 @@ import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService.*
 import com.louiskirsch.quickdynalist.jobs.JobService
 import com.louiskirsch.quickdynalist.network.DynalistService
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistTag
 import com.louiskirsch.quickdynalist.objectbox.MyObjectBox
 import com.squareup.picasso.Picasso
 import io.objectbox.Box
@@ -81,7 +82,7 @@ class DynalistApp : Application() {
             }
         }
         if (version < 16) {
-            val box: Box<DynalistItem> = boxStore.boxFor()
+            val box = DynalistItem.box
             boxStore.runInTxAsync({
                 box.put(box.all.apply { forEach {
                     it.hidden = false
@@ -91,15 +92,22 @@ class DynalistApp : Application() {
             }, null)
         }
         if (version < 21) {
-            val box: Box<DynalistItem> = boxStore.boxFor()
+            val box = DynalistItem.box
             boxStore.runInTxAsync({
                 val now = Date().time
                 box.put(box.all.apply { forEach { it.notifyModified(now) } })
             }, null)
         } else if (version < 22) {
-            val box: Box<DynalistItem> = boxStore.boxFor()
+            val box = DynalistItem.box
             boxStore.runInTxAsync({
                 box.put(box.all.apply { forEach { it.updateMetaData() } })
+            }, null)
+        }
+        if (version < 27) {
+            val itemBox = DynalistItem.box
+            boxStore.runInTxAsync({
+                DynalistTag.box.removeAll()
+                itemBox.put(itemBox.all.apply { forEach { it.updateMetaData() } })
             }, null)
         }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE

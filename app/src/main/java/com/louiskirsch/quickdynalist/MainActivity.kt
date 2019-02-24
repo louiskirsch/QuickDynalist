@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistTag
 import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
@@ -121,11 +122,17 @@ class MainActivity : AppCompatActivity() {
         setupItemContentsTextField()
 
         submitButton.setOnClickListener {
-            dynalist.addItem(itemContents!!.text.toString(), location!!)
+            val text = itemContents!!.text.toString().let {
+                if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
+            }
+            dynalist.addItem(text, location!!)
             itemContents.text.clear()
         }
         submitCloseButton.setOnClickListener {
-            dynalist.addItem(itemContents.text.toString(), location!!)
+            val text = itemContents!!.text.toString().let {
+                if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
+            }
+            dynalist.addItem(text, location!!)
             finish()
         }
     }

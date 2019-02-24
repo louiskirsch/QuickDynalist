@@ -32,6 +32,7 @@ import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
+import com.louiskirsch.quickdynalist.objectbox.DynalistTag
 import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
@@ -337,7 +338,9 @@ abstract class BaseItemListFragment : Fragment() {
             itemContents.setSelection(itemContents.text.length)
 
         submitButton.setOnClickListener {
-            val text = itemContents.text.toString()
+            val text = itemContents.text.toString().let {
+                if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
+            }
             if (editingItem == null) {
                 dynalist.addItem(text, addItemLocation!!)
             } else if (editingItem!!.name != text) {

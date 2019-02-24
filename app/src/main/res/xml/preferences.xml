@@ -14,6 +14,16 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:key="edit_category" app:title="@string/pref_category_edit">
+
+        <SwitchPreference
+            app:defaultValue="true"
+            app:key="edit_detect_tags"
+            app:summary="@string/pref_description_edit_detect_tags"
+            app:title="@string/pref_title_edit_detect_tags" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:key="sync_category" app:title="@string/pref_category_sync">
 
         <SwitchPreference

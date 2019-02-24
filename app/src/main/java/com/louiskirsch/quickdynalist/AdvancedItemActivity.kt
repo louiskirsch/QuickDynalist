@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistTag
 import com.louiskirsch.quickdynalist.utils.actionBarView
 import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
 import kotlinx.android.synthetic.main.activity_advanced_item.*
@@ -215,8 +216,12 @@ class AdvancedItemActivity : AppCompatActivity() {
         } else {
             ""
         }
-        val contents = itemContents.text.toString() + dateString
-        val note = itemNotes.text.toString()
+        val contents = (itemContents.text.toString() + dateString).let {
+            if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
+        }
+        val note = itemNotes.text.toString().let {
+            if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
+        }
 
         if (editingItem == null) {
             val targetLocation = if (itemLocation.visibility == View.VISIBLE)

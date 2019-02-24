@@ -106,6 +106,7 @@
     <string name="dialog_message_image_setting">In order for Quick Dynalist to show your images you need to enable \'Allow others to access via link\' in your Dynalist upload settings.</string>
     <string name="pref_category_sync">Sync</string>
     <string name="pref_category_display">Display</string>
+    <string name="pref_category_edit">Edit</string>
     <string name="pref_description_sync_automatic">Trigger sync automatically whenever Quick Dynalist is opened. Recommended.</string>
     <string name="pref_title_sync_automatic">Auto sync</string>
     <string name="pref_title_sync_frequency">Sync interval in minutes</string>
@@ -113,6 +114,8 @@
     <string name="pref_description_display_children_count">Items are shown with the first %1$s children.</string>
     <string name="pref_description_display_children_count_none">Items are shown without a preview of their children.</string>
     <string name="pref_description_display_children_count_all">Items are shown with all their children as a preview.</string>
+    <string name="pref_title_edit_detect_tags">Detect tags in text</string>
+    <string name="pref_description_edit_detect_tags">Automatically search item text and detect tags.</string>
     <string name="action_duplicate">Duplicate</string>
     <string name="action_move_to_inbox">Move to an inbox</string>
     <string name="action_move_to">Move to …</string>

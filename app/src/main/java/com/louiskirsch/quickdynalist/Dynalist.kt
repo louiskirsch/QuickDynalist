@@ -39,6 +39,9 @@ class Dynalist(private val context: Context) {
    val displayChildrenCount
         get() = settings.getString("display_children_count", "5")!!.toInt()
 
+    val shouldDetectTags
+        get() = settings.getBoolean("edit_detect_tags", true)
+
     var token: String?
         get() = preferences.getString("TOKEN", "NONE")
         set(newToken) = preferences.edit().putString("TOKEN", newToken).apply()
