@@ -6,6 +6,7 @@ import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import com.louiskirsch.quickdynalist.Dynalist
 import com.louiskirsch.quickdynalist.DynalistApp
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
@@ -48,9 +49,10 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             DynalistItemFilter.LOCATION_TYPE -> getDynalistFilterItems(locationId)
             else -> throw Exception("Invalid location")
         }
+        val maxChildren = Dynalist(context).displayChildrenCount
         val newItems = queryResult.map { item ->
             item.children.sortBy { child -> child.position }
-            CachedDynalistItem(item, context).apply { eagerInitialize() }
+            CachedDynalistItem(item, context, maxChildren).apply { eagerInitialize() }
         }
         items.clear()
         items.addAll(newItems)

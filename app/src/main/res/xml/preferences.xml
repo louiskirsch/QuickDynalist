@@ -2,6 +2,18 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <PreferenceCategory app:key="display_category" app:title="@string/pref_category_display">
+
+        <ListPreference
+            app:defaultValue="5"
+            app:entries="@array/pref_entries_display_children_count"
+            app:entryValues="@array/pref_values_display_children_count"
+            app:key="display_children_count"
+            app:summary="@string/pref_description_display_children_count"
+            app:title="@string/pref_title_display_children_count" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:key="sync_category" app:title="@string/pref_category_sync">
 
         <SwitchPreference
@@ -11,6 +23,15 @@
             app:disableDependentsState="false"
             app:title="@string/pref_title_sync_automatic" />
 
+        <SeekBarPreference
+            app:defaultValue="5"
+            android:min="1"
+            android:max="30"
+            app:showSeekBarValue="true"
+            app:key="sync_frequency"
+            app:dependency="sync_automatic"
+            app:title="@string/pref_title_sync_frequency" />
+
         <SwitchPreference
             app:defaultValue="false"
             app:key="sync_mobile_data"
@@ -19,6 +40,5 @@
             app:title="@string/pref_title_sync_mobile_data" />
 
     </PreferenceCategory>
-
 
 </androidx.preference.PreferenceScreen>

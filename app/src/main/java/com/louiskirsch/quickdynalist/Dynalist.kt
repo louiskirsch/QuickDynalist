@@ -30,6 +30,15 @@ class Dynalist(private val context: Context) {
     private val preferences: SharedPreferences
         get() = context.getSharedPreferences("PREFERENCES", Context.MODE_PRIVATE)
 
+    private val settings: SharedPreferences
+        get() = PreferenceManager.getDefaultSharedPreferences(context)
+
+    private val syncFrequency
+        get() = settings.getInt("sync_frequency", 5)
+
+   val displayChildrenCount
+        get() = settings.getString("display_children_count", "5")!!.toInt()
+
     var token: String?
         get() = preferences.getString("TOKEN", "NONE")
         set(newToken) = preferences.edit().putString("TOKEN", newToken).apply()
@@ -64,8 +73,8 @@ class Dynalist(private val context: Context) {
     fun subscribe() {
         EventBus.getDefault().register(this)
 
-        val bookmarksOutdated = lastFullSync.time < Date().time - 5 * 60 * 1000L
-        if (isAuthenticated && bookmarksOutdated) {
+        val syncRequired = lastFullSync.time < Date().time - syncFrequency * 60 * 1000L
+        if (isAuthenticated && syncRequired) {
             sync()
         }
     }
@@ -139,7 +148,6 @@ class Dynalist(private val context: Context) {
     }
 
     fun sync(isManual: Boolean = false) {
-        val settings = PreferenceManager.getDefaultSharedPreferences(context)
         if (!settings.getBoolean("sync_automatic", true))
             return
         if (!isManual && !settings.contains("sync_mobile_data")) {

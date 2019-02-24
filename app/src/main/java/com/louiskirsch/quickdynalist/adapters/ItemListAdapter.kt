@@ -46,7 +46,7 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
 class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
 
-class CachedDynalistItem(val item: DynalistItem, context: Context) {
+class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChildren: Int) {
     val spannableText by lazy {
         item.getSpannableText(context).run {
             if (isBlank() && item.image != null)
@@ -56,7 +56,7 @@ class CachedDynalistItem(val item: DynalistItem, context: Context) {
         }
     }
     val spannableNotes by lazy { item.getSpannableNotes(context) }
-    val spannableChildren by lazy { item.getSpannableChildren(context, 5) }
+    val spannableChildren by lazy { item.getSpannableChildren(context, displayMaxChildren) }
 
     private val identifier = hashKode(item.lastModified, item.children.map { it.lastModified })
 
