@@ -105,7 +105,6 @@ class DynalistApp : Application() {
             }, null)
         }
         if (version < 27) {
-            // TODO still needs to be tested
             val itemBox = DynalistItem.box
             val filterBox = DynalistItemFilter.box
             val tagBox = DynalistTag.box
