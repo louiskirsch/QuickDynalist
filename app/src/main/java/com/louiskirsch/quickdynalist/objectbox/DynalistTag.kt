@@ -57,6 +57,8 @@ class DynalistTag(): Serializable {
         fun find(fromString: String): DynalistTag
                 = cache[fromString.toLowerCase()] ?: find(DynalistTag(fromString))
 
+        fun clearCache() = cache.clear()
+
         private fun find(tag: DynalistTag): DynalistTag {
             var foundTag: DynalistTag? = null
             DynalistApp.instance.boxStore.runInTx {

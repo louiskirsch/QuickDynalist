@@ -7,6 +7,7 @@ import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService.*
 import com.louiskirsch.quickdynalist.jobs.JobService
 import com.louiskirsch.quickdynalist.network.DynalistService
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 import com.louiskirsch.quickdynalist.objectbox.DynalistTag
 import com.louiskirsch.quickdynalist.objectbox.MyObjectBox
 import com.squareup.picasso.Picasso
@@ -104,10 +105,21 @@ class DynalistApp : Application() {
             }, null)
         }
         if (version < 27) {
+            // TODO still needs to be tested
             val itemBox = DynalistItem.box
+            val filterBox = DynalistItemFilter.box
+            val tagBox = DynalistTag.box
             boxStore.runInTxAsync({
-                DynalistTag.box.removeAll()
+                val filters = filterBox.all
+                val tags = filters.map { filter -> filter.tags.map { it.fullName } }
+                tagBox.removeAll()
+                DynalistTag.clearCache()
                 itemBox.put(itemBox.all.apply { forEach { it.updateMetaData() } })
+                filters.zip(tags).forEach { (filter, filterTags) ->
+                    filter.tags.clear()
+                    filter.tags.addAll(filterTags.map { DynalistTag.find(it) })
+                }
+                filterBox.put(filters)
             }, null)
         }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE
