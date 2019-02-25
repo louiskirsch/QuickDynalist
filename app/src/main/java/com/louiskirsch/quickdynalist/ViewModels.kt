@@ -61,6 +61,8 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         val maxChildren = Dynalist(getApplication()).displayChildrenCount
         items.forEach { item -> item.children.sortBy { child -> child.position } }
         return items.map { CachedDynalistItem(it, getApplication(), maxChildren) }.apply {
+            // The first few visible items should be eagerly initialized
+            take(50).forEach { it.eagerInitialize(includeParent) }
             doAsync { forEach { it.eagerInitialize(includeParent) } }
         }
     }
