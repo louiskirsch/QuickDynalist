@@ -226,7 +226,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
     val tags: List<String> get() {
         return listOf(name, note).flatMap {
-            tagRegex.findAll(it).map { m -> m.groupValues[2] } .toList()
+            tagRegex.findAll(it).map { m -> m.groupValues[2].toLowerCase() } .toList()
         }
     }
 
