@@ -76,13 +76,12 @@ class DynalistApp : Application() {
         if (version < 12) {
             doAsync {
                 jobManager.clear()
-                val box: Box<DynalistItem> = boxStore.boxFor()
-                box.put(DynalistItem.newInbox())
+                DynalistItem.box.put(DynalistItem.newInbox().apply { notifyModified() })
                 if (dynalist.isAuthenticated)
                     dynalist.sync()
             }
         }
-        if (version < 16) {
+        if (version in 2..15) {
             val box = DynalistItem.box
             boxStore.runInTxAsync({
                 box.put(box.all.apply { forEach {
@@ -92,19 +91,19 @@ class DynalistApp : Application() {
                 } })
             }, null)
         }
-        if (version < 21) {
+        if (version in 2..20) {
             val box = DynalistItem.box
             boxStore.runInTxAsync({
                 val now = Date().time
                 box.put(box.all.apply { forEach { it.notifyModified(now) } })
             }, null)
-        } else if (version < 22) {
+        } else if (version == 21) {
             val box = DynalistItem.box
             boxStore.runInTxAsync({
                 box.put(box.all.apply { forEach { it.updateMetaData() } })
             }, null)
         }
-        if (version < 27) {
+        if (version in 2..26) {
             val itemBox = DynalistItem.box
             val filterBox = DynalistItemFilter.box
             val tagBox = DynalistTag.box
