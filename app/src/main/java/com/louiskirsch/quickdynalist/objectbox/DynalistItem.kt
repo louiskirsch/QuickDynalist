@@ -8,6 +8,7 @@ import android.os.Parcelable
 import android.text.*
 import android.text.format.DateFormat
 import android.text.style.*
+import android.util.Log
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.utils.*
@@ -18,6 +19,7 @@ import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 import java.io.Serializable
 import java.lang.Exception
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -255,7 +257,10 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
     var date: Date?
         get() = dateTimeRegex.find(name)?.groupValues?.get(1)?.let { date ->
-            dateReader.parse(date)
+            try { dateReader.parse(date) } catch(e: ParseException) {
+                Log.w("DynalistItem", "Could not parse date", e)
+                null
+            }
         }
         set(value) {
             val stripped = name.replace(dateTimeRegex, "").trim()
