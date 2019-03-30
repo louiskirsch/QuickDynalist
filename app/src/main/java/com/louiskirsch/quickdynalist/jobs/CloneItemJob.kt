@@ -3,7 +3,6 @@ package com.louiskirsch.quickdynalist.jobs
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.*
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
-import com.louiskirsch.quickdynalist.objectbox.DynalistItemMetaData
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
@@ -37,8 +36,7 @@ class CloneItemJob(val item: DynalistItem): ItemJob() {
             isChecked = false
             children.clear()
             children.addAll(newChildren)
-            metaData.targetId = 0
-            notifyModified(time.time)
+            notifyModified(time)
         }
         return item
     }

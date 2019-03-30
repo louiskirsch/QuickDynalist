@@ -17,7 +17,6 @@ class EditItemJob(val item: DynalistItem): ItemJob() {
         box.attach(item)
         item.notifyModified()
         box.put(item)
-        metaBox.put(item.metaData.target)
         ListAppWidget.notifyItemChanged(applicationContext, item)
     }
 
@@ -26,7 +25,7 @@ class EditItemJob(val item: DynalistItem): ItemJob() {
         requireItemId(item)
         val token = Dynalist(applicationContext).token
         val request = EditItemRequest(item.serverFileId!!, item.serverItemId!!, item.name,
-                item.note, item.isChecked, token!!)
+                item.note, item.isChecked, item.isChecklist, item.heading, item.color, token!!)
         val response = dynalistService.editItem(request).execute()
         val body = response.body()!!
         requireSuccess(body)

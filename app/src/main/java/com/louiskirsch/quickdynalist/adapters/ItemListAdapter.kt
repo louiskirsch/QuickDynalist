@@ -9,21 +9,59 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
+import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.ImageCache
+import com.louiskirsch.quickdynalist.utils.children
+import com.louiskirsch.quickdynalist.utils.helper
 import com.louiskirsch.quickdynalist.utils.isEllipsized
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_list_item.view.*
+import kotlinx.android.synthetic.main.menu_color_picker.view.*
 import nl.pvdberg.hashkode.compareFields
 import nl.pvdberg.hashkode.hashKode
 import java.lang.Exception
 import java.util.*
+
+
+class DynalistItemPopupMenu(context: Context, anchor: View, isImage: Boolean) {
+    val popup = PopupMenu(context, anchor)
+    private val colorPicker: ViewGroup = LayoutInflater.from(context)
+            .inflate(R.layout.menu_color_picker, null) as ViewGroup
+    private val colorList: ViewGroup = colorPicker.colorList
+
+    init {
+        popup.inflate(R.menu.item_list_popup_menu)
+        if (isImage)
+            popup.inflate(R.menu.item_list_popup_image_extension)
+        anchor.setOnClickListener {
+            popup.show()
+            addColorPicker()
+        }
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun addColorPicker() {
+        popup.helper?.listView?.apply{
+            addHeaderView(colorPicker)
+        }
+    }
+
+    fun notifyColorPick(callback: (Int) -> Unit) {
+        colorList.children.map { it as Button }.forEachIndexed { idx, btn ->
+            btn.setOnClickListener {
+                callback(idx)
+                popup.dismiss()
+            }
+        }
+    }
+}
 
 
 class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -34,16 +72,10 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     val itemChildren = itemView.itemChildren!!
     val itemImage = itemView.itemImage!!
     val itemMenu = itemView.itemMenu!!
-    val menuPopup = PopupMenu(itemMenu.context, itemMenu).apply {
-        inflate(R.menu.item_list_popup_menu)
-        itemMenu.setOnClickListener { show() }
-    }
-    val imagePopup = PopupMenu(itemImage.context, itemImage).apply {
-        inflate(R.menu.item_list_popup_menu)
-        inflate(R.menu.item_list_popup_image_extension)
-        itemImage.setOnClickListener { show() }
-    }
-    val popupMenus = listOf(menuPopup.menu, imagePopup.menu)
+
+    val menuPopup = DynalistItemPopupMenu(itemMenu.context, itemMenu, false)
+    val imagePopup = DynalistItemPopupMenu(itemImage.context, itemImage, true)
+    val popupMenus = listOf(menuPopup.popup.menu, imagePopup.popup.menu)
 }
 
 class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
@@ -81,11 +113,13 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
     override fun hashCode() = hashKode(identifier, item)
 }
 
-class ItemListAdapter(showChecklist: Boolean, private val displayParentText: Boolean)
+class ItemListAdapter(context: Context, showChecklist: Boolean,
+                      private val displayParentText: Boolean)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemTouchCallback.ItemTouchHelperContract {
 
     private val items = ArrayList<CachedDynalistItem>()
     private val idToItem = HashMap<Long, CachedDynalistItem>()
+    private val itemColors = context.resources.getIntArray(R.array.itemColors)
 
     var moveInProgress: Boolean = false
         private set
@@ -99,6 +133,7 @@ class ItemListAdapter(showChecklist: Boolean, private val displayParentText: Boo
     var onRowSwipedListener: ((DynalistItem, Int) -> Boolean)? = null
     var onCheckedStatusChangedListener: ((DynalistItem, Boolean) -> Unit)? = null
     var onMoveStartListener: (() -> Unit)? = null
+    var onColorSelected: ((DynalistItem, Int) -> Unit)? = null
 
     var selectedItem: DynalistItem? = null
         set(value) {
@@ -258,15 +293,26 @@ class ItemListAdapter(showChecklist: Boolean, private val displayParentText: Boo
         holder.itemView.isActivated = selectedItem == item.item
         holder.itemView.isPressed = highlightedPosition == position
 
+        val color = item.item.color
+        if (color > 0)
+            holder.itemView.background.setTint(itemColors[color])
+        else
+            holder.itemView.background.setTintList(null)
+
         val popupListener = { menuItem: MenuItem ->
             onPopupItemClickListener?.invoke(idToItem[clientId]!!.item, menuItem) ?: false
         }
-        holder.menuPopup.setOnMenuItemClickListener(popupListener)
-        holder.imagePopup.setOnMenuItemClickListener(popupListener)
+        val colorPickListener = { color: Int ->
+            onColorSelected?.invoke(idToItem[clientId]!!.item, color) ?: Unit
+        }
+        holder.menuPopup.popup.setOnMenuItemClickListener(popupListener)
+        holder.imagePopup.popup.setOnMenuItemClickListener(popupListener)
+        holder.menuPopup.notifyColorPick(colorPickListener)
+        holder.imagePopup.notifyColorPick(colorPickListener)
         holder.itemMenu.visibility = View.VISIBLE
         holder.itemImage.visibility = View.GONE
         holder.itemNotes.isEllipsized {
-            holder.menuPopup.menu.findItem(R.id.action_show_details).isVisible = it
+            holder.menuPopup.popup.menu.findItem(R.id.action_show_details).isVisible = it
         }
         holder.popupMenus.forEach {
             it.findItem(R.id.action_change_date_remove).isVisible = item.item.date != null
@@ -284,7 +330,8 @@ class ItemListAdapter(showChecklist: Boolean, private val displayParentText: Boo
                         holder.itemMenu.visibility = View.GONE
                         holder.itemImage.visibility = View.VISIBLE
                         holder.itemNotes.isEllipsized {
-                            holder.imagePopup.menu.findItem(R.id.action_show_details).isVisible = it
+                            holder.imagePopup.popup.menu.
+                                    findItem(R.id.action_show_details).isVisible = it
                         }
                     }
                 })

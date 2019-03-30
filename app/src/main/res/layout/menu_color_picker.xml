@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:scrollbars="none">
+    <LinearLayout
+        android:id="@+id/colorList"
+        android:orientation="horizontal" android:layout_width="wrap_content"
+        android:padding="6dp" android:layout_height="wrap_content">
+
+        <Button
+            android:layout_margin="2dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/item_color_picker" />
+
+        <Button
+            android:layout_margin="2dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:backgroundTint="@color/itemColor1"
+            android:backgroundTintMode="multiply"
+            android:background="@drawable/item_color_picker" />
+
+        <Button
+            android:layout_margin="2dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:backgroundTint="@color/itemColor2"
+            android:backgroundTintMode="multiply"
+            android:background="@drawable/item_color_picker" />
+
+        <Button
+            android:layout_margin="2dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:backgroundTint="@color/itemColor3"
+            android:backgroundTintMode="multiply"
+            android:background="@drawable/item_color_picker" />
+
+        <Button
+            android:layout_margin="2dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:backgroundTint="@color/itemColor4"
+            android:backgroundTintMode="multiply"
+            android:background="@drawable/item_color_picker" />
+
+        <Button
+            android:layout_margin="2dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:backgroundTint="@color/itemColor5"
+            android:backgroundTintMode="multiply"
+            android:background="@drawable/item_color_picker" />
+
+        <Button
+            android:layout_margin="2dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:backgroundTint="@color/itemColor6"
+            android:backgroundTintMode="multiply"
+            android:background="@drawable/item_color_picker" />
+
+    </LinearLayout>
+</HorizontalScrollView>

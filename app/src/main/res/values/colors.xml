@@ -13,4 +13,20 @@
 
     <color name="deleteColor">#F44336</color>
     <color name="editColor">#4CAF50</color>
+
+    <color name="itemColor1">#f9d0c4</color>
+    <color name="itemColor2">#fed8b1</color>
+    <color name="itemColor3">#fef2c0</color>
+    <color name="itemColor4">#c8e3c0</color>
+    <color name="itemColor5">#c5def5</color>
+    <color name="itemColor6">#d4c5f9</color>
+    <array name="itemColors">
+        <item>@null</item>
+        <item>@color/itemColor1</item>
+        <item>@color/itemColor2</item>
+        <item>@color/itemColor3</item>
+        <item>@color/itemColor4</item>
+        <item>@color/itemColor5</item>
+        <item>@color/itemColor6</item>
+    </array>
 </resources>

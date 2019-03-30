@@ -38,24 +38,34 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var hidden: Boolean = false
     var isChecklist: Boolean = false
     var areCheckedItemsVisible: Boolean = false
-    var lastModified: Long = Date().time
-        private set
+    var lastModified: Date = Date()
+    var created: Date = Date()
+    var color: Int = 0
+    var heading: Int = 0
 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
     lateinit var parent: ToOne<DynalistItem>
-    lateinit var metaData: ToOne<DynalistItemMetaData>
 
-    fun notifyModified(time: Long = Date().time) {
+    // MetaData
+    var metaDate: Date? = null
+    var metaImage: String? = null
+    var metaSymbol: String? = null
+    lateinit var metaTags: ToMany<DynalistTag>
+    lateinit var metaLinkedItem: ToOne<DynalistItem>
+
+    fun notifyModified(time: Date = Date()) {
         lastModified = time
         updateMetaData()
     }
 
     fun updateMetaData() {
-        if (metaData.targetId > 0)
-            metaData.target.update(this)
-        else
-            metaData.target = DynalistItemMetaData(this)
+        metaDate = date
+        metaImage = image
+        metaSymbol = symbol
+        metaTags.clear()
+        metaTags.addAll(tags.map { DynalistTag.find(it) })
+        metaLinkedItem.target = linkedItem
     }
 
     fun hasParent(parentId: Long, maxDepth: Int = 1): Boolean {
@@ -90,10 +100,13 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         val children = children.filter { !it.isChecked && !it.hidden }.let {
             if (maxItems == -1) it else it.take(maxItems)
         }
+        val colors = context.resources.getIntArray(R.array.itemColors)
         children.mapIndexed { idx, child ->
             child.getSpannableText(context).run {
                 if (isNotBlank()) {
                     setSpan(BulletSpan(15), 0, length, 0)
+                    if (child.color > 0)
+                        setSpan(BackgroundColorSpan(colors[child.color]), 0, length, 0)
                     sb.append(this)
                     if (idx < children.size - 1) sb.append("\n")
                 }
@@ -363,7 +376,6 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         }
 
         fun updateLocally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
-            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
             DynalistApp.instance.boxStore.runInTx {
                 box.get(item.clientId)?.apply {
                     updater(this)
@@ -373,7 +385,6 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         }
 
         fun updateGlobally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
-            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
             box.get(item.clientId)?.apply {
                 updater(this)
                 DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(this))

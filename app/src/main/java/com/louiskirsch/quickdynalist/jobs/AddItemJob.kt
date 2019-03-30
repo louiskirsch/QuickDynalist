@@ -21,7 +21,6 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
                 newItem.parent.target = parent
                 newItem.notifyModified()
                 box.put(newItem)
-                metaBox.put(newItem.metaData.target)
             }
         }
         ListAppWidget.notifyItemChanged(applicationContext, newItem)

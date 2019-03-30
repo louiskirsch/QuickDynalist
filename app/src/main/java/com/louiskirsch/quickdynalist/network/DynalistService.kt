@@ -50,14 +50,15 @@ class BulkInsertItemRequest(val file_id: String, val token: String,
                             val changes: Array<InsertItemRequest.InsertSpec>)
 
 class EditItemRequest(val file_id: String, node_id: String,
-                      content: String, note: String, checked: Boolean, val token: String) {
+                      content: String, note: String, checked: Boolean, checkbox: Boolean,
+                      heading: Int, color: Int, val token: String) {
 
-    class EditSpec(val node_id: String, val content: String,
-                   val note: String, val checked: Boolean) {
+    class EditSpec(val node_id: String, val content: String, val note: String,
+                   val checked: Boolean, val checkbox: Boolean, val heading: Int, val color: Int) {
         val action: String = "edit"
     }
 
-    val changes = arrayOf(EditSpec(node_id, content, note, checked))
+    val changes = arrayOf(EditSpec(node_id, content, note, checked, checkbox, heading, color))
 }
 
 class MoveItemRequest(val file_id: String, parent_id: String, node_id: String,
@@ -128,7 +129,9 @@ class FilesResponse: DynalistResponse() {
 }
 
 class Node(val id: String, val content: String, val note: String, val checked: Boolean,
-           val collapsed: Boolean, val parent: String?, val children: List<String>?)
+           val checkbox: Boolean, val color: Int, val heading: Int, val created: Long,
+           val modified: Long, val collapsed: Boolean,
+           val parent: String?, val children: List<String>?)
 
 class DocumentResponse: DynalistResponse() {
     val nodes: List<Node>? = null

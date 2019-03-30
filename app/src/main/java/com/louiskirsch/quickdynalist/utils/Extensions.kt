@@ -22,6 +22,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import kotlin.math.roundToInt
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import androidx.appcompat.view.menu.MenuPopupHelper
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.network.DynalistResponse
@@ -179,4 +181,13 @@ fun Parcel.writeNullableBoolean(value: Boolean?) {
 fun Parcel.readNullableBoolean(): Boolean? {
     val isNull = readInt() > 0
     return if (!isNull) readInt() > 0 else null
+}
+
+val PopupMenu.helper: MenuPopupHelper? get() {
+    return try {
+        javaClass.getDeclaredField("mPopup").let {
+            it.isAccessible = true
+            it.get(this) as MenuPopupHelper
+        }
+    } catch (e: Exception) { null }
 }

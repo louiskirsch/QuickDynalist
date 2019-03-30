@@ -94,7 +94,7 @@ class DynalistApp : Application() {
         if (version in 2..20) {
             val box = DynalistItem.box
             boxStore.runInTxAsync({
-                val now = Date().time
+                val now = Date()
                 box.put(box.all.apply { forEach { it.notifyModified(now) } })
             }, null)
         } else if (version == 21) {

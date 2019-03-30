@@ -92,7 +92,7 @@ abstract class BaseItemListFragment : Fragment() {
         dynalist = Dynalist(context!!)
         setHasOptionsMenu(true)
 
-        adapter = ItemListAdapter(showAsChecklist, showItemParentText).apply {
+        adapter = ItemListAdapter(context!!, showAsChecklist, showItemParentText).apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (itemCount == 1 && !adapter.moveInProgress)
@@ -113,7 +113,7 @@ abstract class BaseItemListFragment : Fragment() {
                     DynalistItem.updateGlobally(item) { it.date = Date() }
                 }
                 R.id.action_add_date_mod -> {
-                    DynalistItem.updateGlobally(item) { it.date = Date(it.lastModified) }
+                    DynalistItem.updateGlobally(item) { it.date = it.lastModified }
                 }
                 R.id.action_add_date_choose -> chooseItemDate(item)
                 R.id.action_change_date_remove -> {
@@ -150,6 +150,9 @@ abstract class BaseItemListFragment : Fragment() {
             DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(item))
         }
         adapter.onMoveStartListener = { editingItem = null }
+        adapter.onColorSelected = { item, color ->
+            DynalistItem.updateGlobally(item) { it.color = color }
+        }
 
         itemsLiveData.observe(this, Observer<List<CachedDynalistItem>> { newItems ->
             val initializing = adapter.itemCount == 0

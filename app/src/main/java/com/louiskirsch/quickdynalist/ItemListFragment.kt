@@ -156,7 +156,7 @@ class ItemListFragment : BaseItemListFragment() {
         menuItem.isChecked = checked
         adapter.showChecklist = checked
         location.isChecklist = checked
-        doAsync { DynalistItem.updateLocally(location) { it.isChecklist = checked }}
+        doAsync { DynalistItem.updateGlobally(location) { it.isChecklist = checked }}
         return true
     }
 

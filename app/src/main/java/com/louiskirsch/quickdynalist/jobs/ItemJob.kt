@@ -6,12 +6,10 @@ import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.network.DynalistResponse
 import com.louiskirsch.quickdynalist.network.DynalistService
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
-import com.louiskirsch.quickdynalist.objectbox.DynalistItemMetaData
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
-import okhttp3.internal.Util.equal
 import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.doAsync
 
@@ -19,9 +17,6 @@ abstract class ItemJob: Job(Params(1)
         .requireNetwork().persist().groupBy("itemJob")) {
 
     protected val box: Box<DynalistItem>
-        get() = DynalistApp.instance.boxStore.boxFor()
-
-    protected val metaBox: Box<DynalistItemMetaData>
         get() = DynalistApp.instance.boxStore.boxFor()
 
     protected val dynalistService: DynalistService
