@@ -74,13 +74,13 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                     isInbox = false
                     isBookmark = false
                     if (syncJob == null) {
-                        val hasChanged = it.modified > lastModified.time
+                        val hasChanged = it.modified > modified.time
                         isChecked = it.checked
                         position = 0
                         name = it.content
                         note = it.note
                         created = Date(it.created)
-                        lastModified = Date(it.modified)
+                        modified = Date(it.modified)
                         color = it.color
                         heading = it.heading
                         parent.target = null
@@ -93,7 +93,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                 } ?: DynalistItem(doc.id, it.parent, it.id, it.content, it.note,
                         it.children ?: emptyList(), isChecked = it.checked).apply {
                     created = Date(it.created)
-                    lastModified = Date(it.modified)
+                    modified = Date(it.modified)
                     color = it.color
                     heading = it.heading
                 }

@@ -125,7 +125,7 @@ class DynalistItemFilter: Parcelable {
                 order(DynalistItem_.position)
             }
             Order.MODIFIED_DATE -> {
-                order(DynalistItem_.lastModified)
+                order(DynalistItem_.modified)
             }
             else -> Unit
         }
@@ -137,7 +137,7 @@ class DynalistItemFilter: Parcelable {
                 items.sortedWith(compareBy({ it.parent.targetId }, { it.position }))
             sortOrder == Order.DATE -> items.sortedBy { it.date }
             sortOrder == Order.MODIFIED_DATE && logicMode == LogicMode.ANY ->
-                items.sortedBy { it.lastModified }
+                items.sortedBy { it.modified }
             else -> items
         }
     }
@@ -229,15 +229,15 @@ class DynalistItemFilter: Parcelable {
         val today = today.time
         if (minRelativeModifiedDate != null && maxRelativeModifiedDate != null) {
             startCondition(state)
-            between(DynalistItem_.lastModified,
+            between(DynalistItem_.modified,
                     today + minRelativeModifiedDate!! - 1,
                     today + maxRelativeModifiedDate!!)
         } else if (minRelativeModifiedDate != null) {
             startCondition(state)
-            greater(DynalistItem_.lastModified, today + minRelativeModifiedDate!! - 1)
+            greater(DynalistItem_.modified, today + minRelativeModifiedDate!! - 1)
         } else if (maxRelativeModifiedDate != null) {
             startCondition(state)
-            less(DynalistItem_.lastModified, today + maxRelativeModifiedDate!!)
+            less(DynalistItem_.modified, today + maxRelativeModifiedDate!!)
         }
     }
 

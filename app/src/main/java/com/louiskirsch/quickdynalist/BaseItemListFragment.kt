@@ -114,7 +114,7 @@ abstract class BaseItemListFragment : Fragment() {
                     DynalistItem.updateGlobally(item) { it.date = Date() }
                 }
                 R.id.action_add_date_mod -> {
-                    DynalistItem.updateGlobally(item) { it.date = it.lastModified }
+                    DynalistItem.updateGlobally(item) { it.date = it.modified }
                 }
                 R.id.action_add_date_choose -> chooseItemDate(item)
                 R.id.action_change_date_remove -> {

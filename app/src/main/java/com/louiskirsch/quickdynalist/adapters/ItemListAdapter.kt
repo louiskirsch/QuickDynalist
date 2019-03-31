@@ -95,7 +95,7 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
     val spannableNotes by lazy { item.getSpannableNotes(context) }
     val spannableChildren by lazy { item.getSpannableChildren(context, displayMaxChildren) }
 
-    private val identifier = hashKode(item.lastModified, item.children.map { it.lastModified })
+    private val identifier = hashKode(item.modified, item.children.map { it.modified })
 
     fun eagerInitialize(includeParent: Boolean = false) {
         if (includeParent)

@@ -38,7 +38,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var hidden: Boolean = false
     var isChecklist: Boolean = false
     var areCheckedItemsVisible: Boolean = false
-    var lastModified: Date = Date()
+    var modified: Date = Date()
     var created: Date = Date()
     var color: Int = 0
     var heading: Int = 0
@@ -46,6 +46,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
     lateinit var parent: ToOne<DynalistItem>
+    lateinit var metaData: ToOne<DynalistItemMetaData>
 
     // MetaData
     var metaDate: Date? = null
@@ -55,7 +56,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     lateinit var metaLinkedItem: ToOne<DynalistItem>
 
     fun notifyModified(time: Date = Date()) {
-        lastModified = time
+        modified = time
         updateMetaData()
     }
 

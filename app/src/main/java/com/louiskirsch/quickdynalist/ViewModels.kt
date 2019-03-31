@@ -78,7 +78,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 }
                 notEqual(DynalistItem_.name, "")
                 equal(DynalistItem_.hidden, false)
-                orderDesc(DynalistItem_.lastModified)
+                orderDesc(DynalistItem_.modified)
                 eager(DynalistItem_.children, DynalistItem_.parent)
             }) { createCachedDynalistItems(it.take(100), true) }
         }
