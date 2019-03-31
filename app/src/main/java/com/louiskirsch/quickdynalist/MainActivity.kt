@@ -122,19 +122,17 @@ class MainActivity : AppCompatActivity() {
         setupItemContentsTextField()
 
         submitButton.setOnClickListener {
-            val text = itemContents!!.text.toString().let {
-                if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
-            }
+            val text = itemContents!!.text.toString()
             dynalist.addItem(text, location!!)
             itemContents.text.clear()
         }
         submitCloseButton.setOnClickListener {
-            val text = itemContents!!.text.toString().let {
-                if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
-            }
+            val text = itemContents!!.text.toString()
             dynalist.addItem(text, location!!)
             finish()
         }
+
+        DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
     }
 
     override fun finish() {

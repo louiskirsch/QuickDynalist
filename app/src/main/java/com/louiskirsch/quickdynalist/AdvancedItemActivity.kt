@@ -94,6 +94,11 @@ class AdvancedItemActivity : AppCompatActivity() {
             isCursorVisible = true
         }
 
+        DynalistTag.highlightTags(this, itemContents.text)
+        DynalistTag.highlightTags(this, itemNotes.text)
+        DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
+        DynalistTag.setupTagDetection(itemNotes, dynalist.shouldDetectTags)
+
         setupDatePicker()
         setupTimePicker()
     }
@@ -216,12 +221,8 @@ class AdvancedItemActivity : AppCompatActivity() {
         } else {
             ""
         }
-        val contents = (itemContents.text.toString() + dateString).let {
-            if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
-        }
-        val note = itemNotes.text.toString().let {
-            if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
-        }
+        val contents = itemContents.text.toString() + dateString
+        val note = itemNotes.text.toString()
 
         if (editingItem == null) {
             val targetLocation = if (itemLocation.visibility == View.VISIBLE)

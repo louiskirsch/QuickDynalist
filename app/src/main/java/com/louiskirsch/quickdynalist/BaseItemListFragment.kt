@@ -72,6 +72,7 @@ abstract class BaseItemListFragment : Fragment() {
     protected open fun onSetEditingItem(value: DynalistItem) {
         itemContents.apply {
             setText(value.name)
+            DynalistTag.highlightTags(context, text)
             requestFocus()
             setSelection(text.length)
             val inputResultReceiver = object: ResultReceiver(Handler()) {
@@ -298,7 +299,6 @@ abstract class BaseItemListFragment : Fragment() {
     private fun showItemDetails(item: DynalistItem): Boolean {
         val intent = Intent(context, DetailsActivity::class.java)
         intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, item as Parcelable)
-        val activity = activity as AppCompatActivity
         startActivity(intent, transitionBundle)
         return true
     }
@@ -343,9 +343,7 @@ abstract class BaseItemListFragment : Fragment() {
             itemContents.setSelection(itemContents.text.length)
 
         submitButton.setOnClickListener {
-            val text = itemContents.text.toString().let {
-                if (dynalist.shouldDetectTags) DynalistTag.detectTags(it) else it
-            }
+            val text = itemContents.text.toString()
             if (editingItem == null) {
                 dynalist.addItem(text, addItemLocation!!)
             } else if (editingItem!!.name != text) {
@@ -393,6 +391,9 @@ abstract class BaseItemListFragment : Fragment() {
             itemListScrollButton.hide(ScrollFABBehavior.hideListener)
         }
         scrollToIntendedLocation()
+
+        DynalistTag.highlightTags(context!!, itemContents.text)
+        DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
     }
 
     protected abstract val activityTitle: String

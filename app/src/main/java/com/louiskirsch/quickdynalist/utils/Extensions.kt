@@ -2,9 +2,6 @@ package com.louiskirsch.quickdynalist.utils
 
 import android.app.Activity
 import android.content.Context
-import android.text.InputType
-import android.text.Spannable
-import android.text.TextUtils
 import android.text.util.Linkify
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -17,7 +14,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Parcel
-import android.text.SpannableStringBuilder
+import android.text.*
 import android.view.ViewGroup
 import android.widget.TextView
 import kotlin.math.roundToInt
@@ -25,6 +22,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.network.DynalistResponse
 import retrofit2.Call

@@ -19,23 +19,37 @@
         <item name="android:windowSharedElementExitTransition">@transition/change_view_bounds</item>
     </style>
 
-    <style name="DialogAppTheme" parent="Theme.AppCompat.Light.Dialog.MinWidth">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="DialogAppTheme" parent="AppTheme">
         <item name="windowNoTitle">true</item>
 
-        <!-- enable window content transitions -->
-        <item name="android:windowActivityTransitions">true</item>
+        <!-- Dialog style -->
+        <item name="android:windowMinWidthMajor">@dimen/abc_dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@dimen/abc_dialog_min_width_minor</item>
 
-        <!-- specify enter and exit transitions -->
-        <item name="android:windowEnterTransition">@transition/window_explode</item>
-        <item name="android:windowExitTransition">@transition/window_explode</item>
+        <item name="android:colorBackground">?attr/colorBackgroundFloating</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
 
-        <!-- specify shared element transitions -->
-        <item name="android:windowSharedElementEnterTransition">@transition/change_view_bounds
-        </item>
-        <item name="android:windowSharedElementExitTransition">@transition/change_view_bounds</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowTitleStyle">@style/RtlOverlay.DialogWindowTitle.AppCompat</item>
+        <item name="android:windowTitleBackgroundStyle">@style/Base.DialogWindowTitleBackground.AppCompat</item>
+        <item name="android:windowBackground">@drawable/abc_dialog_material_background</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@style/Animation.AppCompat.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="listPreferredItemPaddingLeft">24dip</item>
+        <item name="listPreferredItemPaddingRight">24dip</item>
+
+        <item name="android:listDivider">@null</item>
+
+        <item name="android:buttonBarStyle">@style/Widget.AppCompat.ButtonBar.AlertDialog</item>
+        <item name="android:borderlessButtonStyle">@style/Widget.AppCompat.Button.Borderless</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
     <style name="InvisibleTheme" parent="Theme.AppCompat.Light.NoActionBar">
