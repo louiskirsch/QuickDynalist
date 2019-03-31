@@ -120,6 +120,18 @@ class DynalistApp : Application() {
                 filterBox.put(filters)
             }, null)
         }
+        if (version in 2..28) {
+            val box = DynalistItem.box
+            boxStore.runInTxAsync({
+                val now = Date()
+                box.put(box.all.apply { forEach {
+                    it.created = now
+                    it.color = 0
+                    it.heading = 0
+                    it.notifyModified(now)
+                }})
+            }, null)
+        }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE
     }
 
