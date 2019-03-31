@@ -2,6 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/action_change_color"
+        android:title="@string/action_change_color"
+        app:showAsAction="never" />
+
     <item android:id="@+id/action_edit"
         android:title="@string/action_edit"
         app:showAsAction="never" />

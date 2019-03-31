@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +19,6 @@ import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.children
-import com.louiskirsch.quickdynalist.utils.helper
 import com.louiskirsch.quickdynalist.utils.isEllipsized
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
@@ -35,21 +35,21 @@ class DynalistItemPopupMenu(context: Context, anchor: View, isImage: Boolean) {
     private val colorPicker: ViewGroup = LayoutInflater.from(context)
             .inflate(R.layout.menu_color_picker, null) as ViewGroup
     private val colorList: ViewGroup = colorPicker.colorList
+    private val colorPopup = PopupWindow(context, null, R.attr.popupMenuStyle).apply {
+        contentView = colorPicker
+        isFocusable = true
+    }
 
     init {
         popup.inflate(R.menu.item_list_popup_menu)
         if (isImage)
             popup.inflate(R.menu.item_list_popup_image_extension)
+        popup.menu.findItem(R.id.action_change_color).setOnMenuItemClickListener {
+            colorPopup.showAsDropDown(anchor)
+            true
+        }
         anchor.setOnClickListener {
             popup.show()
-            addColorPicker()
-        }
-    }
-
-    @SuppressLint("RestrictedApi")
-    private fun addColorPicker() {
-        popup.helper?.listView?.apply{
-            addHeaderView(colorPicker)
         }
     }
 
@@ -57,7 +57,7 @@ class DynalistItemPopupMenu(context: Context, anchor: View, isImage: Boolean) {
         colorList.children.map { it as Button }.forEachIndexed { idx, btn ->
             btn.setOnClickListener {
                 callback(idx)
-                popup.dismiss()
+                colorPopup.dismiss()
             }
         }
     }
