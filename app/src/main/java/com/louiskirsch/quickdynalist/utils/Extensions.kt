@@ -22,7 +22,6 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.network.DynalistResponse
 import retrofit2.Call

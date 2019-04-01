@@ -45,6 +45,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.preference:preference:1.0.0"
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.github.timediv:MaterialShowcaseView:fix~dialog-SNAPSHOT'
     implementation project(':hashkode')
 }
 

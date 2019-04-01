@@ -92,7 +92,8 @@ class Dynalist(private val context: Context) {
             context.toast(R.string.token_invalid)
             authenticate()
         } else {
-            sync()
+            val job = SyncJob(requireUnmeteredNetwork = false, isManual = true)
+            DynalistApp.instance.jobManager.addJobInBackground(job)
         }
     }
 
