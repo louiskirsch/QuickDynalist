@@ -52,10 +52,6 @@ class ItemListFragment : BaseItemListFragment() {
                         true
                     }
                 }
-                R.id.dropoff_duplicate -> {
-                    DynalistApp.instance.jobManager.addJobInBackground(CloneItemJob(item))
-                    false
-                }
                 else -> false
             }
         }

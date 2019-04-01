@@ -164,7 +164,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
 
     companion object {
         private val startDropOffs = intArrayOf()
-        private val endDropOffs = intArrayOf(R.id.dropoff_parent, R.id.dropoff_duplicate)
+        private val endDropOffs = intArrayOf(R.id.dropoff_parent)
     }
 
     var showChecklist: Boolean = showChecklist
@@ -259,7 +259,6 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
         val context = holder.itemView.context
         val text = when (getItemId(position)) {
             R.id.dropoff_parent.toLong() -> context.getString(R.string.dropoff_parent)
-            R.id.dropoff_duplicate.toLong() -> context.getString(R.string.dropoff_duplicate)
             else -> throw IllegalStateException("Invalid drop off point")
         }
         holder.textView.text = text

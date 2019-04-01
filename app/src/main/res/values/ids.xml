@@ -2,7 +2,6 @@
 <resources>
     <item name="menu_item_bookmarks_hint" type="id" />
     <item name="dropoff_parent" type="id" />
-    <item name="dropoff_duplicate" type="id" />
     <item name="view_type_item" type="id" />
     <item name="view_type_dropoff" type="id" />
     <item name="tag_dynalist_tag" type="id" />
