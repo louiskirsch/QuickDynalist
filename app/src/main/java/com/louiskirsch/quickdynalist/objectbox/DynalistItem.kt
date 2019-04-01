@@ -298,12 +298,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         get() = dynalistLinkRegex.find(name + note)?.groupValues?.let { values ->
             val fileId = values[2]
             val itemId = values[3]
-            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
-            return box.query {
-                equal(DynalistItem_.serverFileId, fileId)
-                and()
-                equal(DynalistItem_.serverItemId, itemId)
-            }.findFirst()
+            return byServerId(fileId, itemId)
         }
         set(value) {
             val stripped = note.replace(dynalistLinkRegex, "").trim()
@@ -390,6 +385,13 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 updater(this)
                 DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(this))
             }
+        }
+
+        fun byServerId(fileId: String, itemId: String): DynalistItem? {
+            return box.query {
+                equal(DynalistItem_.serverFileId, fileId)
+                equal(DynalistItem_.serverItemId, itemId)
+            }.findFirst()
         }
     }
 

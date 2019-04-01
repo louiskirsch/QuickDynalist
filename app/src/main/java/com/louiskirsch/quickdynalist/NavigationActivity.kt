@@ -31,6 +31,7 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
 import android.content.ActivityNotFoundException
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 
@@ -120,6 +121,15 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     private fun createInitialFragment(): Fragment {
+        val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT) ?: ""
+        if (intent.action == Intent.ACTION_VIEW && intent.data != null) {
+            val fileId = intent.data!!.lastPathSegment!!
+            val itemId = intent.data!!.fragment?.substring(2) ?: "root"
+            val item = DynalistItem.byServerId(fileId, itemId) ?: dynalist.inbox.apply {
+                toast(R.string.error_invalid_url)
+            }
+            return ItemListFragment.newInstance(item, itemText)
+        }
         if (intent.hasExtra(DynalistApp.EXTRA_DISPLAY_FILTER) ||
                 intent.hasExtra(DynalistApp.EXTRA_DISPLAY_FILTER_ID)) {
             val filter = intent.extras?.let { dynalist.resolveFilterInBundle(it) }
@@ -127,7 +137,6 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 return FilteredItemListFragment.newInstance(filter)
         }
         val parent = intent.extras?.let { dynalist.resolveItemInBundle(it) } ?: dynalist.inbox
-        val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT) ?: ""
         return ItemListFragment.newInstance(parent, itemText)
     }
 
