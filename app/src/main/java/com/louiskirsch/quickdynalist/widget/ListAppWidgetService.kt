@@ -3,6 +3,7 @@ package com.louiskirsch.quickdynalist.widget
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.text.style.BackgroundColorSpan
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
@@ -32,6 +33,7 @@ class ListViewsFactory(private val context: Context, intent: Intent)
     private val items = ArrayList<CachedDynalistItem>()
     private val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID)
+    private val itemColors = context.resources.getIntArray(R.array.itemColors)
 
     private var displayParentText = false
 
@@ -61,6 +63,10 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             item.children.sortBy { child -> child.position }
             CachedDynalistItem(item, context, maxChildren).apply {
                 eagerInitialize(displayParentText)
+                if (item.color > 0) {
+                    val span = BackgroundColorSpan(itemColors[item.color])
+                    spannableText.setSpan(span, 0, spannableText.length, 0)
+                }
             }
         }
         items.clear()
