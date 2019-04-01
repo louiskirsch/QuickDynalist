@@ -110,7 +110,7 @@ class ProcessTextActivity : AppCompatActivity() {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onItemEvent(event: ItemEvent) {
-        if (!event.success)
+        if (!event.success && !event.retrying)
             toast(R.string.error_update_server)
         finish()
     }

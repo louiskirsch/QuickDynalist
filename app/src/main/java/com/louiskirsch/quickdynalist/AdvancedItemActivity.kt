@@ -242,7 +242,11 @@ class AdvancedItemActivity : AppCompatActivity() {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onItemEvent(event: ItemEvent) {
-        if (!event.success)
-            toast(R.string.error_update_server)
+        if (!event.success) {
+            if (event.retrying)
+                toast(R.string.error_update_server_retry)
+            else
+                toast(R.string.error_update_server)
+        }
     }
 }

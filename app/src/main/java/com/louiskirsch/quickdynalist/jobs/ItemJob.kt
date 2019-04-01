@@ -74,7 +74,7 @@ abstract class ItemJob: Job(Params(1)
     }
 
     override fun onCancel(cancelReason: Int, throwable: Throwable?) {
-        EventBus.getDefault().post(ItemEvent(false))
+        EventBus.getDefault().post(ItemEvent(false, retrying = false))
         markItemsCompleted()
     }
 
@@ -93,6 +93,8 @@ abstract class ItemJob: Job(Params(1)
             else -> RetryConstraint.createExponentialBackoff(runCount, 10 * 1000)
         }
         constraint.setApplyNewDelayToGroup(true)
+        if (constraint.shouldRetry())
+            EventBus.getDefault().post(ItemEvent(false, retrying = true))
         return constraint
     }
 
