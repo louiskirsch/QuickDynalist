@@ -4,32 +4,39 @@
 
     <item android:id="@+id/action_change_color"
         android:title="@string/action_change_color"
+        android:icon="@drawable/ic_action_change_color"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_edit"
         android:title="@string/action_edit"
+        android:icon="@drawable/ic_action_edit"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_duplicate"
         android:title="@string/action_duplicate"
+        android:icon="@drawable/ic_action_duplicate"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_move_to_bookmark"
         android:title="@string/action_move_to_inbox"
+        android:icon="@drawable/ic_action_move"
         app:showAsAction="never">
         <menu />
     </item>
 
     <item android:id="@+id/action_move_to"
         android:title="@string/action_move_to"
+        android:icon="@drawable/ic_action_move"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_link_to"
         android:title="@string/action_link_to"
+        android:icon="@drawable/ic_action_link"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_change_date"
         android:title="@string/action_change_date"
+        android:icon="@drawable/ic_action_date"
         app:showAsAction="never">
         <menu>
             <item android:id="@+id/action_add_date_today"
@@ -52,6 +59,7 @@
 
     <item android:id="@+id/action_show_details"
         android:title="@string/action_show_details"
+        android:icon="@drawable/ic_action_details"
         app:showAsAction="never" />
 
 </menu>

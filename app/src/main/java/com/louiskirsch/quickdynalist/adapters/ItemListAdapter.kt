@@ -19,6 +19,7 @@ import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.children
+import com.louiskirsch.quickdynalist.utils.helper
 import com.louiskirsch.quickdynalist.utils.isEllipsized
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
@@ -44,6 +45,7 @@ class DynalistItemPopupMenu(context: Context, anchor: View, isImage: Boolean) {
         popup.inflate(R.menu.item_list_popup_menu)
         if (isImage)
             popup.inflate(R.menu.item_list_popup_image_extension)
+        enableIcons()
         popup.menu.findItem(R.id.action_change_color).setOnMenuItemClickListener {
             colorPopup.showAsDropDown(anchor)
             true
@@ -51,6 +53,11 @@ class DynalistItemPopupMenu(context: Context, anchor: View, isImage: Boolean) {
         anchor.setOnClickListener {
             popup.show()
         }
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun enableIcons() {
+        popup.helper?.setForceShowIcon(true)
     }
 
     fun notifyColorPick(callback: (Int) -> Unit) {
