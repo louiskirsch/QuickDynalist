@@ -71,6 +71,8 @@ class ProcessTextActivity : AppCompatActivity() {
             width = WindowManager.LayoutParams.MATCH_PARENT
             height = WindowManager.LayoutParams.WRAP_CONTENT
         }
+        window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
         windowManager.updateViewLayout(window.decorView, lp)
     }
 
