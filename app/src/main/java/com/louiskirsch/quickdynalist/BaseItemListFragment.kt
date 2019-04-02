@@ -212,6 +212,7 @@ abstract class BaseItemListFragment : Fragment() {
         speechRecognitionHelper.dispatchResult(context!!, requestCode, resultCode, data) {
             val sb = SpannableStringBuilder(it)
             DynalistTag.highlightTags(context!!, sb)
+            itemContents.text.apply { if (isNotBlank()) append(' ') }
             itemContents.text.append(sb)
             if (dynalist.speechAutoSubmit)
                 submitButton.performClick()

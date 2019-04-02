@@ -111,7 +111,8 @@ class AdvancedItemActivity : AppCompatActivity() {
         speechRecognitionHelper.dispatchResult(this, requestCode, resultCode, data) {
             val sb = SpannableStringBuilder(it)
             DynalistTag.highlightTags(this, sb)
-            itemNotes.text.appendln().append(sb)
+            itemContents.text.apply { if (isNotBlank()) appendln() }
+            itemNotes.text.append(sb)
         }
         super.onActivityResult(requestCode, resultCode, data)
     }

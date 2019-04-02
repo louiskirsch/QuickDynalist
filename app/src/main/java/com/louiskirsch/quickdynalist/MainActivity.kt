@@ -146,6 +146,7 @@ class MainActivity : AppCompatActivity() {
         speechRecognitionHelper.dispatchResult(this, requestCode, resultCode, data) {
             val sb = SpannableStringBuilder(it)
             DynalistTag.highlightTags(this, sb)
+            itemContents.text.apply { if (isNotBlank()) append(' ') }
             itemContents.text.append(sb)
             if (dynalist.speechAutoSubmit)
                 submitButton.performClick()
