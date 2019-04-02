@@ -14,3 +14,4 @@ class ForbiddenImageEvent(val uri: Uri)
 
 enum class SyncStatus { RUNNING, NOT_RUNNING, SUCCESS, NO_SUCCESS }
 class SyncEvent(val status: SyncStatus, val isManual: Boolean)
+class SyncProgressEvent(val progress: Float)

@@ -31,8 +31,9 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
 import android.content.ActivityNotFoundException
-import android.widget.Toast
+import android.graphics.PorterDuff
 import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 
 
@@ -346,14 +347,32 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     fun onSyncEvent(event: SyncEvent) {
         when (event.status) {
             SyncStatus.RUNNING -> nav_view.menu.findItem(R.id.action_sync_now).apply {
+                setIcon(R.drawable.ic_action_sync)
                 isEnabled = false
                 setTitle(R.string.sync_in_progress)
             }
             SyncStatus.NOT_RUNNING -> nav_view.menu.findItem(R.id.action_sync_now).apply {
+                setIcon(R.drawable.ic_action_sync)
                 isEnabled = true
                 setTitle(R.string.action_sync_now)
             }
             else -> Unit
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onSyncProgressEvent(event: SyncProgressEvent) {
+        val menuItem = nav_view.menu.findItem(R.id.action_sync_now)
+        val icon = if (menuItem.icon !is CircularProgressDrawable) {
+            CircularProgressDrawable(this).also {
+                it.setStyle(CircularProgressDrawable.DEFAULT)
+                it.alpha = 0xCC
+                it.setColorFilter(getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN)
+                menuItem.icon = it
+            }
+        } else {
+            menuItem.icon as CircularProgressDrawable
+        }
+        icon.setStartEndTrim(0f, event.progress)
     }
 }

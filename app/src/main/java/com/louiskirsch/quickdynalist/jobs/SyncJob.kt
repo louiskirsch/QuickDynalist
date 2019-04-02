@@ -49,9 +49,13 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         val files = service.listFiles(AuthenticatedRequest(token!!))
                 .execRespectRateLimit(delayCallback).body()!!.files!!
         val documents = files.filter { it.isDocument && it.isEditable }
-        val contents = documents.map {
-            service.readDocument(ReadDocumentRequest(it.id!!, token))
-                    .execRespectRateLimit(delayCallback).body()!!.nodes!!
+        val contents = documents.mapIndexed { idx, doc ->
+            service.readDocument(ReadDocumentRequest(doc.id!!, token))
+                    .execRespectRateLimit(delayCallback).body()!!.nodes!!.apply {
+                // Report progress
+                val progress = (idx + 1).toFloat() / documents.size / 2f
+                EventBus.getDefault().post(SyncProgressEvent(progress))
+            }
         }
 
         // Query from local database
@@ -62,6 +66,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         val notAssociatedClientItems = clientItems.toMutableSet()
 
         // Transform server data
+        var docIdx = 0 // No flatMapIndexed exists...
         val serverItems = documents.zip(contents).flatMap {
             (doc, content) -> content.map {
                 val serverAbsoluteId = Pair(doc.id!!, it.id)
@@ -97,6 +102,11 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                     color = it.color
                     heading = it.heading
                 }
+            }.apply {
+                // Report progress
+                docIdx++
+                val progress = (docIdx + 1).toFloat() / documents.size / 4f + 0.5f
+                EventBus.getDefault().post(SyncProgressEvent(progress))
             }
         }
         val itemMap = serverItems.associateBy { it.serverAbsoluteId!! }
@@ -126,6 +136,9 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         // Define bookmarks
         val bookmarks = markedItems.filter { !it.markedAsPrimaryInbox }
         bookmarks.forEach { it.isBookmark = true }
+
+        // Report progress
+        EventBus.getDefault().post(SyncProgressEvent(0.9f))
 
         // Store new items in database
         val itemsToRemove = (notAssociatedClientItems - newInbox).filter { it.syncJob == null }

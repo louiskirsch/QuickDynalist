@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist.utils
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Resources
 import android.text.util.Linkify
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -15,6 +16,7 @@ import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Parcel
 import android.text.*
+import android.util.TypedValue
 import android.view.ViewGroup
 import android.widget.TextView
 import kotlin.math.roundToInt
@@ -187,4 +189,8 @@ val PopupMenu.helper: MenuPopupHelper? get() {
             it.get(this) as MenuPopupHelper
         }
     } catch (e: Exception) { null }
+}
+
+fun Resources.dpToPixels(dp: Float): Float {
+    return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics)
 }
