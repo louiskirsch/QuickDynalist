@@ -9,6 +9,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.*
 import android.text.Editable
+import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
@@ -34,6 +35,7 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.objectbox.DynalistTag
 import com.louiskirsch.quickdynalist.utils.ImageCache
+import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
 import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
 import com.louiskirsch.quickdynalist.views.ScrollFABBehavior
@@ -48,6 +50,7 @@ import java.util.*
 import android.util.Pair as UtilPair
 
 abstract class BaseItemListFragment : Fragment() {
+    private val speechRecognitionHelper = SpeechRecognitionHelper()
     protected lateinit var dynalist: Dynalist
     protected lateinit var adapter: ItemListAdapter
 
@@ -206,6 +209,13 @@ abstract class BaseItemListFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        speechRecognitionHelper.dispatchResult(context!!, requestCode, resultCode, data) {
+            val sb = SpannableStringBuilder(it)
+            DynalistTag.highlightTags(context!!, sb)
+            itemContents.text.append(sb)
+            if (dynalist.speechAutoSubmit)
+                submitButton.performClick()
+        }
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 resources.getInteger(R.integer.request_code_move) -> {
@@ -375,6 +385,9 @@ abstract class BaseItemListFragment : Fragment() {
                 transitionBundle
             }
             startActivity(intent, transitionBundle)
+        }
+        recordSpeechButton.setOnClickListener {
+            speechRecognitionHelper.startSpeechRecognition(activity!!)
         }
 
         itemList.layoutManager = LinearLayoutManager(context)

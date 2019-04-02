@@ -42,6 +42,9 @@ class Dynalist(private val context: Context) {
     val shouldDetectTags
         get() = settings.getBoolean("edit_detect_tags", true)
 
+    val speechAutoSubmit
+        get() = settings.getBoolean("edit_speech_auto_submit", false)
+
     var token: String?
         get() = preferences.getString("TOKEN", "NONE")
         set(newToken) = preferences.edit().putString("TOKEN", newToken).apply()

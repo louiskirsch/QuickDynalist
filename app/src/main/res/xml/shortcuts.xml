@@ -31,4 +31,18 @@
         <categories android:name="android.shortcut.search" />
     </shortcut>
 
+    <shortcut
+        android:shortcutId="record_speech"
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_record_speech"
+        android:roundIcon="@mipmap/ic_shortcut_record_speech"
+        android:shortcutShortLabel="@string/shortcut_record_speech"
+        tools:targetApi="n_mr1">
+        <intent
+            android:action="com.louiskirsch.quickdynalist.RECORD_SPEECH"
+            android:targetPackage="com.louiskirsch.quickdynalist"
+            android:targetClass="com.louiskirsch.quickdynalist.ProcessTextActivity" />
+        <categories android:name="android.intent.category.DEFAULT" />
+    </shortcut>
+
 </shortcuts>

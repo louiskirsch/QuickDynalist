@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.text.format.DateFormat
 import android.view.Menu
 import android.view.MenuItem
@@ -16,6 +18,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistTag
+import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
 import com.louiskirsch.quickdynalist.utils.actionBarView
 import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
 import kotlinx.android.synthetic.main.activity_advanced_item.*
@@ -29,6 +32,7 @@ import kotlin.math.max
 
 class AdvancedItemActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
+    private val speechRecognitionHelper = SpeechRecognitionHelper()
 
     private lateinit var adapter: ArrayAdapter<DynalistItem>
     private var location: DynalistItem? = null
@@ -103,6 +107,15 @@ class AdvancedItemActivity : AppCompatActivity() {
         setupTimePicker()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        speechRecognitionHelper.dispatchResult(this, requestCode, resultCode, data) {
+            val sb = SpannableStringBuilder(it)
+            DynalistTag.highlightTags(this, sb)
+            itemNotes.text.appendln().append(sb)
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
     private fun setupBookmarkSpinner() {
         adapter = ArrayAdapter(this,
                 android.R.layout.simple_spinner_item, ArrayList())
@@ -142,8 +155,14 @@ class AdvancedItemActivity : AppCompatActivity() {
         return when (item!!.itemId) {
             android.R.id.home -> discard()
             R.id.send_item -> sendItem()
+            R.id.action_record_speech -> recordSpeech()
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun recordSpeech(): Boolean {
+        speechRecognitionHelper.startSpeechRecognition(this)
+        return true
     }
 
     private fun discard(): Boolean {

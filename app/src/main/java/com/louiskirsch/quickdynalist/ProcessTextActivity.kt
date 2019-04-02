@@ -16,12 +16,14 @@ import android.view.WindowManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
 import org.jetbrains.anko.okButton
 
 
 class ProcessTextActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
-    private lateinit var text: String
+    private val speechRecognitionHelper = SpeechRecognitionHelper()
+    private var text: String? = null
     private lateinit var bookmarks: List<DynalistItem>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,29 +31,21 @@ class ProcessTextActivity : AppCompatActivity() {
         EventBus.getDefault().register(this)
         dynalist.subscribe()
 
-        if (!intent.hasExtra(Intent.EXTRA_TEXT) && !intent.hasExtra(Intent.EXTRA_PROCESS_TEXT)) {
-            alert {
-                titleResource = R.string.dialog_title_error
-                messageResource = R.string.invalid_intent_error
-                okButton {}
-                show()
-            }
-            finish()
-            return
-        }
-
-        text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
-                    ?: intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT).toString()
-
-        val subject = intent.getCharSequenceExtra(Intent.EXTRA_SUBJECT)
-        if (subject != null && URLUtil.isNetworkUrl(text))
-            text = "[$subject]($text)"
-
-        if (savedInstanceState == null) {
-            if (!dynalist.isAuthenticated) {
-                dynalist.authenticate()
+        if (intent.action == "com.louiskirsch.quickdynalist.RECORD_SPEECH") {
+            speechRecognitionHelper.startSpeechRecognition(this)
+        } else {
+            text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
+                    ?: intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
+            if (text == null) {
+                toast(R.string.invalid_intent_error)
+                finish()
             } else {
-                addItem()
+                val subject = intent.getCharSequenceExtra(Intent.EXTRA_SUBJECT)
+                if (subject != null && URLUtil.isNetworkUrl(text))
+                    text = "[$subject]($text)"
+
+                if (savedInstanceState == null)
+                    tryAddItem()
             }
         }
 
@@ -59,6 +53,14 @@ class ProcessTextActivity : AppCompatActivity() {
         model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
             bookmarks = it
         })
+    }
+
+    private fun tryAddItem() {
+        if (!dynalist.isAuthenticated) {
+            dynalist.authenticate()
+        } else {
+            addItem()
+        }
     }
 
     override fun onAttachedToWindow() {
@@ -70,6 +72,15 @@ class ProcessTextActivity : AppCompatActivity() {
             height = WindowManager.LayoutParams.WRAP_CONTENT
         }
         windowManager.updateViewLayout(window.decorView, lp)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        speechRecognitionHelper.dispatchResult(this,
+                requestCode, resultCode, data, ::finish) {
+            text = it
+            tryAddItem()
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onDestroy() {
@@ -90,10 +101,10 @@ class ProcessTextActivity : AppCompatActivity() {
             setAction(R.string.item_change_target_location) {
                 alert {
                     items(bookmarks) { _, selectedLocation: DynalistItem, _ ->
-                        dynalist.addItem(text, selectedLocation)
+                        dynalist.addItem(text!!, selectedLocation)
                     }
                     onCancelled {
-                        dynalist.addItem(text, bookmarks.find { it.isInbox }!!)
+                        dynalist.addItem(text!!, bookmarks.find { it.isInbox }!!)
                     }
                     show()
                 }
@@ -101,7 +112,7 @@ class ProcessTextActivity : AppCompatActivity() {
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION)
-                        dynalist.addItem(text, bookmarks.find { it.isInbox }!!)
+                        dynalist.addItem(text!!, bookmarks.find { it.isInbox }!!)
                 }
             })
             show()

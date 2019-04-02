@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/action_record_speech"
+        android:icon="@drawable/ic_action_record_speech"
+        app:iconTint="@color/colorToolbarIcon"
+        android:title="@string/action_record_speech"
+        app:showAsAction="ifRoom" />
+
     <item android:id="@+id/send_item"
         android:icon="@drawable/ic_action_send_item"
         android:title="@string/send_item"

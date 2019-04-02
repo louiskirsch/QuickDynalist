@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
+import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.view.MotionEvent
 import android.view.View
@@ -18,6 +19,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistTag
+import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
 import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
@@ -29,6 +31,7 @@ import android.util.Pair as UtilPair
 
 class MainActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
+    private val speechRecognitionHelper = SpeechRecognitionHelper()
     private lateinit var adapter: ArrayAdapter<DynalistItem>
     private var location: DynalistItem? = null
 
@@ -132,8 +135,22 @@ class MainActivity : AppCompatActivity() {
             dynalist.addItem(text, location!!)
             finish()
         }
+        recordSpeechButton.setOnClickListener {
+            speechRecognitionHelper.startSpeechRecognition(this)
+        }
 
         DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        speechRecognitionHelper.dispatchResult(this, requestCode, resultCode, data) {
+            val sb = SpannableStringBuilder(it)
+            DynalistTag.highlightTags(this, sb)
+            itemContents.text.append(sb)
+            if (dynalist.speechAutoSubmit)
+                submitButton.performClick()
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun finish() {

@@ -117,6 +117,8 @@
     <string name="pref_description_display_children_count_all">Items are shown with all their children as a preview.</string>
     <string name="pref_title_edit_detect_tags">Detect and highlight possible tags</string>
     <string name="pref_description_edit_detect_tags">Automatically detect words that match tag names while typing.</string>
+    <string name="pref_title_edit_speech_auto_submit">Submit voice recording immediately</string>
+    <string name="pref_description_edit_speech_auto_submit">Voice recordings are immediately added to your Dynalist instead of allowing further edits.</string>
     <string name="action_duplicate">Duplicate</string>
     <string name="action_move_to_inbox">Move to an inbox</string>
     <string name="action_move_to">Move to …</string>
@@ -183,4 +185,6 @@
     <string name="tutorial_list_title">More than just your inbox!</string>
     <string name="tutorial_list_dismiss">GOT IT</string>
     <string name="tutorial_list_content">Quick Dynalist is designed to capture your thoughts instantly. But it can do so much more. When you are ready, jump into the full experience by touching on the list icon.</string>
+    <string name="action_record_speech">Record voice item</string>
+    <string name="shortcut_record_speech">Voice item</string>
 </resources>
