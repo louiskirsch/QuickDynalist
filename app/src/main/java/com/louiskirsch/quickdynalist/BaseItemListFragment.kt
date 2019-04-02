@@ -388,7 +388,7 @@ abstract class BaseItemListFragment : Fragment() {
             startActivity(intent, transitionBundle)
         }
         recordSpeechButton.setOnClickListener {
-            speechRecognitionHelper.startSpeechRecognition(activity!!)
+            speechRecognitionHelper.startSpeechRecognition(this)
         }
 
         itemList.layoutManager = LinearLayoutManager(context)

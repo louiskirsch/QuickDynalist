@@ -4,17 +4,26 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.speech.RecognizerIntent
+import androidx.fragment.app.Fragment
 import com.louiskirsch.quickdynalist.R
 
 class SpeechRecognitionHelper {
 
     fun startSpeechRecognition(activity: Activity) {
+        startSpeechRecognition(activity, activity::startActivityForResult)
+    }
+
+    fun startSpeechRecognition(fragment: Fragment) {
+        startSpeechRecognition(fragment.context!!, fragment::startActivityForResult)
+    }
+
+    private fun startSpeechRecognition(context: Context, starter: (Intent, Int) -> Unit) {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         }
         val speechRecognitionRequestCode =
-                activity.resources.getInteger(R.integer.request_code_speech_recognition)
-        activity.startActivityForResult(intent, speechRecognitionRequestCode)
+                context.resources.getInteger(R.integer.request_code_speech_recognition)
+        starter(intent, speechRecognitionRequestCode)
     }
 
     fun dispatchResult(context:Context, requestCode: Int, resultCode: Int, data: Intent?,
