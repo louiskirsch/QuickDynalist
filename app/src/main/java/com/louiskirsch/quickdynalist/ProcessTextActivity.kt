@@ -24,6 +24,7 @@ class ProcessTextActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
     private val speechRecognitionHelper = SpeechRecognitionHelper()
     private var text: String? = null
+    private lateinit var location: DynalistItem
     private lateinit var bookmarks: List<DynalistItem>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +50,7 @@ class ProcessTextActivity : AppCompatActivity() {
             }
         }
 
+        location = dynalist.inbox
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
             bookmarks = it
@@ -85,6 +87,20 @@ class ProcessTextActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (isFinishing && text != null)
+            dynalist.addItem(text!!, location)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (!isFinishing) {
+            dynalist.addItem(text!!, location)
+            finish()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
@@ -103,28 +119,20 @@ class ProcessTextActivity : AppCompatActivity() {
             setAction(R.string.item_change_target_location) {
                 alert {
                     items(bookmarks) { _, selectedLocation: DynalistItem, _ ->
-                        dynalist.addItem(text!!, selectedLocation)
+                        location = selectedLocation
+                        finish()
                     }
-                    onCancelled {
-                        dynalist.addItem(text!!, bookmarks.find { it.isInbox }!!)
-                    }
+                    onCancelled { finish() }
                     show()
                 }
             }
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     if (event != DISMISS_EVENT_ACTION)
-                        dynalist.addItem(text!!, bookmarks.find { it.isInbox }!!)
+                        finish()
                 }
             })
             show()
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onItemEvent(event: ItemEvent) {
-        if (!event.success && !event.retrying)
-            toast(R.string.error_update_server)
-        finish()
     }
 }
