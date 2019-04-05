@@ -32,7 +32,7 @@
 
         <ImageView
             android:id="@+id/itemImage"
-            tools:src="@drawable/ic_image_placeholder"
+            tools:src="@drawable/ic_action_show_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"

@@ -4,5 +4,6 @@
 
     <item android:id="@+id/action_show_image"
         android:title="@string/action_show_image"
+        android:icon="@drawable/ic_action_show_image"
         app:showAsAction="never" />
 </menu>
