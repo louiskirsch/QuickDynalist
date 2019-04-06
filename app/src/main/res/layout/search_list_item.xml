@@ -13,7 +13,7 @@
     <TextView
         android:id="@+id/itemParent"
         android:textSize="10sp"
-        android:textColor="@color/colorAccent"
+        android:textColor="?attr/colorAccent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:ignore="SmallSp" />

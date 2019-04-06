@@ -17,7 +17,7 @@
         android:visibility="gone"
         android:textSize="10sp"
         style="@style/Widget.AppCompat.TextView"
-        android:textColor="@color/colorAccent"
+        android:textColor="?attr/colorAccent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:ignore="SmallSp" />

@@ -35,6 +35,7 @@ import android.graphics.PorterDuff
 import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
+import com.louiskirsch.quickdynalist.utils.resolveAttribute
 
 
 class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -373,7 +374,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             CircularProgressDrawable(this).also {
                 it.setStyle(CircularProgressDrawable.DEFAULT)
                 it.alpha = 0xCC
-                it.setColorFilter(getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN)
+                it.setColorFilter(resolveAttribute(R.attr.colorAccent), PorterDuff.Mode.SRC_IN)
                 menuItem.icon = it
             }
         } else {

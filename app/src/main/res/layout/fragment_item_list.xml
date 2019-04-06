@@ -76,6 +76,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:text="@string/advanced_item"
+                android:tint="?attr/colorAccent"
                 android:src="@drawable/ic_action_advanced_item" />
 
             <ImageButton
@@ -86,7 +87,7 @@
                 android:layout_marginStart="8dp"
                 android:text="@string/action_record_speech"
                 android:src="@drawable/ic_action_record_speech"
-                android:tint="@color/colorAccent" />
+                android:tint="?attr/colorAccent" />
 
             <EditText
                 android:id="@+id/itemContents"
@@ -110,7 +111,8 @@
                 android:layout_height="match_parent"
                 android:layout_marginEnd="8dp"
                 android:text="@string/send_item"
-                android:src="@drawable/ic_action_send_item_accent" />
+                android:tint="?attr/colorAccent"
+                android:src="@drawable/ic_action_send_item" />
 
         </LinearLayout>
 

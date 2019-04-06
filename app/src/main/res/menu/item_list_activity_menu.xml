@@ -14,7 +14,6 @@
         app:showAsAction="ifRoom" />
 
     <item android:id="@+id/open_in_dynalist"
-        android:icon="@drawable/ic_action_open_in_browser"
         android:title="@string/open_in_dynalist"
         app:showAsAction="never" />
 

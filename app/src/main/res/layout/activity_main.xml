@@ -54,7 +54,7 @@
         android:layout_marginEnd="16dp"
         android:text="@string/action_record_speech"
         android:src="@drawable/ic_action_record_speech"
-        android:tint="@color/colorAccent"
+        android:tint="?attr/colorAccent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/itemContents"
         app:layout_constraintTop_toTopOf="@id/itemContents"

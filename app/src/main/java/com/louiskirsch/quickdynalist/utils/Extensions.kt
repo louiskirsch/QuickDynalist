@@ -194,3 +194,9 @@ val PopupMenu.helper: MenuPopupHelper? get() {
 fun Resources.dpToPixels(dp: Float): Float {
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics)
 }
+
+fun Context.resolveAttribute(attr: Int): Int {
+    val typedValue = TypedValue()
+    theme.resolveAttribute(attr, typedValue, true)
+    return typedValue.data
+}

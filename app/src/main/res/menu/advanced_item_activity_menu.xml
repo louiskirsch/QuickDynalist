@@ -4,11 +4,12 @@
 
     <item android:id="@+id/action_record_speech"
         android:icon="@drawable/ic_action_record_speech"
-        app:iconTint="@color/colorToolbarIcon"
+        app:iconTint="?attr/colorControlNormal"
         android:title="@string/action_record_speech"
         app:showAsAction="ifRoom" />
 
     <item android:id="@+id/send_item"
+        app:iconTint="?attr/colorControlNormal"
         android:icon="@drawable/ic_action_send_item"
         android:title="@string/send_item"
         app:showAsAction="ifRoom" />

@@ -4,11 +4,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/open_item_list"
+        app:iconTint="?attr/colorControlNormal"
         android:icon="@drawable/ic_action_item_list"
         android:title="@string/open_item_list"
         app:showAsAction="ifRoom" />
 
     <item android:id="@+id/open_large"
+        app:iconTint="?attr/colorControlNormal"
         android:icon="@drawable/ic_action_open_large"
         android:title="@string/open_large"
         app:showAsAction="ifRoom" />
