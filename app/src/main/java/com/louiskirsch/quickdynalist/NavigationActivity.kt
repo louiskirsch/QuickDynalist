@@ -360,6 +360,12 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
     }
 
+    override fun onNightModeChanged(mode: Int) {
+        super.onNightModeChanged(mode)
+        EventBus.getDefault().post(NightModeChangedEvent())
+        // TODO we have to refresh the view model to get new spannables
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onSyncProgressEvent(event: SyncProgressEvent) {
         val menuItem = nav_view.menu.findItem(R.id.action_sync_now)

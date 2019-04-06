@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.text.ThemedSpan
 import kotlinx.android.synthetic.main.search_list_item.view.*
 
 class FilterItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -55,10 +56,13 @@ class FilterItemListAdapter(context: Context): RecyclerView.Adapter<FilterItemLi
             onClickListener?.invoke(items[position].item)
         }
 
+        val context = holder.itemView.context
+        val applySearchTerm: (Spannable) -> Unit = { highlightSearchTerm(it) }
         val item = items[position]
+        item.applyThemedSpans(context, includeParent = true)
         val parentText = item.spannableParent
-        val text = item.spannableText.apply { higlightSearchTerm(this) }
-        val notes = item.spannableNotes.apply { higlightSearchTerm(this) }
+        val text = item.spannableText.also(applySearchTerm)
+        val notes = item.spannableNotes.also(applySearchTerm)
         val children = item.spannableChildren
 
         holder.apply {
@@ -71,7 +75,7 @@ class FilterItemListAdapter(context: Context): RecyclerView.Adapter<FilterItemLi
         }
     }
 
-    private fun higlightSearchTerm(text: Spannable) {
+    private fun highlightSearchTerm(text: Spannable) {
         val start = text.indexOf(searchTerm, ignoreCase = true)
         if (start >= 0) {
             val span = BackgroundColorSpan(highlightColor)

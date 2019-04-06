@@ -3,6 +3,7 @@ package com.louiskirsch.quickdynalist
 import com.birbit.android.jobqueue.JobManager
 import com.birbit.android.jobqueue.config.Configuration
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService.*
 import com.louiskirsch.quickdynalist.jobs.JobService
 import com.louiskirsch.quickdynalist.network.DynalistService
@@ -67,11 +68,12 @@ class DynalistApp : Application() {
             Picasso.setSingletonInstance(build())
         }
 
-        upgrade()
+        val dynalist = Dynalist(applicationContext)
+        AppCompatDelegate.setDefaultNightMode(dynalist.preferredTheme)
+        upgrade(dynalist)
     }
 
-    private fun upgrade() {
-        val dynalist = Dynalist(applicationContext)
+    private fun upgrade(dynalist: Dynalist) {
         val version = dynalist.preferencesVersion
         if (version < 12) {
             doAsync {

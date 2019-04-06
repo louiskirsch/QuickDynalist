@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string-array name="pref_entries_display_theme" tools:ignore="InconsistentArrays">
+        <item>Use system default</item>
+        <item>Light</item>
+        <item>Dark</item>
+        <item>Set by Battery Saver</item>
+    </string-array>
+    <string-array name="pref_values_display_theme" tools:ignore="InconsistentArrays">
+        <item>-1</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <integer name="pref_default_display_theme">-1</integer>
+</resources>

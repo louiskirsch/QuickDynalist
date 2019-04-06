@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.text.ThemedSpan
 import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.children
 import com.louiskirsch.quickdynalist.utils.helper
@@ -89,7 +90,8 @@ class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textVie
 
 class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChildren: Int) {
     val spannableParent by lazy {
-        item.parent.target?.getSpannableText(context)?.append(" >") ?: ""
+        item.parent.target?.getSpannableText(context)?.append(" >") as? Spannable
+                ?: SpannableString("")
     }
     val spannableText: Spannable by lazy {
         item.getSpannableText(context).run {
@@ -110,6 +112,14 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
         spannableText
         spannableNotes
         spannableChildren
+    }
+
+    fun applyThemedSpans(context: Context, includeParent: Boolean = false) {
+        if (includeParent)
+            ThemedSpan.applyAll(context, spannableParent)
+        ThemedSpan.applyAll(context, spannableText)
+        ThemedSpan.applyAll(context, spannableNotes)
+        ThemedSpan.applyAll(context, spannableChildren)
     }
 
     override fun equals(other: Any?) = compareFields(other) {
@@ -272,6 +282,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
     }
 
     private fun onBindItemViewHolder(holder: ItemListViewHolder, position: Int) {
+        val context = holder.itemView.context
         val item = items[position]
         val clientId = item.item.clientId
 
@@ -290,6 +301,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
             holder.itemParent.text = item.spannableParent
         }
 
+        item.applyThemedSpans(context)
         holder.itemText.text = item.spannableText
         holder.itemNotes.visibility = if (item.spannableNotes.isBlank()) View.GONE else View.VISIBLE
         holder.itemNotes.text = item.spannableNotes

@@ -4,6 +4,7 @@
     <color name="colorToolbarIcon">#CCFFFFFF</color>
     <color name="colorPrimaryDark">#0D47A1</color>
     <color name="colorAccent">#FF008577</color>
+
     <color name="spanHighlight">#E0E0E0</color>
     <color name="codeColor">#FF0000</color>
     <color name="searchHighlight">#4FC3F7</color>
@@ -15,6 +16,12 @@
     <color name="deleteColor">#F44336</color>
     <color name="editColor">#4CAF50</color>
 
+    <color name="itemBackground">?android:attr/windowBackground</color>
+    <color name="itemBackgroundActivated">#BDBDBD</color>
+    <integer name="itemBackgroundTintMode">0xE</integer>
+    <color name="barBackgroundColor">#EEEEEE</color>
+
+    <color name="itemColor0">@null</color>
     <color name="itemColor1">#f9d0c4</color>
     <color name="itemColor2">#fed8b1</color>
     <color name="itemColor3">#fef2c0</color>
@@ -22,7 +29,7 @@
     <color name="itemColor5">#c5def5</color>
     <color name="itemColor6">#d4c5f9</color>
     <array name="itemColors">
-        <item>@null</item>
+        <item>@color/itemColor0</item>
         <item>@color/itemColor1</item>
         <item>@color/itemColor2</item>
         <item>@color/itemColor3</item>

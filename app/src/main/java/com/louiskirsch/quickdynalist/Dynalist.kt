@@ -45,6 +45,11 @@ class Dynalist(private val context: Context) {
     val speechAutoSubmit
         get() = settings.getBoolean("edit_speech_auto_submit", false)
 
+    val preferredTheme: Int get() {
+        val default = context.resources.getInteger(R.integer.pref_default_display_theme)
+        return settings.getString("display_theme", null)?.toInt() ?: default
+    }
+
     var token: String?
         get() = preferences.getString("TOKEN", "NONE")
         set(newToken) = preferences.edit().putString("TOKEN", newToken).apply()

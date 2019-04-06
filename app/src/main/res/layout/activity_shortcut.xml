@@ -52,6 +52,7 @@
         <RadioButton
             android:id="@+id/shortcutTypeQuickDialog"
             android:text="@string/shortcut_type_quick_dialog"
+            android:drawableTint="?attr/colorControlNormal"
             android:drawableStart="@drawable/ic_shortcut_type_dialog"
             android:layout_width="match_parent"
             android:layout_marginEnd="16dp"
@@ -60,6 +61,7 @@
         <RadioButton
             android:id="@+id/shortcutTypeQuickList"
             android:text="@string/shortcut_type_quick_list"
+            android:drawableTint="?attr/colorControlNormal"
             android:drawableStart="@drawable/ic_shortcut_type_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

@@ -3,10 +3,10 @@
     <item>
         <selector>
             <item android:state_activated="true">
-                <color android:color="#BDBDBD"/>
+                <color android:color="@color/itemBackgroundActivated"/>
             </item>
             <item>
-                <color android:color="#FAFAFA"/>
+                <color android:color="@color/itemBackground"/>
             </item>
         </selector>
     </item>

@@ -63,6 +63,7 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             item.children.sortBy { child -> child.position }
             CachedDynalistItem(item, context, maxChildren).apply {
                 eagerInitialize(displayParentText)
+                applyThemedSpans(context, displayParentText)
                 if (item.color > 0) {
                     val span = BackgroundColorSpan(itemColors[item.color])
                     spannableText.setSpan(span, 0, spannableText.length, 0)

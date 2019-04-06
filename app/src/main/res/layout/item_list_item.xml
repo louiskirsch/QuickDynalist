@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:focusable="true"
     android:clickable="true"
-    android:backgroundTintMode="multiply"
+    android:backgroundTintMode="@integer/itemBackgroundTintMode"
     android:background="@drawable/activatable_selectable_background"
     android:layout_height="wrap_content">
 
@@ -40,6 +40,7 @@
         android:layout_width="40sp"
         android:layout_height="40sp"
         android:text="@string/action_menu"
+        android:tint="?attr/colorControlNormal"
         android:src="@drawable/ic_action_more"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

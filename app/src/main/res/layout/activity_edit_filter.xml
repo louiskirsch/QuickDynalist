@@ -20,7 +20,6 @@
             style="?android:attr/listSeparatorTextViewStyle" />
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginTop="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -162,7 +161,6 @@
             android:layout_height="wrap_content" />
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:id="@+id/filterTagsInputLayout"
             android:hint="@string/filter_tags_hint"
             android:layout_width="match_parent"
@@ -209,7 +207,6 @@
             style="?android:attr/listSeparatorTextViewStyle" />
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginTop="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

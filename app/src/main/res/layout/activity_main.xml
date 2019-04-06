@@ -16,10 +16,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/colorPrimary"
-        app:titleTextColor="?android:attr/textColorPrimaryInverse"
         android:minHeight="?android:attr/actionBarSize"
-        app:theme="@style/AppTheme"
-        app:popupTheme="@style/DialogAppTheme" />
+        app:theme="@style/AppTheme.AppBarOverlay"
+        app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     <Spinner
         android:id="@+id/itemLocation"

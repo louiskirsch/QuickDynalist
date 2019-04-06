@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar.Bridge">
+    <style name="AppTheme.Light" parent="Theme.MaterialComponents.Light.DarkActionBar.Bridge">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -19,7 +19,25 @@
         <item name="android:windowSharedElementExitTransition">@transition/change_view_bounds</item>
     </style>
 
-    <style name="DialogAppTheme" parent="AppTheme">
+    <style name="AppTheme.Dark" parent="Theme.MaterialComponents.Bridge">
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- enable window content transitions -->
+        <item name="android:windowActivityTransitions">true</item>
+
+        <!-- specify enter and exit transitions -->
+        <item name="android:windowEnterTransition">@transition/window_explode</item>
+        <item name="android:windowExitTransition">@transition/window_explode</item>
+
+        <!-- specify shared element transitions -->
+        <item name="android:windowSharedElementEnterTransition">@transition/change_view_bounds
+        </item>
+        <item name="android:windowSharedElementExitTransition">@transition/change_view_bounds</item>
+    </style>
+
+    <style name="AppTheme" parent="AppTheme.Light" />
+
+    <style name="AppTheme.Dialog">
         <item name="windowNoTitle">true</item>
 
         <!-- Dialog style -->
@@ -52,7 +70,7 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
-    <style name="InvisibleTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="InvisibleTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -64,7 +82,7 @@
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="AppTheme">
+    <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -75,7 +93,6 @@
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

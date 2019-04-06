@@ -9,6 +9,8 @@ import android.os.Parcelable
 import android.text.Editable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        toolbar.inflateMenu(R.menu.quick_dialog_menu)
+        setSupportActionBar(toolbar)
 
         intent.extras?.let { dynalist.resolveItemInBundle(it) }?.let { location = it }
 
@@ -84,45 +86,6 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
-        toolbar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.open_item_list -> {
-                    val bundle = Bundle()
-                    bundle.putParcelable(DynalistApp.EXTRA_DISPLAY_ITEM, location)
-                    bundle.putString(NavigationActivity.EXTRA_ITEM_TEXT, itemContents.text.toString())
-
-                    val intent = Intent(this, NavigationActivity::class.java)
-                    intent.putExtras(bundle)
-                    val transition = ActivityOptions.makeSceneTransitionAnimation(this,
-                            UtilPair.create(toolbar as View, "toolbar"),
-                            UtilPair.create(itemContents as View, "itemContents"))
-                    startActivity(intent, transition.toBundle())
-                    itemContents.text.clear()
-                }
-                R.id.open_large -> {
-                    val intent = Intent(this, AdvancedItemActivity::class.java)
-                    intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, location as Parcelable)
-                    intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
-                    intent.putExtra(AdvancedItemActivity.EXTRA_SELECT_BOOKMARK,
-                            itemLocation.visibility == View.VISIBLE)
-                    val transition = if (itemLocation.visibility == View.GONE) {
-                        ActivityOptions.makeSceneTransitionAnimation(this,
-                                UtilPair.create(toolbar as View, "toolbar"),
-                                UtilPair.create(itemContents as View, "itemContents"))
-                    } else {
-                        ActivityOptions.makeSceneTransitionAnimation(this,
-                                UtilPair.create(toolbar as View, "toolbar"),
-                                UtilPair.create(itemLocation as View, "itemLocation"),
-                                UtilPair.create(itemContents as View, "itemContents"))
-                    }
-                    startActivity(intent, transition.toBundle())
-                    itemContents.text.clear()
-                }
-                else -> return@setOnMenuItemClickListener false
-            }
-            return@setOnMenuItemClickListener true
-        }
-
         setupItemContentsTextField()
 
         submitButton.setOnClickListener {
@@ -140,6 +103,51 @@ class MainActivity : AppCompatActivity() {
         }
 
         DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.quick_dialog_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.open_item_list -> {
+                val bundle = Bundle()
+                bundle.putParcelable(DynalistApp.EXTRA_DISPLAY_ITEM, location)
+                bundle.putString(NavigationActivity.EXTRA_ITEM_TEXT, itemContents.text.toString())
+
+                val intent = Intent(this, NavigationActivity::class.java)
+                intent.putExtras(bundle)
+                val transition = ActivityOptions.makeSceneTransitionAnimation(this,
+                        UtilPair.create(toolbar as View, "toolbar"),
+                        UtilPair.create(itemContents as View, "itemContents"))
+                startActivity(intent, transition.toBundle())
+                itemContents.text.clear()
+                true
+            }
+            R.id.open_large -> {
+                val intent = Intent(this, AdvancedItemActivity::class.java)
+                intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, location as Parcelable)
+                intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
+                intent.putExtra(AdvancedItemActivity.EXTRA_SELECT_BOOKMARK,
+                        itemLocation.visibility == View.VISIBLE)
+                val transition = if (itemLocation.visibility == View.GONE) {
+                    ActivityOptions.makeSceneTransitionAnimation(this,
+                            UtilPair.create(toolbar as View, "toolbar"),
+                            UtilPair.create(itemContents as View, "itemContents"))
+                } else {
+                    ActivityOptions.makeSceneTransitionAnimation(this,
+                            UtilPair.create(toolbar as View, "toolbar"),
+                            UtilPair.create(itemLocation as View, "itemLocation"),
+                            UtilPair.create(itemContents as View, "itemContents"))
+                }
+                startActivity(intent, transition.toBundle())
+                itemContents.text.clear()
+                true
+            }
+            else -> false
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

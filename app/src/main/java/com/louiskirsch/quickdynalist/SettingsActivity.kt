@@ -1,8 +1,10 @@
 package com.louiskirsch.quickdynalist
 
 import android.os.Bundle
+import android.os.Handler
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NavUtils
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -26,6 +28,17 @@ class SettingsActivity: AppCompatActivity() {
                     true
                 }
                 onPreferenceChangeListener.onPreferenceChange(this, value)
+            }
+
+            (findPreference("display_theme") as ListPreference).apply {
+                setOnPreferenceChangeListener { _, newValue ->
+                    Handler().postDelayed({
+                        val mode = (newValue as String).toInt()
+                        AppCompatDelegate.setDefaultNightMode(mode)
+                        (activity as AppCompatActivity).delegate.applyDayNight()
+                    }, 100)
+                    true
+                }
             }
         }
     }

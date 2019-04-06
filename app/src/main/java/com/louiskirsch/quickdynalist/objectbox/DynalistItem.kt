@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist.objectbox
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Typeface
 import android.os.Parcel
 import android.os.Parcelable
@@ -11,6 +12,7 @@ import android.text.style.*
 import android.util.Log
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
+import com.louiskirsch.quickdynalist.text.ThemedSpan
 import com.louiskirsch.quickdynalist.utils.*
 import io.objectbox.annotation.*
 import io.objectbox.kotlin.boxFor
@@ -101,13 +103,17 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         val children = children.filter { !it.isChecked && !it.hidden }.let {
             if (maxItems == -1) it else it.take(maxItems)
         }
-        val colors = context.resources.getIntArray(R.array.itemColors)
         children.mapIndexed { idx, child ->
             child.getSpannableText(context).run {
                 if (isNotBlank()) {
                     setSpan(BulletSpan(15), 0, length, 0)
-                    if (child.color > 0)
-                        setSpan(BackgroundColorSpan(colors[child.color]), 0, length, 0)
+                    if (child.color > 0) {
+                        val span = ThemedSpan {
+                            val colors = it.getIntArray(R.array.itemColors)
+                            BackgroundColorSpan(colors[child.color])
+                        }
+                        setSpan(span, 0, length, 0)
+                    }
                     sb.append(this)
                     if (idx < children.size - 1) sb.append("\n")
                 }
@@ -139,8 +145,12 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         val spannable = SpannableStringBuilder(text).linkify()
         val dateFormat = DateFormat.getDateFormat(context)
         val timeFormat = DateFormat.getTimeFormat(context)
-        val spanHighlight = context.getColor(R.color.spanHighlight)
-        val codeColor = context.getColor(R.color.codeColor)
+        val highlightSpanCreator = { res: Resources ->
+            BackgroundColorSpan(res.getColor(R.color.spanHighlight))
+        }
+        val codeSpanCreator = { res: Resources ->
+            ForegroundColorSpan(res.getColor(R.color.codeColor))
+        }
 
         spannable.replaceAll(imageRegex) { "" }
         spannable.replaceAll(dateTimeRegex) {
@@ -156,7 +166,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 "\uD83D\uDCC5 ${context.getString(R.string.invalid_date)}"
             }
             SpannableString(replaceText).apply {
-                val bg = BackgroundColorSpan(spanHighlight)
+                val bg = ThemedSpan(highlightSpanCreator)
                 setSpan(bg, 3, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
             }
         }
@@ -175,7 +185,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                     val span = DynalistLinkSpan(this)
                     setSpan(span, 2, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
                 }
-                val bg = BackgroundColorSpan(spanHighlight)
+                val bg = ThemedSpan(highlightSpanCreator)
                 setSpan(bg, 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
             }
         }
@@ -200,9 +210,9 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
         spannable.replaceAll(inlineCodeRegex) {
             SpannableString(it.groupValues[1]).apply {
-                setSpan(BackgroundColorSpan(spanHighlight), 0, length,
+                setSpan(ThemedSpan(highlightSpanCreator), 0, length,
                         Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                setSpan(ForegroundColorSpan(codeColor), 0, length,
+                setSpan(ThemedSpan(codeSpanCreator), 0, length,
                         Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
             }
         }
@@ -213,7 +223,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             val tag = DynalistTag.find(it.groupValues[2])
             val range = it.groups[2]!!.range
 
-            val bg = BackgroundColorSpan(spanHighlight)
+            val bg = ThemedSpan(highlightSpanCreator)
             spannable.setSpan(bg, range.start, range.endInclusive + 1,
                     Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
             val tagSpan = DynalistTagSpan(tag)

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="itemBackgroundActivated">#474953</color>
+    <integer name="itemBackgroundTintMode">10</integer>
+    <color name="spanHighlight">#424242</color>
+    <color name="barBackgroundColor">@color/primary_material_dark</color>
+
+    <color name="itemColor0">#80FFFFFF</color>
+    <color name="itemColor1">#80F76439</color>
+    <color name="itemColor2">#80F19537</color>
+    <color name="itemColor3">#80ECC937</color>
+    <color name="itemColor4">#805BF02E</color>
+    <color name="itemColor5">#80389BF7</color>
+    <color name="itemColor6">#806C34F7</color>
+</resources>
