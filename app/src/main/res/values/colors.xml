@@ -8,8 +8,6 @@
     <color name="codeColor">#FF0000</color>
     <color name="searchHighlight">#4FC3F7</color>
 
-    <color name="textColorPrimary">#de000000</color>
-    <color name="textColorSecondary">#8a000000</color>
     <color name="chipIconTint">#E0E0E0</color>
 
     <color name="deleteColor">#F44336</color>

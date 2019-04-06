@@ -2,7 +2,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF">
+    android:background="@color/widgetBackground">
 
     <TextView
         android:id="@+id/appwidget_header"
@@ -15,7 +15,7 @@
         android:clickable="true"
         android:focusable="true"
         android:maxLines="1"
-        android:foreground="@drawable/abc_item_background_holo_light"
+        android:foreground="@drawable/widgetSelectableItemBackground"
         android:contentDescription="@string/appwidget_header"
         android:text="@string/appwidget_header"
         android:ellipsize="end"

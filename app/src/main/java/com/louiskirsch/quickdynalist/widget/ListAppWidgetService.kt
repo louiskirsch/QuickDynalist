@@ -7,6 +7,7 @@ import android.text.style.BackgroundColorSpan
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import androidx.appcompat.app.AppCompatDelegate
 import com.louiskirsch.quickdynalist.Dynalist
 import com.louiskirsch.quickdynalist.DynalistApp
 import com.louiskirsch.quickdynalist.R

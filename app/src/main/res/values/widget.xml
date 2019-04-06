@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widgetBackground">@color/background_material_light</color>
+    <color name="widgetTextColorPrimary">#de000000</color>
+    <color name="widgetTextColorSecondary">#8a000000</color>
+    <drawable name="widgetSelectableItemBackground">@drawable/abc_item_background_holo_light</drawable>
+</resources>
