@@ -46,6 +46,9 @@ dependencies {
     implementation "androidx.preference:preference:1.0.0"
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.github.timediv:MaterialShowcaseView:fix~dialog-SNAPSHOT'
+    implementation 'com.github.timediv:jlatexmath-android:android-SNAPSHOT'
+    implementation 'ru.noties:jlatexmath-android-font-cyrillic:0.1.0'
+    implementation 'ru.noties:jlatexmath-android-font-greek:0.1.0'
     implementation project(':hashkode')
 }
 

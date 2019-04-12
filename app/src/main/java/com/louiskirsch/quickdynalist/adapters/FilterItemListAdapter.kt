@@ -59,7 +59,7 @@ class FilterItemListAdapter(context: Context): RecyclerView.Adapter<FilterItemLi
         val context = holder.itemView.context
         val applySearchTerm: (Spannable) -> Unit = { highlightSearchTerm(it) }
         val item = items[position]
-        item.applyThemedSpans(context, includeParent = true)
+        item.applyTheme(context, includeParent = true)
         val parentText = item.spannableParent
         val text = item.spannableText.also(applySearchTerm)
         val notes = item.spannableNotes.also(applySearchTerm)

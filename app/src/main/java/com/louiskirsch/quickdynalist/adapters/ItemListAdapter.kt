@@ -2,9 +2,12 @@ package com.louiskirsch.quickdynalist.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Handler
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -18,10 +21,7 @@ import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.text.ThemedSpan
-import com.louiskirsch.quickdynalist.utils.ImageCache
-import com.louiskirsch.quickdynalist.utils.children
-import com.louiskirsch.quickdynalist.utils.helper
-import com.louiskirsch.quickdynalist.utils.isEllipsized
+import com.louiskirsch.quickdynalist.utils.*
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.item_list_item.view.*
@@ -114,12 +114,35 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
         spannableChildren
     }
 
-    fun applyThemedSpans(context: Context, includeParent: Boolean = false) {
+    private fun applyThemedSpans(context: Context, includeParent: Boolean) {
         if (includeParent)
             ThemedSpan.applyAll(context, spannableParent)
         ThemedSpan.applyAll(context, spannableText)
         ThemedSpan.applyAll(context, spannableNotes)
         ThemedSpan.applyAll(context, spannableChildren)
+    }
+
+    private fun applyImageTint(context: Context, includeParent: Boolean) {
+        val accentColor = context.resolveAttribute(android.R.attr.colorAccent)
+        val primaryColor = context.resolveAttribute(android.R.attr.textColorPrimary)
+        val secondaryColor = context.resolveAttribute(android.R.attr.textColorSecondary)
+
+        val list = (if (includeParent)listOf(Pair(spannableParent, accentColor))
+        else emptyList()) + listOf(
+                Pair(spannableText, primaryColor),
+                Pair(spannableChildren, secondaryColor),
+                Pair(spannableNotes, secondaryColor))
+
+        list.forEach { (text, color) ->
+            text.getSpans(0, text.length, ImageSpan::class.java).forEach {
+                it.drawable.mutate().setTint(color)
+            }
+        }
+    }
+
+    fun applyTheme(context: Context, includeParent: Boolean = false) {
+        applyThemedSpans(context, includeParent)
+        applyImageTint(context, includeParent)
     }
 
     override fun equals(other: Any?) = compareFields(other) {
@@ -301,7 +324,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
             holder.itemParent.text = item.spannableParent
         }
 
-        item.applyThemedSpans(context)
+        item.applyTheme(context)
         holder.itemText.text = item.spannableText
         holder.itemNotes.visibility = if (item.spannableNotes.isBlank()) View.GONE else View.VISIBLE
         holder.itemNotes.text = item.spannableNotes

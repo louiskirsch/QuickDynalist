@@ -3,6 +3,7 @@ package com.louiskirsch.quickdynalist.objectbox
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Parcel
 import android.os.Parcelable
@@ -10,6 +11,7 @@ import android.text.*
 import android.text.format.DateFormat
 import android.text.style.*
 import android.util.Log
+import androidx.core.graphics.drawable.DrawableCompat
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.text.ThemedSpan
@@ -19,6 +21,8 @@ import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
+import org.scilab.forge.jlatexmath.TeXConstants
+import ru.noties.jlatexmath.JLatexMathDrawable
 import java.io.Serializable
 import java.lang.Exception
 import java.text.ParseException
@@ -219,6 +223,23 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
         spannable.replaceAll(whitespaceRegex) { "" }
 
+        latexRegex.findAll(spannable).forEach {
+            val latex = it.groupValues[1]
+            val range = it.range
+            val drawable = JLatexMathDrawable.builder(latex).apply {
+                textSize(70f)
+                fitCanvas(true)
+                padding(8)
+                background(Color.TRANSPARENT)
+                style(TeXConstants.STYLE_TEXT)
+                align(JLatexMathDrawable.ALIGN_LEFT)
+            }.build()
+
+            val span = ImageSpan(drawable)
+            spannable.setSpan(span, range.start, range.endInclusive + 1,
+                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+        }
+
         tagRegex.findAll(spannable).forEach {
             val tag = DynalistTag.find(it.groupValues[2])
             val range = it.groups[2]!!.range
@@ -347,6 +368,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         private val italicRegex = Regex("""__(.*?)__""")
         private val inlineCodeRegex = Regex("""`(.*?)`""")
         private val lineThroughRegex = Regex("""~~(.*?)~~""")
+        private val latexRegex = Regex("""\$\$(.*?)\$\$""")
         private val linkRegex = Regex("""\[(.*?)]\((.*?)\)""")
         private val imageRegex = Regex("""!\[(.*?)]\((.*?)\)""")
         private val dynalistLinkRegex = Regex("""\[(.*?)]\(https://dynalist\.io/d/(.*?)#z=(.*?)\)""")
