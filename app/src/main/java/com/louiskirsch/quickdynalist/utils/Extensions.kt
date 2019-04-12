@@ -16,11 +16,13 @@ import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Parcel
 import android.text.*
+import android.text.style.ImageSpan
 import android.util.TypedValue
 import android.view.ViewGroup
 import android.widget.TextView
 import kotlin.math.roundToInt
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.widget.RemoteViews
 import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
@@ -195,8 +197,17 @@ fun Resources.dpToPixels(dp: Float): Float {
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics)
 }
 
-fun Context.resolveAttribute(attr: Int): Int {
+fun Context.resolveColorAttribute(attr: Int): Int {
     val typedValue = TypedValue()
     theme.resolveAttribute(attr, typedValue, true)
-    return typedValue.data
+    val colorRes = if (typedValue.resourceId != 0) typedValue.resourceId else typedValue.data
+    return getColor(colorRes)
+}
+
+fun TextView.scaleImageSpans() {
+    val spannable = text as SpannedString
+    spannable.getSpans(0, text.length, ImageSpan::class.java).forEach {
+        val width = it.drawable.bounds.width()
+        it.drawable.setBounds(0, 0, width, (lineHeight * 1.5f).toInt())
+    }
 }

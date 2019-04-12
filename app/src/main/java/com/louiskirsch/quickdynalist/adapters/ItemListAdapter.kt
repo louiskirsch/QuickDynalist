@@ -2,7 +2,6 @@ package com.louiskirsch.quickdynalist.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Handler
 import android.text.Spannable
@@ -123,11 +122,11 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
     }
 
     private fun applyImageTint(context: Context, includeParent: Boolean) {
-        val accentColor = context.resolveAttribute(android.R.attr.colorAccent)
-        val primaryColor = context.resolveAttribute(android.R.attr.textColorPrimary)
-        val secondaryColor = context.resolveAttribute(android.R.attr.textColorSecondary)
+        val accentColor = context.resolveColorAttribute(android.R.attr.colorAccent)
+        val primaryColor = context.resolveColorAttribute(android.R.attr.textColorPrimary)
+        val secondaryColor = context.resolveColorAttribute(android.R.attr.textColorSecondary)
 
-        val list = (if (includeParent)listOf(Pair(spannableParent, accentColor))
+        val list = (if (includeParent) listOf(Pair(spannableParent, accentColor))
         else emptyList()) + listOf(
                 Pair(spannableText, primaryColor),
                 Pair(spannableChildren, secondaryColor),
@@ -135,7 +134,7 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
 
         list.forEach { (text, color) ->
             text.getSpans(0, text.length, ImageSpan::class.java).forEach {
-                it.drawable.mutate().setTint(color)
+                it.drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
             }
         }
     }
@@ -326,10 +325,13 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
 
         item.applyTheme(context)
         holder.itemText.text = item.spannableText
+        holder.itemText.scaleImageSpans()
         holder.itemNotes.visibility = if (item.spannableNotes.isBlank()) View.GONE else View.VISIBLE
         holder.itemNotes.text = item.spannableNotes
+        holder.itemNotes.scaleImageSpans()
         holder.itemChildren.visibility = if (item.spannableChildren.isBlank()) View.GONE else View.VISIBLE
         holder.itemChildren.text = item.spannableChildren
+        holder.itemChildren.scaleImageSpans()
         holder.itemView.setOnClickListener { onClickListener?.invoke(idToItem[clientId]!!.item) }
         holder.itemView.isActivated = selectedItem == item.item
         holder.itemView.isPressed = highlightedPosition == position

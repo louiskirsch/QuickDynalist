@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.text.ThemedSpan
+import com.louiskirsch.quickdynalist.utils.scaleImageSpans
 import kotlinx.android.synthetic.main.search_list_item.view.*
 
 class FilterItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -67,11 +68,15 @@ class FilterItemListAdapter(context: Context): RecyclerView.Adapter<FilterItemLi
 
         holder.apply {
             itemParent.text = parentText
+            itemParent.scaleImageSpans()
             itemText.text = text
+            itemText.scaleImageSpans()
             itemNotes.visibility = if (notes.isBlank()) View.GONE else View.VISIBLE
             itemNotes.text = notes
+            itemNotes.scaleImageSpans()
             itemChildren.visibility = if (children.isBlank()) View.GONE else View.VISIBLE
             itemChildren.text = children
+            itemChildren.scaleImageSpans()
         }
     }
 

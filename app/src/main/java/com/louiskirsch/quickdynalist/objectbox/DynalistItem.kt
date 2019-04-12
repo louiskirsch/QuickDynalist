@@ -227,15 +227,15 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             val latex = it.groupValues[1]
             val range = it.range
             val drawable = JLatexMathDrawable.builder(latex).apply {
-                textSize(70f)
+                textSize(50f)
                 fitCanvas(true)
-                padding(8)
+                padding(0)
                 background(Color.TRANSPARENT)
                 style(TeXConstants.STYLE_TEXT)
                 align(JLatexMathDrawable.ALIGN_LEFT)
             }.build()
 
-            val span = ImageSpan(drawable)
+            val span = ImageSpan(drawable, ImageSpan.ALIGN_BOTTOM)
             spannable.setSpan(span, range.start, range.endInclusive + 1,
                     Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         }
