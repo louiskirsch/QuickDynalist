@@ -208,6 +208,6 @@ fun TextView.scaleImageSpans() {
     val spannable = text as SpannedString
     spannable.getSpans(0, text.length, ImageSpan::class.java).forEach {
         val width = it.drawable.bounds.width()
-        it.drawable.setBounds(0, 0, width, (lineHeight * 1.5f).toInt())
+        it.drawable.setBounds(0, 0, width, (lineHeight * 1.3f).toInt())
     }
 }
