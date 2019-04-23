@@ -256,7 +256,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
     fun populateChildren(itemMap: Map<Pair<String, String>, DynalistItem>) {
         childrenIds!!.forEachIndexed { idx, childId ->
-            itemMap[Pair(serverFileId, childId)]!!.let { child ->
+            itemMap[Pair(serverFileId, childId)]?.let { child ->
                 if (child.syncJob == null) {
                     child.serverParentId = serverItemId
                     child.parent.target = this
