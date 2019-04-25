@@ -335,7 +335,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             val stripped = note.replace(dynalistLinkRegex, "").trim()
             note = if (value != null) {
                 val link = "[${value.name}](https://dynalist.io/d/${value.serverFileId}#z=${value.serverItemId})"
-                "$link\n$stripped"
+                if (stripped.isNotBlank()) "$link\n$stripped" else link
             } else {
                 stripped
             }
