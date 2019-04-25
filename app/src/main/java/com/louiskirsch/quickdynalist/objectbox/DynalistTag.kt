@@ -13,6 +13,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
 import com.louiskirsch.quickdynalist.DynalistApp
 import com.louiskirsch.quickdynalist.R
+import com.louiskirsch.quickdynalist.text.EnhancedMovementMethod
 import io.objectbox.Box
 import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
@@ -130,7 +131,7 @@ class DynalistTag(): Serializable {
 
         fun setupTagDetection(editText: EditText, autoDetectTagNames: Boolean) {
             class TagCandidate(val tag: DynalistTag)
-            editText.movementMethod = LinkMovementMethod.getInstance()
+            editText.movementMethod = EnhancedMovementMethod.instance
             editText.addTextChangedListener(object: TextWatcher {
                 var processingCandidates = false
 
