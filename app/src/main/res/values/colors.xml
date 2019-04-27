@@ -13,7 +13,7 @@
     <color name="deleteColor">#F44336</color>
     <color name="editColor">#4CAF50</color>
 
-    <color name="itemBackground">?android:attr/windowBackground</color>
+    <color name="itemBackground">#fafafa</color>
     <color name="itemBackgroundActivated">#BDBDBD</color>
     <integer name="itemBackgroundTintMode">0xE</integer>
     <color name="barBackgroundColor">#EEEEEE</color>

@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -27,6 +28,7 @@ class ProcessTextActivity : AppCompatActivity() {
     private lateinit var location: DynalistItem
     private lateinit var bookmarks: List<DynalistItem>
 
+    @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         EventBus.getDefault().register(this)

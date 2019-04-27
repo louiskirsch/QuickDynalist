@@ -7,6 +7,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
 
@@ -23,8 +24,8 @@ class SwipeBackgroundDrawer(context: Context, swipeLeftDrawable: Int, swipeRight
     private val swipeLeftDimensions = Dimensions(this.swipeLeftDrawable)
     private val swipeRightDimensions = Dimensions(this.swipeRightDrawable)
     private val background = ColorDrawable()
-    private val swipeLeftColor = context.getColor(swipeLeftColor)
-    private val swipeRightColor = context.getColor(swipeRightColor)
+    private val swipeLeftColor = ContextCompat.getColor(context, swipeLeftColor)
+    private val swipeRightColor = ContextCompat.getColor(context, swipeRightColor)
     private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
 
     fun draw(c: Canvas, viewHolder: RecyclerView.ViewHolder, dX: Float, isCurrentlyActive: Boolean) {

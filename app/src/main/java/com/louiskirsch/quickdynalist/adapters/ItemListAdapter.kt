@@ -7,10 +7,7 @@ import android.os.Handler
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ImageSpan
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Button
 import android.widget.PopupWindow
 import android.widget.TextView
@@ -39,6 +36,8 @@ class DynalistItemPopupMenu(context: Context, anchor: View, isImage: Boolean) {
     private val colorPopup = PopupWindow(context, null, R.attr.popupMenuStyle).apply {
         contentView = colorPicker
         isFocusable = true
+        width = WindowManager.LayoutParams.WRAP_CONTENT
+        height = WindowManager.LayoutParams.WRAP_CONTENT
     }
 
     init {

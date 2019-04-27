@@ -189,4 +189,5 @@
     <string name="tutorial_list_content">Quick Dynalist is designed to capture your thoughts instantly. But it can do so much more. When you are ready, jump into the full experience by touching on the list icon.</string>
     <string name="action_record_speech">Record voice item</string>
     <string name="shortcut_record_speech">Voice item</string>
+    <string name="error_speech_recognition_not_available">Unfortunately, speech recognition is not available on this device.</string>
 </resources>

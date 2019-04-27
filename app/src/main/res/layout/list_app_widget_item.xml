@@ -10,7 +10,8 @@
     android:layout_width="match_parent"
     android:descendantFocusability="blocksDescendants"
     android:foreground="@drawable/widgetSelectableItemBackground"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:ignore="UnusedAttribute">
 
     <TextView
         android:id="@+id/itemParent"

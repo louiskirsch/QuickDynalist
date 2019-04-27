@@ -1,11 +1,13 @@
 package com.louiskirsch.quickdynalist.utils
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.speech.RecognizerIntent
 import androidx.fragment.app.Fragment
 import com.louiskirsch.quickdynalist.R
+import org.jetbrains.anko.toast
 
 class SpeechRecognitionHelper {
 
@@ -23,7 +25,11 @@ class SpeechRecognitionHelper {
         }
         val speechRecognitionRequestCode =
                 context.resources.getInteger(R.integer.request_code_speech_recognition)
-        starter(intent, speechRecognitionRequestCode)
+        try {
+            starter(intent, speechRecognitionRequestCode)
+        } catch (e: ActivityNotFoundException) {
+            context.toast(R.string.error_speech_recognition_not_available)
+        }
     }
 
     fun dispatchResult(context:Context, requestCode: Int, resultCode: Int, data: Intent?,

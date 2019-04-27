@@ -4,8 +4,9 @@
     <color name="colorPrimaryDark">@color/primary_dark_material_dark</color>
     <color name="colorAccent">#1565C0</color>
 
-    <color name="itemBackgroundActivated">#474953</color>
-    <integer name="itemBackgroundTintMode">10</integer>
+    <color name="itemBackground">#2e2e2e</color>
+    <color name="itemBackgroundActivated">#424242</color>
+    <integer name="itemBackgroundTintMode">15</integer>
     <color name="spanHighlight">#424242</color>
     <color name="barBackgroundColor">@color/primary_material_dark</color>
 

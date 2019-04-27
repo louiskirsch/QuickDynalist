@@ -10,7 +10,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.louiskirsch.quickdynalist"
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 35
         versionName "2.6.2"

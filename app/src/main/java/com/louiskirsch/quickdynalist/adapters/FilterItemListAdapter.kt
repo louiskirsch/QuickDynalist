@@ -6,6 +6,7 @@ import android.text.style.BackgroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
@@ -23,7 +24,7 @@ class FilterItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView
 class FilterItemListAdapter(context: Context): RecyclerView.Adapter<FilterItemListViewHolder>() {
 
     private val items = ArrayList<CachedDynalistItem>()
-    private val highlightColor = context.getColor(R.color.searchHighlight)
+    private val highlightColor = ContextCompat.getColor(context, R.color.searchHighlight)
 
     var searchTerm: String = ""
         set(value) {

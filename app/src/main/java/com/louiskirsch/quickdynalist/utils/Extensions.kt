@@ -25,6 +25,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.RemoteViews
 import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.network.DynalistResponse
@@ -200,8 +201,10 @@ fun Resources.dpToPixels(dp: Float): Float {
 fun Context.resolveColorAttribute(attr: Int): Int {
     val typedValue = TypedValue()
     theme.resolveAttribute(attr, typedValue, true)
-    val colorRes = if (typedValue.resourceId != 0) typedValue.resourceId else typedValue.data
-    return getColor(colorRes)
+    return if (typedValue.resourceId != 0)
+        ContextCompat.getColor(this, typedValue.resourceId)
+    else
+        typedValue.data
 }
 
 fun TextView.scaleImageSpans() {
