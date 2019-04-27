@@ -136,7 +136,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                                        maxDepth: Int = 0, depth: Int = 0) {
         if (depth > maxDepth)
             return
-        children.sortedBy { it.position }.forEachIndexed { idx, child ->
+        children.sortedBy { it.position }.forEach { child ->
             repeat(depth) { sb.append("    ") }
             sb.append("- ")
             sb.append(child.getSpannableText(context))
