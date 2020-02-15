@@ -277,8 +277,18 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         }
     }
 
-    val markedAsPrimaryInbox: Boolean
-        get() = markedAsBookmark && "#primary" in tags
+    var markedAsPrimaryInbox: Boolean
+        get() = markedAsBookmark && primaryTagMarker in tags
+        set(value) {
+            if (value && !markedAsPrimaryInbox) {
+                note = "$primaryTagMarker ${tagMarkers[0]} $note"
+            }
+            if (!value && markedAsPrimaryInbox) {
+                name = strippedMarkersName
+                note = strippedMarkersNote
+            }
+            isInbox = value
+        }
 
     var markedAsBookmark: Boolean
         get() = tagMarkers.any { it in tags }
@@ -355,6 +365,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         const val LOCATION_TYPE = "item"
         val box get() = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
 
+        private val primaryTagMarker = "#primary"
         private val tagMarkers = listOf("#inbox", "#quickdynalist")
         @SuppressLint("SimpleDateFormat")
         private val dateReader = SimpleDateFormat("yyyy-MM-dd")

@@ -6,7 +6,6 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 
 class AuthenticatedEvent(val success: Boolean)
 class ItemEvent(val success: Boolean, val retrying: Boolean = false)
-class NoInboxEvent
 class RateLimitDelay(val delay: Long, val jobTag: String)
 class DynalistLocateEvent(val item: DynalistItem)
 class DynalistFilterEvent(val filter: DynalistItemFilter)

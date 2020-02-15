@@ -79,6 +79,7 @@ class Dynalist(private val context: Context) {
         get() = DynalistApp.instance.boxStore.boxFor()
 
     val inbox: DynalistItem
+        // TODO return nullable here and handle correctly
         get() = itemBox.query { equal(DynalistItem_.isInbox, true) } .findFirst()!!
 
     fun subscribe() {
@@ -103,24 +104,6 @@ class Dynalist(private val context: Context) {
             val job = SyncJob(requireUnmeteredNetwork = false, isManual = true)
             DynalistApp.instance.jobManager.addJobInBackground(job)
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onNoInboxEvent(event: NoInboxEvent) {
-        if (errorDialogShown)
-            return
-
-        errorDialogShown = true
-        context.alert {
-            messageResource = R.string.no_inbox_configured
-            titleResource = R.string.dialog_title_error
-            onCancelled {
-                errorDialogShown = false
-            }
-            positiveButton(android.R.string.ok) {
-                errorDialogShown = false
-            }
-        }.show()
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)

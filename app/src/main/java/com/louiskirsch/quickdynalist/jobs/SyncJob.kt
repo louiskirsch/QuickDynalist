@@ -181,7 +181,10 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                 ?: return null
         service.deleteItem(DeleteItemRequest(inboxFileId, response.node_id!!, token))
                 .execRespectRateLimit(delayCallback)
-        return DynalistItem.byServerId(inboxFileId, inboxId)
+        val inbox = DynalistItem.byServerId(inboxFileId, inboxId) ?: return null
+        val job = EditItemJob(inbox.apply { inbox.markedAsPrimaryInbox = true })
+        DynalistApp.instance.jobManager.addJobInBackground(job)
+        return inbox
     }
 
     private fun findNewVersionedDocuments(token: String): List<Pair<File, Long>> {

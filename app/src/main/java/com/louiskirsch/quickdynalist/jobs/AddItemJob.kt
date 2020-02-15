@@ -28,15 +28,10 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
 
     private fun insertAPIRequest(): DynalistResponse {
         val token = Dynalist(applicationContext).token
-        return if (parent.isInbox && !parent.markedAsPrimaryInbox) {
-            dynalistService.addToInbox(InboxRequest(newItem.name, newItem.note, token!!))
-                    .execute().body()!!
-        } else {
-            requireItemId(parent)
-            val request = InsertItemRequest(parent.serverFileId!!, parent.serverItemId!!,
-                    newItem.name, newItem.note, token!!)
-            dynalistService.addToDocument(request).execute().body()!!
-        }
+        requireItemId(parent)
+        val request = InsertItemRequest(parent.serverFileId!!, parent.serverItemId!!,
+                newItem.name, newItem.note, token!!)
+        return dynalistService.addToDocument(request).execute().body()!!
     }
 
     @Throws(Throwable::class)

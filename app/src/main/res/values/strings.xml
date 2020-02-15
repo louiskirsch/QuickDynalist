@@ -22,12 +22,9 @@
     <string name="item_contents_required">Item text is required</string>
     <string name="item_date_required">A date is required if time is specified</string>
     <string name="unset">Delete</string>
-    <string name="no_inbox_configured">There is no inbox configured. Please visit your Dynalist and select \"Set as inbox\" in the menu of an item. No panic, we will try to add this item again later. Alternatively, add the tags #primary #inbox to any item in your Dynalist.</string>
     <string name="dialog_title_error">Error</string>
     <string name="item_change_target_location">Change location</string>
     <string name="open_item_list">Open item list</string>
-    <string name="inbox_help">About your primary inbox</string>
-    <string name="inbox_help_text">Your primary inbox will be out of date because we can not detect where your Dynalist inbox is located. To change this, please add the tags #primary #inbox to your inbox item.</string>
     <string name="open_in_dynalist">Open in dynalist</string>
     <string name="invalid_intent_error">Sorry. We can\'t add this item to your Dynalist.</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

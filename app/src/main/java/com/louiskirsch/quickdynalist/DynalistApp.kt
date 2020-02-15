@@ -6,15 +6,14 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import com.birbit.android.jobqueue.scheduling.FrameworkJobSchedulerService.*
 import com.louiskirsch.quickdynalist.jobs.JobService
+import com.louiskirsch.quickdynalist.jobs.SyncJob
 import com.louiskirsch.quickdynalist.network.DynalistService
-import com.louiskirsch.quickdynalist.objectbox.DynalistItem
-import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
-import com.louiskirsch.quickdynalist.objectbox.DynalistTag
-import com.louiskirsch.quickdynalist.objectbox.MyObjectBox
+import com.louiskirsch.quickdynalist.objectbox.*
 import com.squareup.picasso.Picasso
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
+import io.objectbox.kotlin.query
 import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.doAsync
 import retrofit2.Retrofit
@@ -132,6 +131,14 @@ class DynalistApp : Application() {
                     it.notifyModified(now)
                 }})
             }, null)
+        }
+        if (version in 2..36) {
+            // Remove outdated inbox
+            DynalistItem.box.query {
+                equal(DynalistItem_.serverItemId, "inbox")
+            }.remove()
+            if (dynalist.isAuthenticated)
+                SyncJob.forceSync(false)
         }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE
     }

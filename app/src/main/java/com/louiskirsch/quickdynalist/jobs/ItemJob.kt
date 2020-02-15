@@ -43,15 +43,6 @@ abstract class ItemJob: Job(Params(1)
                 EventBus.getDefault().post(AuthenticatedEvent(false))
                 throw NotAuthenticatedException()
             }
-            body.isInboxNotConfigured -> {
-                val dynalist = Dynalist(applicationContext)
-                if (!dynalist.inbox.markedAsPrimaryInbox) {
-                    EventBus.getDefault().post(NoInboxEvent())
-                    throw NoInboxException()
-                } else {
-                    throw InvalidJobException("User configured a new inbox.")
-                }
-            }
             body.isRequestUnfulfillable -> throw InvalidJobException(body.errorDesc)
             !body.isOK -> throw BackendException(body.errorDesc)
         }

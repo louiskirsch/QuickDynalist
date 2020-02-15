@@ -69,17 +69,13 @@ class ItemListFragment : BaseItemListFragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (location.isInbox && !location.markedAsPrimaryInbox)
-            inflater.inflate(R.menu.item_list_activity_primary_inbox_menu, menu)
-        else {
-            inflater.inflate(R.menu.item_list_activity_menu, menu)
-            super.onCreateOptionsMenu(menu, inflater)
-            menu.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
-            menu.findItem(R.id.toggle_bookmark).isChecked = location.isBookmark
-            menu.findItem(R.id.toggle_show_checked_items).isChecked = location.areCheckedItemsVisible
-            if (location.serverItemId == null) {
-                menu.findItem(R.id.open_in_dynalist).isVisible = false
-            }
+        inflater.inflate(R.menu.item_list_activity_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
+        menu.findItem(R.id.toggle_bookmark).isChecked = location.isBookmark
+        menu.findItem(R.id.toggle_show_checked_items).isChecked = location.areCheckedItemsVisible
+        if (location.serverItemId == null) {
+            menu.findItem(R.id.open_in_dynalist).isVisible = false
         }
     }
 
@@ -117,7 +113,6 @@ class ItemListFragment : BaseItemListFragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.inbox_help -> showInboxHelp()
             R.id.open_in_dynalist -> openInDynalist()
             R.id.goto_parent -> openDynalistItem(location.parent.target)
             R.id.share -> shareDynalistItem()
@@ -153,16 +148,6 @@ class ItemListFragment : BaseItemListFragment() {
         adapter.showChecklist = checked
         location.isChecklist = checked
         doAsync { DynalistItem.updateGlobally(location) { it.isChecklist = checked }}
-        return true
-    }
-
-    private fun showInboxHelp(): Boolean {
-        context!!.alert {
-            titleResource = R.string.inbox_help
-            messageResource = R.string.inbox_help_text
-            okButton {}
-            show()
-        }
         return true
     }
 
