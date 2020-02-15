@@ -355,8 +355,6 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         const val LOCATION_TYPE = "item"
         val box get() = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
 
-        fun newInbox() = DynalistItem(null, null, "inbox",
-                "\uD83D\uDCE5 Inbox", "", emptyList(), isInbox = true, isBookmark = true)
         private val tagMarkers = listOf("#inbox", "#quickdynalist")
         @SuppressLint("SimpleDateFormat")
         private val dateReader = SimpleDateFormat("yyyy-MM-dd")

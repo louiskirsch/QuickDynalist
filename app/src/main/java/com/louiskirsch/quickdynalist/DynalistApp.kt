@@ -78,7 +78,6 @@ class DynalistApp : Application() {
         if (version < 12) {
             doAsync {
                 jobManager.clear()
-                DynalistItem.box.put(DynalistItem.newInbox().apply { notifyModified() })
                 if (dynalist.isAuthenticated)
                     dynalist.sync()
             }

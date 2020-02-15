@@ -190,4 +190,5 @@
     <string name="action_record_speech">Record voice item</string>
     <string name="shortcut_record_speech">Voice item</string>
     <string name="error_speech_recognition_not_available">Unfortunately, speech recognition is not available on this device.</string>
+    <string name="detect_inbox_item">Quick Dynalist is detecting your inbox. This item can be deleted.</string>
 </resources>

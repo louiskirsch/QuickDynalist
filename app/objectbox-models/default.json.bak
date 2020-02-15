@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:1068626277769387505",
-      "lastPropertyId": "25:5846196620534722247",
+      "lastPropertyId": "26:41460099890070579",
       "name": "DynalistItem",
       "properties": [
         {
@@ -74,10 +74,6 @@
           "name": "areCheckedItemsVisible"
         },
         {
-          "id": "17:8109775206210945534",
-          "name": "lastModified"
-        },
-        {
           "id": "18:6618574385164320569",
           "indexId": "11:6344156678285359920",
           "name": "metaDataId"
@@ -110,6 +106,10 @@
           "id": "25:5846196620534722247",
           "indexId": "13:5532784840759966418",
           "name": "metaLinkedItemId"
+        },
+        {
+          "id": "26:41460099890070579",
+          "name": "modified"
         }
       ],
       "relations": [
@@ -267,7 +267,8 @@
   ],
   "retiredPropertyUids": [
     8027434694088666144,
-    7236153048786427648
+    7236153048786427648,
+    8109775206210945534
   ],
   "retiredRelationUids": [],
   "version": 1

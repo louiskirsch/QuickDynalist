@@ -29,11 +29,15 @@ interface DynalistService {
 
     @POST("doc/edit")
     fun editItem(@Body request: EditItemRequest): Call<DynalistResponse>
+
+    @POST("doc/check_for_updates")
+    fun checkForUpdates(@Body request: VersionsRequest): Call<VersionResponse>
 }
 
 class AuthenticatedRequest(val token: String)
 class InboxRequest(val content: String, val note: String, val token: String)
 class ReadDocumentRequest(val file_id: String, val token: String)
+class VersionsRequest(val file_ids: Array<String>, val token: String)
 
 class InsertItemRequest(val file_id: String, parent_id: String,
                         content: String, note: String, val token: String) {
@@ -101,6 +105,10 @@ open class DynalistResponse {
 
     val errorDesc: String
         get() = "Code: $_code; Message: $_msg"
+}
+
+class VersionResponse: DynalistResponse() {
+    val versions: Map<String, Long>? = null
 }
 
 class InboxItemResponse: DynalistResponse() {
