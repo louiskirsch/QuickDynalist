@@ -2,10 +2,12 @@ package com.louiskirsch.quickdynalist
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.EditText
+import androidx.core.content.FileProvider
 import androidx.preference.PreferenceManager
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
 import com.louiskirsch.quickdynalist.jobs.SyncJob
@@ -20,6 +22,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.*
+import java.io.File
 import java.util.*
 
 class Dynalist(private val context: Context) {
@@ -36,7 +39,7 @@ class Dynalist(private val context: Context) {
     private val syncFrequency
         get() = settings.getInt("sync_frequency", 5)
 
-   val displayChildrenCount
+    val displayChildrenCount
         get() = settings.getString("display_children_count", "5")!!.toInt()
 
     val shouldDetectTags
@@ -49,6 +52,10 @@ class Dynalist(private val context: Context) {
         val default = context.resources.getInteger(R.integer.pref_default_display_theme)
         return settings.getString("display_theme", null)?.toInt() ?: default
     }
+
+    var syncMobileData: Boolean
+        get() = settings.getBoolean("sync_mobile_data", false)
+        set(value) = settings.edit().putBoolean("sync_mobile_data", value).apply()
 
     var token: String?
         get() = preferences.getString("TOKEN", "NONE")
@@ -78,9 +85,8 @@ class Dynalist(private val context: Context) {
     private val filterBox: Box<DynalistItemFilter>
         get() = DynalistApp.instance.boxStore.boxFor()
 
-    val inbox: DynalistItem
-        // TODO return nullable here and handle correctly
-        get() = itemBox.query { equal(DynalistItem_.isInbox, true) } .findFirst()!!
+    val inbox: DynalistItem?
+        get() = itemBox.query { equal(DynalistItem_.isInbox, true) } .findFirst()
 
     fun subscribe() {
         EventBus.getDefault().register(this)
@@ -95,14 +101,11 @@ class Dynalist(private val context: Context) {
         EventBus.getDefault().unregister(this)
     }
 
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onAuthenticationEvent(event: AuthenticatedEvent) {
         if (!event.success) {
-            context.toast(R.string.token_invalid)
             authenticate()
-        } else {
-            val job = SyncJob(requireUnmeteredNetwork = false, isManual = true)
-            DynalistApp.instance.jobManager.addJobInBackground(job)
         }
     }
 
@@ -143,27 +146,8 @@ class Dynalist(private val context: Context) {
     }
 
     fun sync(isManual: Boolean = false) {
-        if (!settings.getBoolean("sync_automatic", true))
+        if (isSyncing || !settings.getBoolean("sync_automatic", true))
             return
-        if (!isManual && !settings.contains("sync_mobile_data")) {
-            context.alert {
-                isCancelable = false
-                titleResource = R.string.dialog_title_sync_mobile_data
-                messageResource = R.string.dialog_message_sync_mobile_data
-                positiveButton(R.string.confirm_sync_mobile_data) {
-                    settings.edit().putBoolean("sync_mobile_data", true).apply()
-                    sync(isManual)
-                }
-                negativeButton(R.string.confirm_no_sync_mobile_data) {
-                    settings.edit().putBoolean("sync_mobile_data", false).apply()
-                    sync(isManual)
-                }
-                show()
-            }
-            return
-        }
-        if (isSyncing) return
-        val syncMobileData = settings.getBoolean("sync_mobile_data", false)
         val job = SyncJob(!syncMobileData, isManual)
         DynalistApp.instance.jobManager.addJobInBackground(job)
     }
@@ -171,39 +155,9 @@ class Dynalist(private val context: Context) {
     fun authenticate() {
         if (isAuthenticating)
             return
-
-        context.alert(R.string.auth_instructions) {
-            isCancelable = false
-            positiveButton(R.string.auth_start) {
-                showTokenDialog()
-                openTokenGenerationBrowser()
-            }
-        }.show()
-    }
-
-    private fun showTokenDialog() {
-        val builder = AlertDialog.Builder(context)
-        val view = LayoutInflater.from(context).inflate(R.layout.activity_auth, null)
-        builder.setMessage(R.string.auth_copy_instructions)
-                .setCancelable(false)
-                .setView(view)
-                .setPositiveButton(R.string.auth_accept_token) { _, _ ->
-                    val tokenField = view.findViewById<EditText>(R.id.auth_token)
-                    val token = tokenField.text.toString()
-                    val jobManager = DynalistApp.instance.jobManager
-                    val job = VerifyTokenJob(token)
-                    authDialog = null
-                    jobManager.addJobInBackground(job)
-                }
-                .setOnDismissListener {
-                    authDialog = null
-                }
-        authDialog = builder.create()
-        authDialog!!.show()
-    }
-
-    private fun openTokenGenerationBrowser() {
-        context.browse("https://dynalist.io/developer")
+        context.startActivity(Intent(context, WizardActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        })
     }
 
     fun resolveFilterInBundle(bundle: Bundle): DynalistItemFilter? {
@@ -230,5 +184,30 @@ class Dynalist(private val context: Context) {
             return item
         }
         return null
+    }
+
+    fun sendBugReport(): Boolean {
+        val logsPath = File(context.cacheDir, "logs-cache")
+        logsPath.mkdir()
+        val outputFile = logsPath.resolve("quick-dynalist-logs.txt")
+        try {
+            Runtime.getRuntime().exec( "logcat -f " + outputFile.absolutePath)
+
+            val logUri = FileProvider.getUriForFile(context,
+                    "com.louiskirsch.quickdynalist.fileprovider", outputFile)
+            Intent(Intent.ACTION_SEND).apply {
+                type = "vnd.android.cursor.dir/email"
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(context.getString(R.string.bug_report_email)))
+                putExtra(Intent.EXTRA_STREAM, logUri)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                val subject = context.getString(R.string.bug_report_subject, BuildConfig.VERSION_NAME)
+                putExtra(Intent.EXTRA_SUBJECT, subject)
+                val intentTitle = context.getString(R.string.bug_report_intent_title)
+                context.startActivity(Intent.createChooser(this, intentTitle))
+            }
+        } catch (e: Exception) {
+            context.toast(R.string.error_log_collection)
+        }
+        return true
     }
 }

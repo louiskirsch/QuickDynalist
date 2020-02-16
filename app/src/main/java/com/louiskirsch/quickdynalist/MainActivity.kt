@@ -28,7 +28,6 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.*
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import android.util.Pair as UtilPair
 
 class MainActivity : AppCompatActivity() {
@@ -211,7 +210,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateSubmitEnabled() {
-        val enabled = dynalist.isAuthenticated && !itemContents!!.text.toString().isEmpty()
+        val enabled = dynalist.isAuthenticated && itemContents!!.text.toString().isNotEmpty()
         submitButton!!.isEnabled = enabled
         submitCloseButton!!.isEnabled = enabled
     }
@@ -219,23 +218,6 @@ class MainActivity : AppCompatActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onAuthenticationEvent(event: AuthenticatedEvent) {
         updateSubmitEnabled()
-        if (event.success)
-            showTutorial()
-    }
-
-    private fun showTutorial() {
-        val listButton = toolbar.findViewById<View>(R.id.open_item_list)
-        MaterialShowcaseView.Builder(this).apply {
-            setTarget(listButton)
-            setTitleText(R.string.tutorial_list_title)
-            setDismissText(R.string.tutorial_list_dismiss)
-            setContentText(R.string.tutorial_list_content)
-            singleUse("tutorial_list")
-            setTargetTouchable(true)
-            setDismissOnTouch(true)
-            renderOverNavigationBar()
-            show()
-        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

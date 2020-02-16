@@ -14,21 +14,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SearchActivity"
+        <activity android:name=".WizardActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".SearchActivity"
             android:exported="true"
-            android:windowSoftInputMode="stateVisible"
-            android:theme="@style/AppTheme.CustomActionBar">
-
+            android:theme="@style/AppTheme.CustomActionBar"
+            android:windowSoftInputMode="stateVisible">
             <intent-filter>
                 <action android:name="com.louiskirsch.quickdynalist.SEARCH_DISPLAY_ITEM" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
         </activity>
-
         <activity android:name=".EditFilterActivity" />
-
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
@@ -90,19 +91,28 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="com.louiskirsch.quickdynalist.SHOW_LIST" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="dynalist.io"
                     android:pathPrefix="/d/"
                     android:scheme="https" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <service
@@ -114,19 +124,9 @@
             android:theme="@style/AppTheme.Dialog"
             android:windowSoftInputMode="stateVisible">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="com.louiskirsch.quickdynalist.SHOW_DIALOG" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
         </activity>
         <activity
             android:name=".ProcessTextActivity"
@@ -162,6 +162,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="com.louiskirsch.quickdynalist.RECORD_SPEECH" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

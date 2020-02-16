@@ -25,13 +25,12 @@ class ProcessTextActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
     private val speechRecognitionHelper = SpeechRecognitionHelper()
     private var text: String? = null
-    private lateinit var location: DynalistItem
+    private var location: DynalistItem? = null
     private lateinit var bookmarks: List<DynalistItem>
 
     @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        EventBus.getDefault().register(this)
         dynalist.subscribe()
 
         if (intent.action == "com.louiskirsch.quickdynalist.RECORD_SPEECH") {
@@ -61,6 +60,7 @@ class ProcessTextActivity : AppCompatActivity() {
 
     private fun tryAddItem() {
         if (!dynalist.isAuthenticated) {
+            // TODO start with activity for result, then update location and try again
             dynalist.authenticate()
         } else {
             addItem()
@@ -91,29 +91,21 @@ class ProcessTextActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        if (isFinishing && text != null)
-            dynalist.addItem(text!!, location)
+        if (isFinishing && text != null && location != null)
+            dynalist.addItem(text!!, location!!)
     }
 
     override fun onStop() {
         super.onStop()
-        if (!isFinishing) {
-            dynalist.addItem(text!!, location)
+        if (!isFinishing && location != null) {
+            dynalist.addItem(text!!, location!!)
             finish()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        EventBus.getDefault().unregister(this)
         dynalist.unsubscribe()
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onAuthenticationEvent(event: AuthenticatedEvent) {
-        if (event.success) {
-            addItem()
-        }
     }
 
     private fun addItem() {

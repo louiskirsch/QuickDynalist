@@ -45,4 +45,18 @@
         <categories android:name="android.intent.category.DEFAULT" />
     </shortcut>
 
+    <shortcut
+        android:shortcutId="quick_dialog"
+        android:enabled="true"
+        android:icon="@mipmap/ic_shortcut_quick_dialog"
+        android:roundIcon="@mipmap/ic_shortcut_quick_dialog"
+        android:shortcutShortLabel="@string/shortcut_quick_dialog"
+        tools:targetApi="n_mr1">
+        <intent
+            android:action="com.louiskirsch.quickdynalist.SHOW_DIALOG"
+            android:targetPackage="com.louiskirsch.quickdynalist"
+            android:targetClass="com.louiskirsch.quickdynalist.MainActivity" />
+        <categories android:name="android.intent.category.DEFAULT" />
+    </shortcut>
+
 </shortcuts>

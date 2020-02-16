@@ -117,12 +117,13 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         })
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, createInitialFragment()).commit()
+            createInitialFragment()?.let {
+                supportFragmentManager.beginTransaction().add(R.id.fragment_container, it).commit()
+            }
         }
     }
 
-    private fun createInitialFragment(): Fragment {
+    private fun createInitialFragment(): Fragment? {
         val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT) ?: ""
         if (intent.action == Intent.ACTION_VIEW && intent.data != null) {
             val fileId = intent.data!!.lastPathSegment!!
@@ -130,7 +131,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             val item = DynalistItem.byServerId(fileId, itemId) ?: dynalist.inbox.apply {
                 toast(R.string.error_invalid_url)
             }
-            return ItemListFragment.newInstance(item, itemText)
+            return item?.let { ItemListFragment.newInstance(it, itemText) }
         }
         if (intent.hasExtra(DynalistApp.EXTRA_DISPLAY_FILTER) ||
                 intent.hasExtra(DynalistApp.EXTRA_DISPLAY_FILTER_ID)) {
@@ -139,7 +140,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 return FilteredItemListFragment.newInstance(filter)
         }
         val parent = intent.extras?.let { dynalist.resolveItemInBundle(it) } ?: dynalist.inbox
-        return ItemListFragment.newInstance(parent, itemText)
+        return parent?.let { ItemListFragment.newInstance(it, itemText) }
     }
 
     private fun SubMenu.fillMenuWithItems(items: List<Location>,
@@ -178,6 +179,20 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         dynalist.unsubscribe()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!dynalist.isAuthenticated && !dynalist.isAuthenticating) {
+            dynalist.authenticate()
+        }
+        if (supportFragmentManager.fragments.isEmpty()) {
+            createInitialFragment()?.let {
+                supportFragmentManager.beginTransaction()
+                        .add(R.id.fragment_container, it)
+                        .commit()
+            }
+        }
+    }
+
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -206,7 +221,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 okButton { dynalist.sync() }
                 show()
             }
-            R.id.send_bug_report -> sendBugReport()
+            R.id.send_bug_report -> dynalist.sendBugReport()
             R.id.open_settings -> openSettings()
             R.id.share_quickdynalist -> shareQuickDynalist()
             R.id.rate_quickdynalist -> rateQuickDynalist()
@@ -270,32 +285,6 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             type = "text/plain"
             startActivity(Intent.createChooser(this, getString(R.string.share_quickdynalist)))
         }
-    }
-
-    private fun sendBugReport(): Boolean {
-        // save logcat in file
-        val logsPath = File(cacheDir, "logs-cache")
-        logsPath.mkdir()
-        val outputFile = logsPath.resolve("quick-dynalist-logs.txt")
-        try {
-            Runtime.getRuntime().exec( "logcat -f " + outputFile.absolutePath)
-
-            val logUri = FileProvider.getUriForFile(this,
-                    "com.louiskirsch.quickdynalist.fileprovider", outputFile)
-            Intent(Intent.ACTION_SEND).apply {
-                type = "vnd.android.cursor.dir/email"
-                putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.bug_report_email)))
-                putExtra(Intent.EXTRA_STREAM, logUri)
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                val subject = getString(R.string.bug_report_subject, BuildConfig.VERSION_NAME)
-                putExtra(Intent.EXTRA_SUBJECT, subject)
-                val intentTitle = getString(R.string.bug_report_intent_title)
-                startActivity(Intent.createChooser(this, intentTitle))
-            }
-        } catch (e: Exception) {
-            toast(R.string.error_log_collection)
-        }
-        return true
     }
 
     private fun openDynalistItem(itemToOpen: DynalistItem) {

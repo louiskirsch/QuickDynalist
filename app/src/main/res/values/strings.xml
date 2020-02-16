@@ -1,10 +1,9 @@
 <resources>
     <string name="app_name">Quick Dynalist</string>
-    <string name="auth_start">Next</string>
-    <string name="auth_instructions">Quick Dynalist requires an api token to access your Dynalist account. Please generate a token in the following step and copy it into the app. The token will only be locally stored on this device.</string>
-    <string name="auth_copy_instructions">Please copy the token you generated into the text box below.</string>
+    <string name="auth_start">Get token</string>
+    <string name="auth_instructions">Quick Dynalist is a third party app to access your Dynalist account. It requires an api token to proceed. Please generate a token below and copy it here. The token will only be locally stored on this device.</string>
     <string name="token_hint">Token</string>
-    <string name="auth_accept_token">Use token</string>
+    <string name="auth_accept_token">Continue</string>
     <string name="token_invalid">Error: Token was invalid</string>
     <string name="content_hint">Item text</string>
     <string name="btn_add_item">Add item</string>
@@ -87,7 +86,7 @@
     <string name="action_sync_now_long_label">Sync Quick Dynalist</string>
     <string name="sync_started">Quick Dynalist is syncing</string>
     <string name="sync_in_progress">Sync in progress…</string>
-    <string name="alert_sync_no_success">Error: Sync failed</string>
+    <string name="alert_sync_no_success">Sync failed</string>
     <string name="invalid_date">Invalid date</string>
     <string name="toggle_bookmark">Make inbox</string>
     <string name="create_widget">Create widget</string>
@@ -186,6 +185,14 @@
     <string name="tutorial_list_content">Quick Dynalist is designed to capture your thoughts instantly. But it can do so much more. When you are ready, jump into the full experience by touching on the list icon.</string>
     <string name="action_record_speech">Record voice item</string>
     <string name="shortcut_record_speech">Voice item</string>
+    <string name="shortcut_quick_dialog">Quick Dialog</string>
     <string name="error_speech_recognition_not_available">Unfortunately, speech recognition is not available on this device.</string>
     <string name="detect_inbox_item">Quick Dynalist is detecting your inbox. This item can be deleted.</string>
+    <string name="auth_welcome">Welcome to Quick Dynalist.</string>
+    <string name="sync_welcome">Making your Dynalist available offline.</string>
+    <string name="sync_done">You are all set.</string>
+    <string name="dialog_setup_title">Quick notes to inbox.</string>
+    <string name="dialog_setup_instructions">Thoughts come and go quickly. Create a shortcut on your homescreen for a quick dialog to capture your thoughts.</string>
+    <string name="create_no_quick_dialog">No thanks</string>
+    <string name="create_quick_dialog">Create shortcut</string>
 </resources>

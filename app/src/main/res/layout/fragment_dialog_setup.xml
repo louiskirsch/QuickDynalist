@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="50dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".DialogSetupFragment">
+
+
+    <TextView
+        android:id="@+id/dialog_setup_title"
+        android:fontFamily="sans-serif-light"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
+        android:text="@string/dialog_setup_title"
+        android:paddingBottom="20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/dialog_setup_instructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
+        app:layout_constraintTop_toBottomOf="@id/dialog_setup_title"
+        android:text="@string/dialog_setup_instructions" />
+
+    <VideoView
+        android:id="@+id/dialog_setup_video"
+        app:layout_constraintTop_toBottomOf="@id/dialog_setup_instructions"
+        app:layout_constraintBottom_toTopOf="@id/no_dialog_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/no_dialog_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="@string/create_no_quick_dialog"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/create_dialog_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.Button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:text="@string/create_quick_dialog"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
