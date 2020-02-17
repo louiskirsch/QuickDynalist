@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import org.jetbrains.anko.toast
 
 class WizardActivity : AppCompatActivity() {
 
@@ -13,5 +14,9 @@ class WizardActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                     .add(R.id.fragment_container, LoginFragment()).commit()
         }
+    }
+
+    override fun onBackPressed() {
+        toast(R.string.wizard_not_completed)
     }
 }

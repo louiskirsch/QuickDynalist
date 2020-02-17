@@ -30,6 +30,7 @@ class LoginFragment : Fragment() {
         auth_open_browser.setOnClickListener {
             context!!.browse("https://dynalist.io/developer")
         }
+        auth_submit_token.isEnabled = false
         auth_submit_token.setOnClickListener {
             val token = auth_token.text.toString()
             val jobManager = DynalistApp.instance.jobManager

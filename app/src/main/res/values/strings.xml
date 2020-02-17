@@ -195,4 +195,5 @@
     <string name="dialog_setup_instructions">Thoughts come and go quickly. Create a shortcut on your homescreen for a quick dialog to capture your thoughts.</string>
     <string name="create_no_quick_dialog">No thanks</string>
     <string name="create_quick_dialog">Create shortcut</string>
+    <string name="wizard_not_completed">Quick Dynalist is not ready yet</string>
 </resources>
