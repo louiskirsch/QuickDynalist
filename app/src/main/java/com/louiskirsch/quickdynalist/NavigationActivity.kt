@@ -289,14 +289,15 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
     private fun openDynalistItem(itemToOpen: DynalistItem) {
         val currentFragment = supportFragmentManager
-                .findFragmentById(R.id.fragment_container) as BaseItemListFragment
-        val itemText = currentFragment.itemContents.text
-        val fragment = ItemListFragment.newInstance(itemToOpen, itemText.toString())
+                .findFragmentById(R.id.fragment_container) as? BaseItemListFragment
+        val itemText = currentFragment?.itemContents?.text
+        val itemString = itemText?.toString() ?: ""
+        val fragment = ItemListFragment.newInstance(itemToOpen, itemString)
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
                 .commit()
-        itemText.clear()
+        itemText?.clear()
     }
 
     private fun openDynalistItemFilter(filterToOpen: DynalistItemFilter) {
