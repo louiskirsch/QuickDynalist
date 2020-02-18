@@ -175,9 +175,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                 ?: return null
         val docNodes = service.readDocument(ReadDocumentRequest(inboxFileId, token))
                 .execRespectRateLimit(delayCallback).body()!!.nodes!!
-        val insertedNodeId = docNodes.firstOrNull { it.id == response.node_id } ?.id
-                ?: return null
-        val inboxId = docNodes.firstOrNull { it.children!!.contains(insertedNodeId) } ?.id
+        val inboxId = docNodes.firstOrNull { it.children!!.contains(response.node_id) } ?.id
                 ?: return null
         service.deleteItem(DeleteItemRequest(inboxFileId, response.node_id!!, token))
                 .execRespectRateLimit(delayCallback)
