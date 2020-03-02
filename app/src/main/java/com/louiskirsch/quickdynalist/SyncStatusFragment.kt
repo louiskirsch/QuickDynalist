@@ -35,6 +35,8 @@ class SyncStatusFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         EventBus.getDefault().register(this)
+        if (Dynalist(context!!).lastFullSync.time > 0)
+            onSyncEvent(SyncEvent(SyncStatus.SUCCESS, false))
     }
 
     override fun onStop() {
@@ -67,13 +69,7 @@ class SyncStatusFragment : Fragment() {
                     duration = 800
                     interpolator = DecelerateInterpolator()
                     withEndAction {
-                        Handler().postDelayed({
-                            activity!!.supportFragmentManager.beginTransaction().apply {
-                                setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                                replace(R.id.fragment_container, DialogSetupFragment())
-                                commit()
-                            }
-                        }, 800)
+                        Handler().postDelayed({nextWizardScreen()}, 800)
                     }
                     start()
                 }
@@ -91,6 +87,20 @@ class SyncStatusFragment : Fragment() {
                 }
             }
             else -> {}
+        }
+    }
+
+    private fun nextWizardScreen() {
+        val dynalist = Dynalist(context!!)
+        val fragment = if (dynalist.inbox == null) {
+            InboxConfigurationFragment()
+        } else {
+            DialogSetupFragment()
+        }
+        activity!!.supportFragmentManager.beginTransaction().apply {
+            setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+            replace(R.id.fragment_container, fragment)
+            commit()
         }
     }
 

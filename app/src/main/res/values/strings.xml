@@ -187,7 +187,6 @@
     <string name="shortcut_record_speech">Voice item</string>
     <string name="shortcut_quick_dialog">Quick Dialog</string>
     <string name="error_speech_recognition_not_available">Unfortunately, speech recognition is not available on this device.</string>
-    <string name="detect_inbox_item">Quick Dynalist is detecting your inbox. This item can be deleted.</string>
     <string name="auth_welcome">Welcome to Quick Dynalist.</string>
     <string name="sync_welcome">Making your Dynalist available offline.</string>
     <string name="sync_done">You are all set.</string>
@@ -196,4 +195,10 @@
     <string name="create_no_quick_dialog">No thanks</string>
     <string name="create_quick_dialog">Create shortcut</string>
     <string name="wizard_not_completed">Quick Dynalist is not ready yet</string>
+    <string name="inbox_configure">Set your inbox.</string>
+    <string name="inbox_instructions">New items often end up here before you sort them into their final destination. You have not specified an inbox in the official Dynalist app, select one here.</string>
+    <string name="inbox_accept">Set</string>
+    <string name="inbox_search">Find</string>
+    <string name="inbox_location">Inbox location</string>
+    <string name="inbox_error_set_request">Could not set this inbox.</string>
 </resources>

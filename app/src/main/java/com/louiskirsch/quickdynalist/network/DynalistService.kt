@@ -32,12 +32,22 @@ interface DynalistService {
 
     @POST("doc/check_for_updates")
     fun checkForUpdates(@Body request: VersionsRequest): Call<VersionResponse>
+
+    @POST("pref/get")
+    fun getPreference(@Body request: PreferenceRequest): Call<PreferenceResponse>
+
+    @POST("pref/set")
+    fun setPreference(@Body request: SetPreferenceRequest): Call<DynalistResponse>
 }
 
 class AuthenticatedRequest(val token: String)
 class InboxRequest(val content: String, val note: String, val token: String)
 class ReadDocumentRequest(val file_id: String, val token: String)
 class VersionsRequest(val file_ids: Array<String>, val token: String)
+class PreferenceRequest(val key: String, val token: String)
+open class SetPreferenceRequest(val key: String, val value: String, val token: String)
+class SetInboxRequest(fileId: String, nodeId: String, token: String)
+    : SetPreferenceRequest("inbox_location", "$fileId/$nodeId", token)
 
 class InsertItemRequest(val file_id: String, parent_id: String,
                         content: String, note: String, val token: String) {
@@ -109,6 +119,20 @@ open class DynalistResponse {
 
 class VersionResponse: DynalistResponse() {
     val versions: Map<String, Long>? = null
+}
+
+class PreferenceResponse: DynalistResponse() {
+    val key: String? = null
+    val value: String? = null
+
+    val parsedItemValue: Pair<String, String>? get() {
+        if (value == null || value.isBlank()) return null
+        val s = value.split('/')
+        if (s.size == 2) {
+            return Pair(s[0], s[1])
+        }
+        return Pair(value, "root")
+    }
 }
 
 class InboxItemResponse: DynalistResponse() {

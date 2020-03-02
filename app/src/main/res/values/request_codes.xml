@@ -7,4 +7,5 @@
     <integer name="request_code_create_filter">5</integer>
     <integer name="request_code_create_widget">6</integer>
     <integer name="request_code_speech_recognition">7</integer>
+    <integer name="request_code_search_item">8</integer>
 </resources>

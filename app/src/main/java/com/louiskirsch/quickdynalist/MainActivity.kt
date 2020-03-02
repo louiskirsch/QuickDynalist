@@ -196,7 +196,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateSubmitEnabled()
-        if (!dynalist.isAuthenticated && !dynalist.isAuthenticating) {
+        if (!dynalist.isAuthenticated) {
             dynalist.authenticate()
         } else {
             itemContents!!.requestFocus()

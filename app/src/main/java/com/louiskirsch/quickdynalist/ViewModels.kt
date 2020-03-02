@@ -30,6 +30,16 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         })
     }
 
+    val bookmarksAndDocsLiveData: ObjectBoxLiveData<DynalistItem> by lazy {
+        ObjectBoxLiveData(box.query {
+            equal(DynalistItem_.isBookmark, true)
+            or()
+            equal(DynalistItem_.serverItemId, "root")
+            orderDesc(DynalistItem_.isBookmark)
+            order(DynalistItem_.name)
+        })
+    }
+
     val itemsParent = MutableLiveData<DynalistItem>()
     val itemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
         Transformations.switchMap(itemsParent) { parent ->

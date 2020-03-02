@@ -26,8 +26,6 @@ import java.io.File
 import java.util.*
 
 class Dynalist(private val context: Context) {
-    var authDialog: AlertDialog? = null
-    var errorDialogShown: Boolean = false
     private var isSyncing: Boolean = false
 
     private val preferences: SharedPreferences
@@ -63,9 +61,6 @@ class Dynalist(private val context: Context) {
 
     val isAuthenticated: Boolean
         get() = this.preferences.contains("TOKEN")
-
-    val isAuthenticating: Boolean
-        get() = authDialog != null
 
     var preferencesVersion: Int
         get() = preferences.getInt("PREFS_VERSION", 1)
@@ -106,6 +101,13 @@ class Dynalist(private val context: Context) {
     fun onAuthenticationEvent(event: AuthenticatedEvent) {
         if (!event.success) {
             authenticate()
+        }
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onInboxEvent(event: InboxEvent) {
+        if (!event.configured) {
+            authenticate(configureOnlyInbox = true)
         }
     }
 
@@ -152,10 +154,9 @@ class Dynalist(private val context: Context) {
         DynalistApp.instance.jobManager.addJobInBackground(job)
     }
 
-    fun authenticate() {
-        if (isAuthenticating)
-            return
+    fun authenticate(configureOnlyInbox: Boolean = false) {
         context.startActivity(Intent(context, WizardActivity::class.java).apply {
+            putExtra(WizardActivity.EXTRA_CONFIG_INBOX_ONLY, configureOnlyInbox)
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         })
     }

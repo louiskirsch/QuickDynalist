@@ -181,7 +181,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
     override fun onResume() {
         super.onResume()
-        if (!dynalist.isAuthenticated && !dynalist.isAuthenticating) {
+        if (!dynalist.isAuthenticated) {
             dynalist.authenticate()
         }
         if (supportFragmentManager.fragments.isEmpty()) {
