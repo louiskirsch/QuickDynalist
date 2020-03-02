@@ -20,9 +20,13 @@
     </style>
 
     <style name="AppTheme.Dark" parent="Theme.MaterialComponents.Bridge">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorSecondary">@color/colorPrimary</item>
+
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="colorOnPrimary">@color/colorAccent</item>
 
         <!-- enable window content transitions -->
         <item name="android:windowActivityTransitions">true</item>

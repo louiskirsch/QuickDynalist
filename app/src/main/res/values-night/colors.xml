@@ -2,7 +2,8 @@
 <resources>
     <color name="colorPrimary">@color/primary_material_dark</color>
     <color name="colorPrimaryDark">@color/primary_dark_material_dark</color>
-    <color name="colorAccent">#1565C0</color>
+    <color name="colorAccent">#90CAF9</color>
+
 
     <color name="itemBackground">#2e2e2e</color>
     <color name="itemBackgroundActivated">#424242</color>
