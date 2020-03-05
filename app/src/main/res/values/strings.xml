@@ -201,4 +201,8 @@
     <string name="inbox_search">Find</string>
     <string name="inbox_location">Inbox location</string>
     <string name="inbox_error_set_request">Could not set this inbox.</string>
+    <string name="date_repetition_d">every %1$s days</string>
+    <string name="date_repetition_w">every %1$s weeks</string>
+    <string name="date_repetition_m">every %1$s months</string>
+    <string name="date_repetition_y">every %1$s years</string>
 </resources>

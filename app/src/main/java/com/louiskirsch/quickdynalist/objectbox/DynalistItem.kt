@@ -11,7 +11,6 @@ import android.text.*
 import android.text.format.DateFormat
 import android.text.style.*
 import android.util.Log
-import androidx.core.graphics.drawable.DrawableCompat
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.text.ThemedSpan
@@ -159,13 +158,20 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         spannable.replaceAll(imageRegex) { "" }
         spannable.replaceAll(dateTimeRegex) {
             val replaceText = try {
-                val date = dateReader.parse(it.groupValues[1])
-                if (it.groupValues[2].isEmpty()) {
-                    "\uD83D\uDCC5 ${dateFormat.format(date)}"
-                } else {
-                    val time = timeReader.parse(it.groupValues[2])
-                    "\uD83D\uDCC5 ${dateFormat.format(date)} ${timeFormat.format(time)}"
-                }
+                val date = dateReader.get()!!.parse(it.groupValues[1])
+                "\uD83D\uDCC5 ${dateFormat.format(date)}" +
+                    (it.groupValues[2].ifEmpty { null }?.let { text ->
+                        " ${timeFormat.format(timeReader.get()!!.parse(text))}"
+                    } ?: "") +
+                    (it.groupValues[3].ifEmpty { null }?.let { text ->
+                        " - ${dateFormat.format(dateReader.get()!!.parse(text))}"
+                    } ?: "") +
+                    (it.groupValues[4].ifEmpty { null }?.let { text ->
+                        " ${timeFormat.format(timeReader.get()!!.parse(text))}"
+                    } ?: "") +
+                    (it.groupValues[5].ifEmpty { null }?.let { text ->
+                        ", ${context.getString(dateRepStrings.getValue(it.groupValues[6]), text)}"
+                    } ?: "")
             } catch (e: Exception) {
                 "\uD83D\uDCC5 ${context.getString(R.string.invalid_date)}"
             }
@@ -299,7 +305,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
     var date: Date?
         get() = dateTimeRegex.find(name)?.groupValues?.get(1)?.let { date ->
-            try { dateReader.parse(date) } catch(e: ParseException) {
+            try { dateReader.get()!!.parse(date) } catch(e: ParseException) {
                 Log.w("DynalistItem", "Could not parse date", e)
                 null
             }
@@ -307,7 +313,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         set(value) {
             val stripped = name.replace(dateTimeRegex, "").trim()
             name = if (value != null) {
-                val date = "!(${dateReader.format(value)})"
+                val date = "!(${dateReader.get()!!.format(value)})"
                 "$stripped $date"
             } else {
                 stripped
@@ -317,7 +323,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     val time: Date?
         get() = dateTimeRegex.find(name)?.groupValues?.get(2)?.let { time ->
             return if (time.isNotBlank())
-                timeReader.parse(time)
+                timeReader.get()!!.parse(time)
             else
                 null
         }
@@ -353,11 +359,21 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         val box get() = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
 
         private val tagMarkers = listOf("#inbox", "#quickdynalist")
-        @SuppressLint("SimpleDateFormat")
-        private val dateReader = SimpleDateFormat("yyyy-MM-dd")
-        @SuppressLint("SimpleDateFormat")
-        private val timeReader = SimpleDateFormat("HH:mm")
-        private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?\)""")
+        private val dateReader = object : ThreadLocal<SimpleDateFormat>() {
+            @SuppressLint("SimpleDateFormat")
+            override fun initialValue() = SimpleDateFormat("yyyy-MM-dd")
+        }
+        private val timeReader = object : ThreadLocal<SimpleDateFormat>() {
+            @SuppressLint("SimpleDateFormat")
+            override fun initialValue() = SimpleDateFormat("HH:mm")
+        }
+        private val dateRepStrings = mapOf(
+                "d" to R.string.date_repetition_d,
+                "w" to R.string.date_repetition_w,
+                "m" to R.string.date_repetition_m,
+                "y" to R.string.date_repetition_y
+        )
+        private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?(?: - ([0-9\-]+)[ ]?([0-9:]+)?)?[ |]*(?:([0-9]+)([dwmy]))?\)""")
         private val tagRegex = Regex("""(^| )([#@][\d\w_-]+)""")
         private val boldRegex = Regex("""\*\*(.*?)\*\*""")
         private val italicRegex = Regex("""__(.*?)__""")
