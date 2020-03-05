@@ -385,7 +385,7 @@ abstract class BaseItemListFragment : Fragment() {
                 intent.putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, editingItem as Parcelable)
             } else {
                 intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, addItemLocation as Parcelable)
-                intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text)
+                intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text.toString())
             }
             clearItemContents()
             val activity = activity as AppCompatActivity

@@ -8,6 +8,7 @@ import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
@@ -25,7 +26,7 @@ class ItemListFragment : BaseItemListFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         arguments!!.let {
-            location = it.getParcelable(ItemListFragment.ARG_LOCATION)!!
+            location = it.getParcelable(ARG_LOCATION)!!
             DynalistApp.instance.boxStore.boxFor<DynalistItem>().attach(location)
         }
         super.onCreate(savedInstanceState)
@@ -57,9 +58,9 @@ class ItemListFragment : BaseItemListFragment() {
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         itemContents.setText(arguments!!.getCharSequence(ARG_ITEM_TEXT))
-        super.onActivityCreated(savedInstanceState)
     }
 
     override fun onStart() {
@@ -181,8 +182,8 @@ class ItemListFragment : BaseItemListFragment() {
             return ItemListFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(ARG_LOCATION, parent)
-                    putCharSequence(ARG_ITEM_TEXT, itemText)
-                    scrollTo?.let { putParcelable(BaseItemListFragment.ARG_SCROLL_TO, it) }
+                    putCharSequence(ARG_ITEM_TEXT, itemText.toString())
+                    scrollTo?.let { putParcelable(ARG_SCROLL_TO, it) }
                 }
             }
         }
