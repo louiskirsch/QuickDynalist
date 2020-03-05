@@ -36,7 +36,6 @@
     <string name="dialog_ask_discard">Are you sure you want to discard this item?</string>
     <string name="open_quick_dialog">Quick Dialog</string>
     <string name="add_inbox">Add inbox …</string>
-    <string name="alert_sync_required">Sync is required to perform this action</string>
     <string name="action_sync">Sync</string>
     <string name="alert_sync_success">Sync successful</string>
     <string name="goto_parent">Go to parent item</string>
@@ -84,7 +83,7 @@
     <string name="rate_quickdynalist">Rate Quick Dynalist</string>
     <string name="action_sync_now">Sync now</string>
     <string name="action_sync_now_long_label">Sync Quick Dynalist</string>
-    <string name="sync_started">Quick Dynalist is syncing</string>
+    <string name="sync_started">Quick Dynalist is downloading remote changes</string>
     <string name="sync_in_progress">Sync in progress…</string>
     <string name="alert_sync_no_success">Sync failed</string>
     <string name="invalid_date">Invalid date</string>
@@ -94,17 +93,15 @@
     <string name="title_activity_settings">Settings</string>
     <string name="open_settings">Settings</string>
     <string name="pref_title_sync_mobile_data">Sync with mobile data</string>
-    <string name="pref_description_sync_mobile_data">Sync automatically even if no WiFi connection is available.</string>
+    <string name="pref_description_sync_mobile_data">Download remote changes automatically even if no WiFi connection is available.</string>
     <string name="confirm_sync_mobile_data">Use mobile data</string>
     <string name="confirm_no_sync_mobile_data">Use WiFi only</string>
-    <string name="dialog_title_sync_mobile_data">Configure syncing</string>
-    <string name="dialog_message_sync_mobile_data">Syncing with your Dynalist might use a lot of your mobile data volume. Please choose whether you want to stick with WiFi or also use your mobile data plan for syncing. <b>This only affects syncing changes from your Dynalist to Quick Dynalist.</b> Changes you make in this app are always uploaded immediately.</string>
     <string name="dialog_title_image_setting">Can\'t access your images</string>
     <string name="dialog_message_image_setting">In order for Quick Dynalist to show your images you need to enable \'Allow others to access via link\' in your Dynalist upload settings.</string>
     <string name="pref_category_sync">Sync</string>
     <string name="pref_category_display">Display</string>
     <string name="pref_category_edit">Compose</string>
-    <string name="pref_description_sync_automatic">Trigger sync automatically whenever Quick Dynalist is opened. Recommended.</string>
+    <string name="pref_description_sync_automatic">Trigger downloading remote changes automatically whenever Quick Dynalist is opened. Recommended.</string>
     <string name="pref_title_sync_automatic">Auto sync</string>
     <string name="pref_title_sync_frequency">Sync interval in minutes</string>
     <string name="pref_title_display_children_count">Number of child items to preview</string>
