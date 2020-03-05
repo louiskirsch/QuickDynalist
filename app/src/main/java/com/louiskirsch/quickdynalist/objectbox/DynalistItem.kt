@@ -170,7 +170,9 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                         " ${timeFormat.format(timeReader.get()!!.parse(text))}"
                     } ?: "") +
                     (it.groupValues[5].ifEmpty { null }?.let { text ->
-                        ", ${context.getString(dateRepStrings.getValue(it.groupValues[6]), text)}"
+                        val quantityType = dateRepStrings.getValue(it.groupValues[6])
+                        val quantity = text.toInt()
+                        ", ${context.resources.getQuantityString(quantityType, quantity, quantity)}"
                     } ?: "")
             } catch (e: Exception) {
                 "\uD83D\uDCC5 ${context.getString(R.string.invalid_date)}"
@@ -368,10 +370,10 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             override fun initialValue() = SimpleDateFormat("HH:mm")
         }
         private val dateRepStrings = mapOf(
-                "d" to R.string.date_repetition_d,
-                "w" to R.string.date_repetition_w,
-                "m" to R.string.date_repetition_m,
-                "y" to R.string.date_repetition_y
+                "d" to R.plurals.date_repetition_d,
+                "w" to R.plurals.date_repetition_w,
+                "m" to R.plurals.date_repetition_m,
+                "y" to R.plurals.date_repetition_y
         )
         private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?(?: - ([0-9\-]+)[ ]?([0-9:]+)?)?[ |]*(?:([0-9]+)([dwmy]))?\)""")
         private val tagRegex = Regex("""(^| )([#@][\d\w_-]+)""")

@@ -122,7 +122,9 @@
     <string name="action_move_to">Move to …</string>
     <string name="action_link_to">Link to …</string>
     <string name="action_change_date">Change date</string>
+    <string name="action_add_date_yesterday">Yesterday</string>
     <string name="action_add_date_today">Today</string>
+    <string name="action_add_date_tomorrow">Tomorrow</string>
     <string name="action_add_date_mod">Modification date</string>
     <string name="action_add_date_choose">Choose …</string>
     <string name="action_change_date_remove">Remove</string>
@@ -201,8 +203,24 @@
     <string name="inbox_search">Find</string>
     <string name="inbox_location">Inbox location</string>
     <string name="inbox_error_set_request">Could not set this inbox.</string>
-    <string name="date_repetition_d">every %1$s days</string>
-    <string name="date_repetition_w">every %1$s weeks</string>
-    <string name="date_repetition_m">every %1$s months</string>
-    <string name="date_repetition_y">every %1$s years</string>
+    <plurals name="date_repetition_d">
+        <item quantity="zero">always</item>
+        <item quantity="one">daily</item>
+        <item quantity="other">every %1$d days</item>
+    </plurals>
+    <plurals name="date_repetition_w">
+        <item quantity="zero">always</item>
+        <item quantity="one">weekly</item>
+        <item quantity="other">every %1$d weeks</item>
+    </plurals>
+    <plurals name="date_repetition_m">
+        <item quantity="zero">always</item>
+        <item quantity="one">monthly</item>
+        <item quantity="other">every %1$d months</item>
+    </plurals>
+    <plurals name="date_repetition_y">
+        <item quantity="zero">always</item>
+        <item quantity="one">annually</item>
+        <item quantity="other">every %1$d years</item>
+    </plurals>
 </resources>

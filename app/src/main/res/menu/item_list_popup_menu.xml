@@ -46,8 +46,16 @@
         android:icon="@drawable/ic_action_date"
         app:showAsAction="never">
         <menu>
+            <item android:id="@+id/action_add_date_yesterday"
+                android:title="@string/action_add_date_yesterday"
+                app:showAsAction="never" />
+
             <item android:id="@+id/action_add_date_today"
                 android:title="@string/action_add_date_today"
+                app:showAsAction="never" />
+
+            <item android:id="@+id/action_add_date_tomorrow"
+                android:title="@string/action_add_date_tomorrow"
                 app:showAsAction="never" />
 
             <item android:id="@+id/action_add_date_mod"

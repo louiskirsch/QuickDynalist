@@ -114,8 +114,18 @@ abstract class BaseItemListFragment : Fragment() {
                 R.id.action_duplicate -> {
                     DynalistApp.instance.jobManager.addJobInBackground(CloneItemJob(item))
                 }
+                R.id.action_add_date_yesterday -> {
+                    DynalistItem.updateGlobally(item) {
+                        it.date = Calendar.getInstance().apply { add(Calendar.DATE, -1) }.time
+                    }
+                }
                 R.id.action_add_date_today -> {
                     DynalistItem.updateGlobally(item) { it.date = Date() }
+                }
+                R.id.action_add_date_tomorrow -> {
+                    DynalistItem.updateGlobally(item) {
+                        it.date = Calendar.getInstance().apply { add(Calendar.DATE, 1) }.time
+                    }
                 }
                 R.id.action_add_date_mod -> {
                     DynalistItem.updateGlobally(item) { it.date = it.modified }
