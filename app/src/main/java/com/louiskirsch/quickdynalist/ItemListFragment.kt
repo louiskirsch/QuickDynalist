@@ -84,7 +84,12 @@ class ItemListFragment : BaseItemListFragment() {
         val checked = !menuItem.isChecked
         menuItem.isChecked = checked
         location.markedAsBookmark = checked
-        doAsync { DynalistItem.updateGlobally(location) { it.markedAsBookmark = checked }}
+        doAsync {
+            DynalistItem.updateGlobally(location) { it.markedAsBookmark = checked }
+            uiThread {
+                context!!.toast(if (checked) R.string.bookmark_added else R.string.bookmark_removed)
+            }
+        }
         return true
     }
 

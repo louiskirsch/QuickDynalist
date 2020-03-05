@@ -203,6 +203,8 @@
     <string name="pref_cleanup_tags">Cleanup tags</string>
     <string name="pref_description_clean_tags">Removes unused tags from suggestions and filters.</string>
     <string name="pref_cleanup_tags_success">Tags are cleaned up</string>
+    <string name="bookmark_added">Added #inbox tag</string>
+    <string name="bookmark_removed">Removed #inbox tag</string>
     <plurals name="date_repetition_d">
         <item quantity="zero">always</item>
         <item quantity="one">daily</item>
