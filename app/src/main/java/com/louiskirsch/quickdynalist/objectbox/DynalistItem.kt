@@ -409,6 +409,10 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                         hidden = readInt() > 0
                         isChecklist = readInt() > 0
                         areCheckedItemsVisible = readInt() > 0
+                        modified = Date(readLong())
+                        created = Date(readLong())
+                        color = readInt()
+                        heading = readInt()
                         parent.targetId = readLong()
                     }
                 }
@@ -457,6 +461,10 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             writeInt(hidden.int)
             writeInt(isChecklist.int)
             writeInt(areCheckedItemsVisible.int)
+            writeLong(modified.time)
+            writeLong(created.time)
+            writeInt(color)
+            writeInt(heading)
             writeLong(parent.targetId)
         }
     }
