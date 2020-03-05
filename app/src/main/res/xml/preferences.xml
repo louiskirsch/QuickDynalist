@@ -25,6 +25,14 @@
 
     <PreferenceCategory app:key="edit_category" app:title="@string/pref_category_edit">
 
+        <DropDownPreference
+            app:defaultValue="bottom"
+            app:entries="@array/pref_entries_insert_position"
+            app:entryValues="@array/pref_values_insert_position"
+            app:key="edit_insert_position"
+            app:summary="@string/pref_description_edit_insert_position"
+            app:title="@string/pref_title_edit_insert_position" />
+
         <SwitchPreference
             app:defaultValue="true"
             app:key="edit_detect_tags"

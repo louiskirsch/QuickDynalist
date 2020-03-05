@@ -14,9 +14,14 @@ class CloneItemJob(val item: DynalistItem): ItemJob() {
 
     override fun addToDatabase() {
         val now = Date()
+        val dynalist = Dynalist(applicationContext)
         DynalistApp.instance.boxStore.runInTx {
             box.get(item.clientId)?.let { item ->
-                item.position = item.parent.target.children.size
+                item.position = if (dynalist.addToTopOfList) {
+                    (minPosition(item.parent.targetId) ?: 1) - 1
+                } else {
+                    (maxPosition(item.parent.targetId) ?: -1) + 1
+                }
                 if (item.date != null)
                     item.date = Date()
                 box.put(cloneRecursively(item, now).apply { syncJob = "$id-root" })

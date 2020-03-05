@@ -89,6 +89,26 @@ abstract class ItemJob: Job(Params(1)
         return constraint
     }
 
+    protected fun minPosition(parentId: Long): Int? {
+        val minimum = box.query { equal(DynalistItem_.parentId, parentId) }
+                .property(DynalistItem_.position).min()
+        return if (minimum == Long.MAX_VALUE) null else minimum.toInt()
+    }
+
+    protected fun maxPosition(parentId: Long): Int? {
+        val maximum = box.query { equal(DynalistItem_.parentId, parentId) }
+                .property(DynalistItem_.position).max()
+        return if (maximum == Long.MIN_VALUE) null else maximum.toInt()
+    }
+
+    protected fun childIndex(itemId: Long): Int {
+        val item = box.get(itemId)
+        return box.query {
+            equal(DynalistItem_.parentId, item.parent.targetId)
+            less(DynalistItem_.position, item.position.toLong())
+        }.count().toInt()
+    }
+
     companion object {
         const val TAG = "ItemJob"
     }

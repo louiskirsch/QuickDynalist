@@ -205,6 +205,8 @@
     <string name="pref_cleanup_tags_success">Tags are cleaned up</string>
     <string name="bookmark_added">Added #inbox tag</string>
     <string name="bookmark_removed">Removed #inbox tag</string>
+    <string name="pref_title_edit_insert_position">Add to position</string>
+    <string name="pref_description_edit_insert_position">New items are added to the %1$s of the list.</string>
     <plurals name="date_repetition_d">
         <item quantity="zero">always</item>
         <item quantity="one">daily</item>

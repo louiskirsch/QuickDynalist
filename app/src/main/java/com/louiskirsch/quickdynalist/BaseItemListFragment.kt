@@ -194,7 +194,7 @@ abstract class BaseItemListFragment : Fragment() {
             return
         }
         DynalistApp.instance.jobManager.addJobInBackground(
-                MoveItemJob(item, targetLocation, -1)
+                MoveItemJob(item, targetLocation, Int.MIN_VALUE)
         )
         Snackbar.make(itemListCoordinator, R.string.move_item_success,
                 Snackbar.LENGTH_LONG).apply {

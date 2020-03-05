@@ -50,14 +50,14 @@ class SetInboxRequest(fileId: String, nodeId: String, token: String)
     : SetPreferenceRequest("inbox_location", "$fileId/$nodeId", token)
 
 class InsertItemRequest(val file_id: String, parent_id: String,
-                        content: String, note: String, val token: String) {
+                        content: String, note: String, val token: String, index: Int = -1) {
 
     class InsertSpec(val parent_id: String, val content: String, val note: String,
                      val index: Int = -1) {
         val action: String = "insert"
     }
 
-    val changes = arrayOf(InsertSpec(parent_id, content, note))
+    val changes = arrayOf(InsertSpec(parent_id, content, note, index))
 }
 
 class BulkInsertItemRequest(val file_id: String, val token: String,

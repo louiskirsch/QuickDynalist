@@ -14,7 +14,6 @@ class DeleteItemJob(val item: DynalistItem): ItemJob() {
 
     override fun addToDatabase() {
         val parent = item.parent.target
-        val siblings = parent.children.filter { !it.hidden && it != item }.sortedBy { it.position }
         DynalistApp.instance.boxStore.runInTx {
             box.get(item.clientId)?.let { item ->
                 val items = getChildrenRecursively(item) + listOf(item)
@@ -22,8 +21,7 @@ class DeleteItemJob(val item: DynalistItem): ItemJob() {
                     it.hidden = true
                     it.syncJob = id
                 }
-                siblings.forEachWithIndex { i, sib -> sib.position = i }
-                box.put(items + siblings)
+                box.put(items)
             }
         }
         ListAppWidget.notifyItemChanged(applicationContext, parent)

@@ -26,4 +26,13 @@
         <item>3</item>
     </string-array>
     <integer name="pref_default_display_theme">1</integer>
+
+    <string-array name="pref_entries_insert_position">
+        <item>top</item>
+        <item>bottom</item>
+    </string-array>
+    <string-array name="pref_values_insert_position">
+        <item>top</item>
+        <item>bottom</item>
+    </string-array>
 </resources>

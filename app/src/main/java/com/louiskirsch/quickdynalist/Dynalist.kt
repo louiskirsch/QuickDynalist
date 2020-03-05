@@ -40,6 +40,12 @@ class Dynalist(private val context: Context) {
     val displayChildrenCount
         get() = settings.getString("display_children_count", "5")!!.toInt()
 
+    val addToTopOfList
+        get() = settings.getString("edit_insert_position", "bottom") == "top"
+
+    val insertPosition
+        get() = if (addToTopOfList) 0 else -1
+
     val shouldDetectTags
         get() = settings.getBoolean("edit_detect_tags", true)
 

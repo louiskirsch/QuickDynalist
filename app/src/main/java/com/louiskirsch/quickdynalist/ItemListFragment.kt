@@ -32,7 +32,7 @@ class ItemListFragment : BaseItemListFragment() {
         super.onCreate(savedInstanceState)
         adapter.onRowMovedIntoListener = { from, to ->
             DynalistApp.instance.jobManager.addJobInBackground(
-                    MoveItemJob(from, to, -1)
+                    MoveItemJob(from, to, Int.MIN_VALUE)
             )
         }
         adapter.onRowMovedListener = { item, toPosition ->
@@ -48,7 +48,7 @@ class ItemListFragment : BaseItemListFragment() {
                         false
                     } else {
                         DynalistApp.instance.jobManager.addJobInBackground(
-                                MoveItemJob(item, location.parent.target, -1)
+                                MoveItemJob(item, location.parent.target, Int.MIN_VALUE)
                         )
                         true
                     }

@@ -10,7 +10,8 @@ import org.greenrobot.eventbus.EventBus
 
 class AddItemTreeService(private val itemJob: ItemJob) {
 
-    private val token = Dynalist(itemJob.applicationContext).token!!
+    private val dynalist = Dynalist(itemJob.applicationContext)
+    private val token = dynalist.token!!
 
     private val dynalistService
         get() = DynalistApp.instance.dynalistService
@@ -40,7 +41,7 @@ class AddItemTreeService(private val itemJob: ItemJob) {
 
     fun insert(item: DynalistItem): List<DynalistItem> {
         val request = InsertItemRequest(item.serverFileId!!, item.serverParentId!!, item.name,
-                item.note, token)
+                item.note, token, dynalist.insertPosition)
         val response = dynalistService.addToDocument(request)
                 .execRespectRateLimit(delayCallback).body()!!
         itemJob.requireSuccess(response)

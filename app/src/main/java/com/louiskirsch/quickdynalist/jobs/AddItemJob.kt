@@ -14,10 +14,15 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
             null, text, note)
 
     override fun addToDatabase() {
+        val dynalist = Dynalist(applicationContext)
         DynalistApp.instance.boxStore.runInTx {
             box.get(parent.clientId)?.also { parent ->
                 newItem.syncJob = id
-                newItem.position = parent.children.size
+                newItem.position = if (dynalist.addToTopOfList) {
+                    (minPosition(parent.clientId) ?: 1) - 1
+                } else {
+                    (maxPosition(parent.clientId) ?: -1) + 1
+                }
                 newItem.parent.target = parent
                 newItem.notifyModified()
                 box.put(newItem)
@@ -27,10 +32,11 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
     }
 
     private fun insertAPIRequest(): DynalistResponse {
-        val token = Dynalist(applicationContext).token
+        val dynalist = Dynalist(applicationContext)
+        val token = dynalist.token
         requireItemId(parent)
         val request = InsertItemRequest(parent.serverFileId!!, parent.serverItemId!!,
-                newItem.name, newItem.note, token!!)
+                newItem.name, newItem.note, token!!, dynalist.insertPosition)
         return dynalistService.addToDocument(request).execute().body()!!
     }
 
