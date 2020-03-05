@@ -203,6 +203,9 @@
     <string name="inbox_search">Find</string>
     <string name="inbox_location">Inbox location</string>
     <string name="inbox_error_set_request">Could not set this inbox.</string>
+    <string name="pref_cleanup_tags">Cleanup tags</string>
+    <string name="pref_description_clean_tags">Removes unused tags from suggestions and filters.</string>
+    <string name="pref_cleanup_tags_success">Tags are cleaned up</string>
     <plurals name="date_repetition_d">
         <item quantity="zero">always</item>
         <item quantity="one">daily</item>

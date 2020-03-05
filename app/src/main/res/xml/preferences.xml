@@ -31,6 +31,11 @@
             app:summary="@string/pref_description_edit_detect_tags"
             app:title="@string/pref_title_edit_detect_tags" />
 
+        <Preference
+            app:key="cleanup_tags"
+            app:summary="@string/pref_description_clean_tags"
+            app:title="@string/pref_cleanup_tags" />
+
         <SwitchPreference
             app:defaultValue="false"
             app:key="edit_speech_auto_submit"

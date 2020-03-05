@@ -9,6 +9,12 @@ import androidx.core.app.NavUtils
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
+import com.louiskirsch.quickdynalist.objectbox.DynalistTag
+import io.objectbox.kotlin.query
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.toast
+import org.jetbrains.anko.uiThread
 
 class SettingsActivity: AppCompatActivity() {
 
@@ -39,6 +45,17 @@ class SettingsActivity: AppCompatActivity() {
                     }, 100)
                     true
                 }
+            }
+
+            findPreference("cleanup_tags").setOnPreferenceClickListener {
+                doAsync {
+                    val toRemove = DynalistTag.box.all.filter { it.consumers.size == 0 }
+                    DynalistTag.box.remove(toRemove)
+                    uiThread {
+                        context!!.toast(R.string.pref_cleanup_tags_success)
+                    }
+                }
+                true
             }
         }
     }

@@ -15,13 +15,11 @@ import com.louiskirsch.quickdynalist.DynalistApp
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.text.EnhancedMovementMethod
 import io.objectbox.Box
-import io.objectbox.annotation.Convert
-import io.objectbox.annotation.Entity
-import io.objectbox.annotation.Id
-import io.objectbox.annotation.Index
+import io.objectbox.annotation.*
 import io.objectbox.converter.PropertyConverter
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import io.objectbox.relation.ToMany
 import java.io.Serializable
 
 @Entity
@@ -35,10 +33,15 @@ class DynalistTag(): Serializable {
     }
 
     @Id var id: Long = 0
+
     @Index
     @Convert(converter = TypeConverter::class, dbType = Integer::class)
     var type: Type = Type.HASH_TAG
+
     @Index var name: String = ""
+
+    @Backlink(to = "metaTags")
+    lateinit var consumers: ToMany<DynalistItem>
 
     val fullName: String get() {
         val prefix = if (type == Type.AT_TAG) '@' else '#'
