@@ -7,6 +7,8 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -81,6 +83,17 @@ class ShortcutActivity : AppCompatActivity() {
                 adapter.addAll(it)
             })
         }
+        shortcutName.addTextChangedListener(object: TextWatcher {
+            private var beforeText: CharSequence? = null
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                beforeText = s?.toString()
+            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s?.isBlank() != beforeText?.isBlank())
+                    invalidateOptionsMenu()
+            }
+        })
     }
 
     private fun updateFromLocation() {
@@ -98,6 +111,11 @@ class ShortcutActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.activity_shortcut, menu)
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(R.id.create_shortcut)?.isEnabled = !shortcutName.text.isBlank()
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
