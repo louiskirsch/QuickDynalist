@@ -96,6 +96,13 @@ class ShortcutActivity : AppCompatActivity() {
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        val dynalist = Dynalist(this)
+        if (!dynalist.isAuthenticated)
+            dynalist.authenticate()
+    }
+
     private fun updateFromLocation() {
         shortcutName.setText(location!!.nameWithoutSymbol.take(10))
         location!!.symbol?.let {

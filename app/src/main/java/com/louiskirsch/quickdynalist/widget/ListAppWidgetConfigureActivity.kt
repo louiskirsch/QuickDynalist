@@ -15,10 +15,7 @@ import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.louiskirsch.quickdynalist.DynalistApp
-import com.louiskirsch.quickdynalist.DynalistItemViewModel
-import com.louiskirsch.quickdynalist.Location
-import com.louiskirsch.quickdynalist.R
+import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import kotlinx.android.synthetic.main.list_app_widget_configure.*
 
@@ -58,7 +55,16 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
             if (locations.isNotEmpty() && initializing) {
                 initializeSelection(locations)
             }
+            if (initializing != locations.isEmpty())
+                invalidateOptionsMenu()
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val dynalist = Dynalist(this)
+        if (!dynalist.isAuthenticated)
+            dynalist.authenticate()
     }
 
     private fun initializeSelection(locations: List<Location>) {
@@ -75,6 +81,11 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.activity_list_app_widget_configure, menu)
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(R.id.create_list_app_widget)?.isEnabled = !widgetLocation.adapter.isEmpty
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

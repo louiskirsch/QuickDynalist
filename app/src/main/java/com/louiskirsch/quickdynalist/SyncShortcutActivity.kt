@@ -9,9 +9,13 @@ class SyncShortcutActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SyncJob.forceSync()
-        // TODO could also start this in foreground service and show notification
-        toast(R.string.sync_started)
-        finish()
+        val dynalist = Dynalist(this)
+        if (dynalist.isAuthenticated) {
+            SyncJob.forceSync()
+            toast(R.string.sync_started)
+            finish()
+        } else {
+            dynalist.authenticate()
+        }
     }
 }
