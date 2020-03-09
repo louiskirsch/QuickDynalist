@@ -40,6 +40,8 @@
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:ellipsize="end"
+                android:minLines="2"
+                android:maxLines="20"
                 android:justificationMode="inter_word"
                 app:layout_collapseMode="parallax"
                 android:layout_width="match_parent"
