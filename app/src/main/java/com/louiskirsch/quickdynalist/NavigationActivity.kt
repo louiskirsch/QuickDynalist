@@ -70,6 +70,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+        itemNotes.setOnTouchListener(OnLinkTouchListener())
 
         val itemsModel = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         val filtersModel = ViewModelProviders.of(this).get(DynalistItemFilterViewModel::class.java)
