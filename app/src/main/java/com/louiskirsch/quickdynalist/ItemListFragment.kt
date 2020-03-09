@@ -34,12 +34,17 @@ class ItemListFragment : BaseItemListFragment() {
             val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
             model.singleItem.value = location
             model.singleItemLiveData.observe(this, Observer { data ->
-                val newLocation = data.first()
-                val isModified = location.modified != newLocation.modified
-                if (isModified) {
-                    location = newLocation
-                    updateAppBar(refresh = true)
-                    activity!!.invalidateOptionsMenu()
+                if (data.isNotEmpty()) {
+                    val newLocation = data.first()
+                    val isModified = location.modified != newLocation.modified
+                    if (isModified) {
+                        location = newLocation
+                        updateAppBar(refresh = true)
+                        activity!!.invalidateOptionsMenu()
+                    }
+                } else {
+                    // Item disappeared - close this fragment
+                    fragmentManager?.popBackStack()
                 }
             })
         }
