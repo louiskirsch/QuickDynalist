@@ -94,6 +94,7 @@ class ItemListFragment : BaseItemListFragment() {
                     override fun onError(e: Exception?) {}
                     override fun onSuccess() {
                         itemImage.visibility = View.VISIBLE
+                        itemListCoordinator.isNestedScrollingEnabled = true
                     }
                 })
                 into(imageCache.getPutInCacheCallback(image))
@@ -103,7 +104,7 @@ class ItemListFragment : BaseItemListFragment() {
             val image = location.image
             val notes = activity!!.itemNotes.text
             val title = activity!!.title
-            if (image != null && notes.isBlank() && title.isBlank()) {
+            if (image != null && notes.isBlank() && title.length < 20) {
                 ImageCache(context!!).openInGallery(image)
             } else {
                 showItemDetails(location)
