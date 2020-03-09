@@ -434,7 +434,7 @@ abstract class BaseItemListFragment : Fragment() {
             this.title = title
             collapsingToolbar.title = title
             itemNotes.text = notes
-            if (!refresh) {
+            if (!refresh || notes.isBlank()) {
                 appBar.setExpanded(false, false)
             }
             editItemFab.visibility = View.GONE
