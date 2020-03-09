@@ -5,21 +5,20 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
-import com.louiskirsch.quickdynalist.jobs.CloneItemJob
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.prependIfNotBlank
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
 import io.objectbox.kotlin.boxFor
+import kotlinx.android.synthetic.main.app_bar_navigation.*
 import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.jetbrains.anko.*
-import android.util.Pair as UtilPair
 
 class ItemListFragment : BaseItemListFragment() {
     private lateinit var location: DynalistItem
@@ -67,6 +66,47 @@ class ItemListFragment : BaseItemListFragment() {
         super.onStart()
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
         model.selectedLocation.value = ItemLocation(location)
+
+        // TODO this (parts of it) should probably be also in the filter fragment code?
+        // TODO also listen to changes in location
+        // TODO remove old details activity
+        // TODO fix edit bar to bottom
+        val itemImage = activity!!.itemImage
+        val itemNotes = activity!!.itemNotes
+        val appBar = activity!!.appBar
+        val toolbar = activity!!.collapsingToolbar
+        val editItemFab = activity!!.editItemFab
+        val themedContext = ContextThemeWrapper(context, R.style.AppTheme_AppBarOverlay)
+        val notes = location.getSpannableNotes(themedContext)
+        val title = location.getSpannableText(themedContext)
+        itemListCoordinator.isNestedScrollingEnabled = !notes.isBlank()
+        appBar.setExpanded(false, false)
+        toolbar.title = title
+        itemNotes.text = notes
+        itemImage.visibility = View.GONE
+        location.image?.also { image ->
+            val picasso = Picasso.get()
+            val imageCache = ImageCache(context!!)
+            val request = imageCache.getFile(image)?.let { picasso.load(it) } ?: picasso.load(image)
+            request.apply {
+                into(itemImage, object: Callback {
+                    override fun onError(e: Exception?) {}
+                    override fun onSuccess() {
+                        itemImage.visibility = View.VISIBLE
+                        itemImage.setOnClickListener {
+                            imageCache.openInGallery(image)
+                        }
+                    }
+                })
+                into(imageCache.getPutInCacheCallback(image))
+            }
+        }
+        editItemFab.setOnClickListener {
+            val intent = Intent(context, AdvancedItemActivity::class.java).apply {
+                putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, location as Parcelable)
+            }
+            startActivity(intent)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

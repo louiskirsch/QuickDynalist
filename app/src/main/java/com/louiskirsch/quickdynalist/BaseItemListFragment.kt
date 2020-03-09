@@ -173,6 +173,7 @@ abstract class BaseItemListFragment : Fragment() {
             val initializing = adapter.itemCount == 0
             adapter.updateItems(newItems)
              if (newItems.isEmpty()) {
+                 activity!!.appBar.setExpanded(activity!!.itemNotes.text.isNotBlank(), true)
                  itemListNoItems.apply {
                      if (visibility != View.VISIBLE) {
                          visibility = View.VISIBLE

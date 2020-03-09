@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".ItemListFragment">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <com.louiskirsch.quickdynalist.views.NestedCoordinatorLayout
         android:id="@+id/itemListCoordinator"
         android:layout_width="match_parent"
         android:layout_weight="1"
@@ -53,7 +53,7 @@
             android:layout_margin="16dp"
             android:src="@drawable/ic_action_jump_to_bottom"/>
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </com.louiskirsch.quickdynalist.views.NestedCoordinatorLayout>
 
     <LinearLayout
         android:id="@+id/insertBar"
@@ -61,8 +61,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="8dp" android:paddingBottom="8dp"
         android:orientation="horizontal"
-        android:background="@color/barBackgroundColor"
-        app:layout_behavior=".views.MoveUpwardBehavior">
+        android:background="@color/barBackgroundColor">
 
         <ImageButton
             android:id="@+id/advancedItemButton"
