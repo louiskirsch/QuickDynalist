@@ -425,8 +425,7 @@ abstract class BaseItemListFragment : Fragment() {
     protected abstract fun activityTitle(context: Context): CharSequence
     protected abstract fun activityAppBarNotes(context: Context): CharSequence?
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    protected open fun updateAppBar(refresh: Boolean = false) {
         val themedContext = ContextThemeWrapper(context, R.style.AppTheme_AppBarOverlay)
         val title = activityTitle(themedContext)
         val notes = activityAppBarNotes(themedContext) ?: ""
@@ -435,10 +434,17 @@ abstract class BaseItemListFragment : Fragment() {
             this.title = title
             collapsingToolbar.title = title
             itemNotes.text = notes
-            appBar.setExpanded(false, false)
+            if (!refresh) {
+                appBar.setExpanded(false, false)
+            }
             editItemFab.visibility = View.GONE
             itemImage.visibility = View.GONE
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        updateAppBar()
     }
 
     override fun onDetach() {

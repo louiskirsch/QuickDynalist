@@ -7,7 +7,10 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
 import android.view.*
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
@@ -25,9 +28,20 @@ class ItemListFragment : BaseItemListFragment() {
     private lateinit var location: DynalistItem
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        arguments!!.let {
-            location = it.getParcelable(ARG_LOCATION)!!
+        arguments!!.let { args ->
+            location = args.getParcelable(ARG_LOCATION)!!
             DynalistApp.instance.boxStore.boxFor<DynalistItem>().attach(location)
+            val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+            model.singleItem.value = location
+            model.singleItemLiveData.observe(this, Observer { data ->
+                val newLocation = data.first()
+                val isModified = location.modified != newLocation.modified
+                if (isModified) {
+                    location = newLocation
+                    updateAppBar(refresh = true)
+                    activity!!.invalidateOptionsMenu()
+                }
+            })
         }
         super.onCreate(savedInstanceState)
         adapter.onRowMovedIntoListener = { from, to ->
@@ -61,11 +75,12 @@ class ItemListFragment : BaseItemListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         itemContents.setText(arguments!!.getCharSequence(ARG_ITEM_TEXT))
-
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
         model.selectedLocation.value = ItemLocation(location)
+    }
 
-        // TODO also listen to changes in location
+    override fun updateAppBar(refresh: Boolean) {
+        super.updateAppBar(refresh)
         // TODO fix edit bar to bottom (skip, very hard to do)
         val itemImage = activity!!.itemImage
         val appBar = activity!!.appBar

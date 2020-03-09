@@ -40,6 +40,15 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         })
     }
 
+    val singleItem = MutableLiveData<DynalistItem>()
+    val singleItemLiveData: LiveData<List<DynalistItem>> by lazy {
+        Transformations.switchMap(singleItem) { item ->
+            ObjectBoxLiveData(box.query {
+                equal(DynalistItem_.clientId, item.clientId)
+            })
+        }
+    }
+
     val itemsParent = MutableLiveData<DynalistItem>()
     val itemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
         Transformations.switchMap(itemsParent) { parent ->
