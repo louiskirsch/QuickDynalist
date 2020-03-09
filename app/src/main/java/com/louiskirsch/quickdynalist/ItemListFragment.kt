@@ -69,8 +69,7 @@ class ItemListFragment : BaseItemListFragment() {
 
         // TODO this (parts of it) should probably be also in the filter fragment code?
         // TODO also listen to changes in location
-        // TODO remove old details activity
-        // TODO fix edit bar to bottom
+        // TODO fix edit bar to bottom (skip, very hard to do)
         val itemImage = activity!!.itemImage
         val itemNotes = activity!!.itemNotes
         val appBar = activity!!.appBar
@@ -93,14 +92,12 @@ class ItemListFragment : BaseItemListFragment() {
                     override fun onError(e: Exception?) {}
                     override fun onSuccess() {
                         itemImage.visibility = View.VISIBLE
-                        itemImage.setOnClickListener {
-                            imageCache.openInGallery(image)
-                        }
                     }
                 })
                 into(imageCache.getPutInCacheCallback(image))
             }
         }
+        appBar.setOnClickListener { showItemDetails(location) }
         editItemFab.setOnClickListener {
             val intent = Intent(context, AdvancedItemActivity::class.java).apply {
                 putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, location as Parcelable)

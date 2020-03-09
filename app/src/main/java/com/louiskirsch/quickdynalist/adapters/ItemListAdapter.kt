@@ -353,9 +353,6 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
         holder.imagePopup.notifyColorPick(colorPickListener)
         holder.itemMenu.visibility = View.VISIBLE
         holder.itemImage.visibility = View.GONE
-        holder.itemNotes.isEllipsized {
-            holder.menuPopup.popup.menu.findItem(R.id.action_show_details).isVisible = it
-        }
         holder.popupMenus.forEach {
             it.findItem(R.id.action_change_date_remove).isVisible = item.item.date != null
             it.findItem(R.id.action_move_to_bookmark).isVisible = !item.item.isBookmark
@@ -371,10 +368,6 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
                     override fun onSuccess() {
                         holder.itemMenu.visibility = View.GONE
                         holder.itemImage.visibility = View.VISIBLE
-                        holder.itemNotes.isEllipsized {
-                            holder.imagePopup.popup.menu.
-                                    findItem(R.id.action_show_details).isVisible = it
-                        }
                     }
                 })
                 into(imageCache.getPutInCacheCallback(image))

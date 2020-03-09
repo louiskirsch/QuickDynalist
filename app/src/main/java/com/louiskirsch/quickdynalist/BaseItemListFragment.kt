@@ -108,7 +108,6 @@ abstract class BaseItemListFragment : Fragment() {
         adapter.onClickListener = { openDynalistItem(it) }
         adapter.onPopupItemClickListener = { item, menuItem ->
             when (menuItem.itemId) {
-                R.id.action_show_details -> showItemDetails(item)
                 R.id.action_edit -> editingItem = item
                 R.id.action_show_image -> ImageCache(context!!).openInGallery(item.image!!)
                 R.id.action_duplicate -> {
@@ -319,7 +318,7 @@ abstract class BaseItemListFragment : Fragment() {
         }
     }
 
-    private fun showItemDetails(item: DynalistItem): Boolean {
+    protected fun showItemDetails(item: DynalistItem): Boolean {
         val intent = Intent(context, DetailsActivity::class.java)
         intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM, item as Parcelable)
         startActivity(intent, transitionBundle)
