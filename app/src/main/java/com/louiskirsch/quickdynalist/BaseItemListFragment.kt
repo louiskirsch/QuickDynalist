@@ -6,6 +6,7 @@ import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.*
 import android.text.Editable
@@ -421,11 +422,36 @@ abstract class BaseItemListFragment : Fragment() {
         DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
     }
 
-    protected abstract val activityTitle: String
+    protected abstract fun activityTitle(context: Context): CharSequence
+    protected abstract fun activityAppBarNotes(context: Context): CharSequence?
 
-    override fun onStart() {
-        super.onStart()
-        activity!!.title = activityTitle
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val themedContext = ContextThemeWrapper(context, R.style.AppTheme_AppBarOverlay)
+        val title = activityTitle(themedContext)
+        val notes = activityAppBarNotes(themedContext) ?: ""
+        itemListCoordinator.isNestedScrollingEnabled = !notes.isBlank()
+        activity!!.apply {
+            this.title = title
+            collapsingToolbar.title = title
+            itemNotes.text = notes
+            appBar.setExpanded(false, false)
+            editItemFab.visibility = View.GONE
+            itemImage.visibility = View.GONE
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        activity!!.apply {
+            val title = getString(R.string.app_name)
+            this.title = title
+            collapsingToolbar.title = title
+            itemNotes.text = ""
+            appBar.setExpanded(false, false)
+            editItemFab.visibility = View.GONE
+            itemImage.visibility = View.GONE
+        }
     }
 
     private fun updateSubmitEnabled() {

@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist
 
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -43,8 +44,8 @@ class FilteredItemListFragment : BaseItemListFragment() {
         outState.putBoolean("saved", saved)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
         model.selectedLocation.value =
                 FilterLocation(filter, context!!)
@@ -163,8 +164,14 @@ class FilteredItemListFragment : BaseItemListFragment() {
         insertBar.visibility = View.GONE
     }
 
-    override val activityTitle: String
-        get() = filter.name ?: getString(R.string.filter_name_generic)
+    override fun activityTitle(context: Context): CharSequence {
+        return filter.name ?: getString(R.string.filter_name_generic)
+    }
+
+    override fun activityAppBarNotes(context: Context): CharSequence? {
+        // TODO generate description of filter
+        return null
+    }
 
     companion object {
         private const val ARG_FILTER = "EXTRA_FILTER"

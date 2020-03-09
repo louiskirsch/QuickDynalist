@@ -1,6 +1,7 @@
 package com.louiskirsch.quickdynalist
 
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -60,29 +61,15 @@ class ItemListFragment : BaseItemListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         itemContents.setText(arguments!!.getCharSequence(ARG_ITEM_TEXT))
-    }
 
-    override fun onStart() {
-        super.onStart()
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
         model.selectedLocation.value = ItemLocation(location)
 
-        // TODO this (parts of it) should probably be also in the filter fragment code?
         // TODO also listen to changes in location
         // TODO fix edit bar to bottom (skip, very hard to do)
         val itemImage = activity!!.itemImage
-        val itemNotes = activity!!.itemNotes
         val appBar = activity!!.appBar
-        val toolbar = activity!!.collapsingToolbar
         val editItemFab = activity!!.editItemFab
-        val themedContext = ContextThemeWrapper(context, R.style.AppTheme_AppBarOverlay)
-        val notes = location.getSpannableNotes(themedContext)
-        val title = location.getSpannableText(themedContext)
-        itemListCoordinator.isNestedScrollingEnabled = !notes.isBlank()
-        appBar.setExpanded(false, false)
-        toolbar.title = title
-        itemNotes.text = notes
-        itemImage.visibility = View.GONE
         location.image?.also { image ->
             val picasso = Picasso.get()
             val imageCache = ImageCache(context!!)
@@ -98,11 +85,20 @@ class ItemListFragment : BaseItemListFragment() {
             }
         }
         appBar.setOnClickListener { showItemDetails(location) }
+        editItemFab.visibility = View.VISIBLE
         editItemFab.setOnClickListener {
             val intent = Intent(context, AdvancedItemActivity::class.java).apply {
                 putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, location as Parcelable)
             }
             startActivity(intent)
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        activity!!.apply {
+            editItemFab.setOnClickListener(null)
+            appBar.setOnClickListener(null)
         }
     }
 
@@ -212,7 +208,14 @@ class ItemListFragment : BaseItemListFragment() {
     }
 
     override val addItemLocation: DynalistItem? get() = location
-    override val activityTitle: String get() = location.strippedMarkersName
+
+    override fun activityTitle(context: Context): CharSequence {
+        return location.getSpannableText(context)
+    }
+
+    override fun activityAppBarNotes(context: Context): CharSequence? {
+        return location.getSpannableNotes(context)
+    }
 
     companion object {
         private const val ARG_LOCATION = "EXTRA_LOCATION"
