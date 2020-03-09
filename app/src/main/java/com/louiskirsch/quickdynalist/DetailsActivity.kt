@@ -1,8 +1,11 @@
 package com.louiskirsch.quickdynalist
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.method.LinkMovementMethod
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
@@ -15,6 +18,8 @@ import kotlinx.android.synthetic.main.activity_details.*
 
 class DetailsActivity : AppCompatActivity() {
 
+    private lateinit var displayItem: DynalistItem
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_details)
@@ -23,7 +28,7 @@ class DetailsActivity : AppCompatActivity() {
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
-        val displayItem: DynalistItem = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)
+        displayItem = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)
 
         itemText.apply {
             text = displayItem.getSpannableText(context)
@@ -56,11 +61,26 @@ class DetailsActivity : AppCompatActivity() {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.activity_details, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item!!.itemId == android.R.id.home) {
-            fixedFinishAfterTransition()
-            return true
+        return when (item!!.itemId) {
+            android.R.id.home -> {
+                fixedFinishAfterTransition()
+                true
+            }
+            R.id.action_edit -> {
+                val intent = Intent(this, AdvancedItemActivity::class.java).apply {
+                    putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, displayItem as Parcelable)
+                }
+                finish()
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 }
