@@ -99,7 +99,16 @@ class ItemListFragment : BaseItemListFragment() {
                 into(imageCache.getPutInCacheCallback(image))
             }
         }
-        appBar.setOnClickListener { showItemDetails(location) }
+        appBar.setOnClickListener {
+            val image = location.image
+            val notes = activity!!.itemNotes.text
+            val title = activity!!.title
+            if (image != null && notes.isBlank() && title.isBlank()) {
+                ImageCache(context!!).openInGallery(image)
+            } else {
+                showItemDetails(location)
+            }
+        }
         editItemFab.visibility = View.VISIBLE
         editItemFab.setOnClickListener {
             val intent = Intent(context, AdvancedItemActivity::class.java).apply {
