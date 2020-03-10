@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist
 
 
 import android.animation.ObjectAnimator
+import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
 import androidx.fragment.app.Fragment
@@ -63,6 +64,7 @@ class SyncStatusFragment : Fragment() {
     fun onSyncEvent(event: SyncEvent) {
         when (event.status) {
             SyncStatus.SUCCESS -> {
+                activity!!.setResult(Activity.RESULT_OK)
                 updateProgress(1f)
                 sync_done.animate().apply {
                     alpha(1f)
@@ -73,6 +75,7 @@ class SyncStatusFragment : Fragment() {
                 }
             }
             SyncStatus.NO_SUCCESS -> {
+                activity!!.setResult(Activity.RESULT_CANCELED)
                 updateProgress(1f)
                 sync_failed.animate().apply {
                     alpha(1f)

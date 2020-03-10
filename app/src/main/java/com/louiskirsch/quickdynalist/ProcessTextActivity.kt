@@ -1,14 +1,12 @@
 package com.louiskirsch.quickdynalist
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import android.webkit.URLUtil
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +16,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
-import org.jetbrains.anko.okButton
 
 
 class ProcessTextActivity : AppCompatActivity() {
@@ -26,44 +23,53 @@ class ProcessTextActivity : AppCompatActivity() {
     private val speechRecognitionHelper = SpeechRecognitionHelper()
     private var text: String? = null
     private var location: DynalistItem? = null
-    private lateinit var bookmarks: List<DynalistItem>
+    private var bookmarks: List<DynalistItem> = emptyList()
 
     @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dynalist.subscribe()
-
-        if (intent.action == "com.louiskirsch.quickdynalist.RECORD_SPEECH") {
-            speechRecognitionHelper.startSpeechRecognition(this)
-        } else {
-            text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
-                    ?: intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
-            if (text == null) {
-                toast(R.string.invalid_intent_error)
-                finish()
-            } else {
-                val subject = intent.getCharSequenceExtra(Intent.EXTRA_SUBJECT)
-                if (subject != null && URLUtil.isNetworkUrl(text))
-                    text = "[$subject]($text)"
-
-                if (savedInstanceState == null)
-                    tryAddItem()
-            }
-        }
 
         location = dynalist.inbox
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
             bookmarks = it
         })
+
+        if (intent.action == getString(R.string.ACTION_RECORD_SPEECH)) {
+            speechRecognitionHelper.startSpeechRecognition(this)
+        } else {
+            text = deriveText()
+            if (text == null) {
+                finishWithError()
+            } else if(savedInstanceState == null) {
+                tryAddItem()
+            }
+        }
+    }
+
+    private fun finishWithError() {
+        toast(R.string.invalid_intent_error)
+        finish()
+    }
+
+    private fun deriveText(): String? {
+        val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
+                ?: intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
+                ?: return null
+        val subject = intent.getCharSequenceExtra(Intent.EXTRA_SUBJECT)
+        return if (subject != null && URLUtil.isNetworkUrl(text))
+            "[$subject]($text)"
+        else
+            text
     }
 
     private fun tryAddItem() {
-        if (!dynalist.isAuthenticated) {
-            // TODO start with activity for result, then update location and try again
-            dynalist.authenticate()
+        if (!dynalist.isAuthenticated || location == null) {
+            val configureOnlyInbox = dynalist.isAuthenticated
+            startActivityForResult(dynalist.createAuthenticationIntent(configureOnlyInbox),
+                    resources.getInteger(R.integer.request_code_authenticate))
         } else {
-            addItem()
+            showSnackbar()
         }
     }
 
@@ -86,7 +92,18 @@ class ProcessTextActivity : AppCompatActivity() {
             text = it
             tryAddItem()
         }
-        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            resources.getInteger(R.integer.request_code_authenticate) -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    if (location == null)
+                        location = dynalist.inbox
+                    showSnackbar()
+                } else {
+                    finishWithError()
+                }
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onPause() {
@@ -103,12 +120,7 @@ class ProcessTextActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        dynalist.unsubscribe()
-    }
-
-    private fun addItem() {
+    private fun showSnackbar() {
         Snackbar.make(window.decorView, R.string.add_item_success, Snackbar.LENGTH_SHORT).apply {
             setAction(R.string.item_change_target_location) {
                 alert {

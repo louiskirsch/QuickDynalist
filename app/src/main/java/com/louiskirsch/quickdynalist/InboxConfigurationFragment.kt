@@ -120,7 +120,10 @@ class InboxConfigurationFragment : Fragment() {
 
     private fun nextWizardScreen() {
         if (finishAfter) {
-            activity!!.finish()
+            activity!!.apply {
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
         } else {
             activity!!.supportFragmentManager.beginTransaction().apply {
                 setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)

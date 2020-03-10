@@ -1,5 +1,6 @@
 package com.louiskirsch.quickdynalist
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -160,11 +161,15 @@ class Dynalist(private val context: Context) {
         DynalistApp.instance.jobManager.addJobInBackground(job)
     }
 
-    fun authenticate(configureOnlyInbox: Boolean = false) {
-        context.startActivity(Intent(context, WizardActivity::class.java).apply {
+    fun createAuthenticationIntent(configureOnlyInbox: Boolean = false): Intent {
+        return Intent(context, WizardActivity::class.java).apply {
             putExtra(WizardActivity.EXTRA_CONFIG_INBOX_ONLY, configureOnlyInbox)
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        })
+        }
+    }
+
+    fun authenticate(configureOnlyInbox: Boolean = false) {
+        context.startActivity(createAuthenticationIntent(configureOnlyInbox))
     }
 
     fun resolveFilterInBundle(bundle: Bundle): DynalistItemFilter? {
