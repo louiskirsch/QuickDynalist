@@ -34,6 +34,7 @@ import android.content.ActivityNotFoundException
 import android.graphics.PorterDuff
 import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import com.louiskirsch.quickdynalist.DynalistApp.Companion.MAIN_UI_FRAGMENT
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 import com.louiskirsch.quickdynalist.utils.resolveColorAttribute
 
@@ -119,7 +120,9 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
         if (savedInstanceState == null) {
             createInitialFragment()?.let {
-                supportFragmentManager.beginTransaction().add(R.id.fragment_container, it).commit()
+                supportFragmentManager.beginTransaction()
+                        .add(R.id.fragment_container, it, MAIN_UI_FRAGMENT)
+                        .commit()
             }
         }
     }
@@ -185,10 +188,10 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         if (!dynalist.isAuthenticated) {
             dynalist.authenticate()
         }
-        if (supportFragmentManager.fragments.isEmpty()) {
+        if (supportFragmentManager.findFragmentByTag(MAIN_UI_FRAGMENT) == null) {
             createInitialFragment()?.let {
                 supportFragmentManager.beginTransaction()
-                        .add(R.id.fragment_container, it)
+                        .add(R.id.fragment_container, it, MAIN_UI_FRAGMENT)
                         .commit()
             }
         }
@@ -288,25 +291,23 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         }
     }
 
+    private fun replaceMainUiFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction().apply {
+            supportFragmentManager.findFragmentByTag(MAIN_UI_FRAGMENT)?.let { remove(it) }
+            add(R.id.fragment_container, fragment, MAIN_UI_FRAGMENT)
+            addToBackStack(null)
+            commit()
+        }
+    }
+
     private fun openDynalistItem(itemToOpen: DynalistItem) {
-        val currentFragment = supportFragmentManager
-                .findFragmentById(R.id.fragment_container) as? BaseItemListFragment
-        val itemText = currentFragment?.itemContents?.text
-        val itemString = itemText?.toString() ?: ""
-        val fragment = ItemListFragment.newInstance(itemToOpen, itemString)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
-        itemText?.clear()
+        val fragment = ItemListFragment.newInstance(itemToOpen)
+        replaceMainUiFragment(fragment)
     }
 
     private fun openDynalistItemFilter(filterToOpen: DynalistItemFilter) {
         val fragment = FilteredItemListFragment.newInstance(filterToOpen)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
+        replaceMainUiFragment(fragment)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

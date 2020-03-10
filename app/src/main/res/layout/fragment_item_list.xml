@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ItemListFragment">
@@ -11,8 +9,7 @@
     <com.louiskirsch.quickdynalist.views.NestedCoordinatorLayout
         android:id="@+id/itemListCoordinator"
         android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:layout_height="0dp">
+        android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/itemList"
@@ -55,59 +52,4 @@
 
     </com.louiskirsch.quickdynalist.views.NestedCoordinatorLayout>
 
-    <LinearLayout
-        android:id="@+id/insertBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="8dp" android:paddingBottom="8dp"
-        android:orientation="horizontal"
-        android:background="@color/barBackgroundColor">
-
-        <ImageButton
-            android:id="@+id/advancedItemButton"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="8dp"
-            android:text="@string/advanced_item"
-            android:tint="?attr/colorAccent"
-            android:src="@drawable/ic_action_advanced_item" />
-
-        <ImageButton
-            android:id="@+id/recordSpeechButton"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="8dp"
-            android:text="@string/action_record_speech"
-            android:src="@drawable/ic_action_record_speech"
-            android:tint="?attr/colorAccent" />
-
-        <EditText
-            android:id="@+id/itemContents"
-            android:transitionName="itemContents"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:ems="10"
-            android:backgroundTint="@android:color/transparent"
-            android:hint="@string/content_hint"
-            android:inputType="text|textAutoCorrect">
-            <requestFocus />
-        </EditText>
-
-        <ImageButton
-            android:id="@+id/submitButton"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="8dp"
-            android:text="@string/send_item"
-            android:tint="?attr/colorAccent"
-            android:src="@drawable/ic_action_send_item" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>

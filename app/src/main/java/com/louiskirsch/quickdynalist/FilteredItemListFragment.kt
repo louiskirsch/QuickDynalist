@@ -57,11 +57,6 @@ class FilteredItemListFragment : BaseItemListFragment() {
         menu.findItem(R.id.toggle_saved).isChecked = saved
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        insertBar.visibility = View.GONE
-    }
-
     private fun ensureSaved() {
         if (saved) return
         saved = true
@@ -112,6 +107,7 @@ class FilteredItemListFragment : BaseItemListFragment() {
     override val showAsChecklist: Boolean get() = filter.showAsChecklist
     override val enableDragging: Boolean get() = false
     override val showItemParentText: Boolean get() = true
+    override val hideIfNotEditing: Boolean get() = true
 
     override val itemsLiveData: LiveData<List<CachedDynalistItem>> get() {
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
@@ -154,16 +150,6 @@ class FilteredItemListFragment : BaseItemListFragment() {
         intent.putExtra(ShortcutActivity.EXTRA_LOCATION, filter)
     }
 
-    override fun onSetEditingItem(value: DynalistItem) {
-        insertBar.visibility = View.VISIBLE
-        super.onSetEditingItem(value)
-    }
-
-    override fun onClearEditingItem() {
-        super.onClearEditingItem()
-        insertBar.visibility = View.GONE
-    }
-
     override fun activityTitle(context: Context): CharSequence {
         return filter.name ?: getString(R.string.filter_name_generic)
     }
@@ -181,7 +167,7 @@ class FilteredItemListFragment : BaseItemListFragment() {
             return FilteredItemListFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(ARG_FILTER, filter)
-                    scrollTo?.let { putParcelable(BaseItemListFragment.ARG_SCROLL_TO, it) }
+                    scrollTo?.let { putParcelable(ARG_SCROLL_TO, it) }
                 }
             }
         }

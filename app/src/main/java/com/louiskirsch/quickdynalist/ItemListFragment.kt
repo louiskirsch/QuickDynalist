@@ -79,14 +79,13 @@ class ItemListFragment : BaseItemListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        itemContents.setText(arguments!!.getCharSequence(ARG_ITEM_TEXT))
+        arguments!!.getCharSequence(ARG_ITEM_TEXT)?.let { insertBarFragment.setText(it) }
         val model = ViewModelProviders.of(activity!!).get(ItemListFragmentViewModel::class.java)
         model.selectedLocation.value = ItemLocation(location)
     }
 
     override fun updateAppBar(refresh: Boolean) {
         super.updateAppBar(refresh)
-        // TODO fix edit bar to bottom (skip, very hard to do)
         val itemImage = activity!!.itemImage
         val appBar = activity!!.appBar
         val editItemFab = activity!!.editItemFab
@@ -252,12 +251,12 @@ class ItemListFragment : BaseItemListFragment() {
         private const val ARG_ITEM_TEXT = "EXTRA_ITEM_TEXT"
 
         @JvmStatic
-        fun newInstance(parent: DynalistItem, itemText: CharSequence,
+        fun newInstance(parent: DynalistItem, itemText: CharSequence? = null,
                         scrollTo: DynalistItem? = null): ItemListFragment {
             return ItemListFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(ARG_LOCATION, parent)
-                    putCharSequence(ARG_ITEM_TEXT, itemText.toString())
+                    itemText?.let { putCharSequence(ARG_ITEM_TEXT, it.toString()) }
                     scrollTo?.let { putParcelable(ARG_SCROLL_TO, it) }
                 }
             }

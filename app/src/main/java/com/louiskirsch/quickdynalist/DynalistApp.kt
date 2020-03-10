@@ -32,6 +32,7 @@ class DynalistApp : Application() {
 
     companion object {
         lateinit var instance: DynalistApp
+        const val MAIN_UI_FRAGMENT = "MAIN_UI_FRAGMENT"
         const val EXTRA_DISPLAY_ITEM = "EXTRA_DISPLAY_ITEM"
         const val EXTRA_DISPLAY_ITEM_ID = "EXTRA_DISPLAY_ITEM_ID"
         const val EXTRA_DISPLAY_FILTER = "EXTRA_DISPLAY_FILTER"
