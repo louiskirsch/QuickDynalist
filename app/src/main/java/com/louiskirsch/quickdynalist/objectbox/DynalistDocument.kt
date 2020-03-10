@@ -8,6 +8,9 @@ import io.objectbox.kotlin.boxFor
 
 @Entity
 class DynalistDocument(var serverFileId: String?) {
+
+    constructor() : this(null)
+
     @Id
     var id: Long = 0
     var version: Long = 0
