@@ -179,10 +179,6 @@ class InsertBarFragment : Fragment() {
         DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-    }
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is InteractionListener) {
