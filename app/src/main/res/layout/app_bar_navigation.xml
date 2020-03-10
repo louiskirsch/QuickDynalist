@@ -72,7 +72,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior=".views.BottomBarScrollingViewBehavior"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:id="@+id/fragment_container" />
 
     <fragment android:name="com.louiskirsch.quickdynalist.InsertBarFragment"

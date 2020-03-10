@@ -364,7 +364,15 @@ abstract class BaseItemListFragment :Fragment(),
                 findFragmentById(R.id.insertBarFragment) as InsertBarFragment
         insertBarFragment.configure(this, hideIfNotEditing)
         insertBarFragment.registerListener(this)
+        adjustBottomBarPadding(insertBarFragment.view!!)
         updateAppBar()
+    }
+
+    private fun adjustBottomBarPadding(bottomBar: View) {
+        val paddingBottom = if (bottomBar.visibility == View.VISIBLE) bottomBar.height else 0
+        view?.apply {
+            setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
+        }
     }
 
     override fun onDestroyView() {

@@ -17,7 +17,7 @@ class BottomBarScrollingViewBehavior: AppBarLayout.ScrollingViewBehavior {
     }
 
     override fun onLayoutChild(parent: CoordinatorLayout, child: View, layoutDirection: Int): Boolean {
-        parent.findViewWithTag<View>("bottomBar")?.let { dependency ->
+        parent.getDependencies(child).first { it.tag == "bottomBar" }?.let { dependency ->
             val paddingBottom = if (dependency.visibility == View.VISIBLE) dependency.height else 0
             child.setPadding(child.paddingLeft, child.paddingTop, child.paddingRight, paddingBottom)
         }

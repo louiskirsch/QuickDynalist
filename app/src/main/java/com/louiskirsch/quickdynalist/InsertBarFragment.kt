@@ -209,11 +209,11 @@ class InsertBarFragment : Fragment() {
     }
 
     private fun hide() {
-        view!!.visibility = View.GONE
+        view?.visibility = View.GONE
     }
 
     private fun show() {
-        view!!.visibility = View.VISIBLE
+        view?.visibility = View.VISIBLE
     }
 
     fun setText(text: CharSequence?) {
@@ -242,6 +242,8 @@ class InsertBarFragment : Fragment() {
     fun configure(locationProvider: LocationProvider?, hideIfNotEditing: Boolean) {
         this.locationProvider = locationProvider
         this.hideIfNotEditing = hideIfNotEditing
+        if (view == null)
+            return
         editingItem = null
         if (hideIfNotEditing || locationProvider == null)
             hide()
