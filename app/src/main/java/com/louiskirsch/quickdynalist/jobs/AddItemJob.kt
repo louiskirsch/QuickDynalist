@@ -43,12 +43,12 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
     @Throws(Throwable::class)
     override fun onRun() {
         val response = insertAPIRequest()
+        requireSuccess(response)
         val newItemId = when (response) {
             is InboxItemResponse -> response.node_id
             is InsertedItemsResponse -> response.new_node_ids!![0]
             else -> throw BackendException("Invalid response - no itemId included")
         }
-        requireSuccess(response)
         DynalistApp.instance.boxStore.runInTx {
             val updatedItem = box.query { equal(DynalistItem_.syncJob, id) }.findFirst()?.apply {
                 syncJob = null

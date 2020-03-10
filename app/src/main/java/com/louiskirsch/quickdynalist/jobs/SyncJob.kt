@@ -102,9 +102,21 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         val box = DynalistItem.box
 
         // Query documents from server
-        val remoteFiles = service.listFiles(AuthenticatedRequest(token!!))
-                .execRespectRateLimit(delayCallback).body()!!
-                .files!!.filter { it.isDocument && it.isEditable }
+        val remoteFilesResponse = service.listFiles(AuthenticatedRequest(token!!))
+                .execRespectRateLimit(delayCallback).body()
+        val remoteFiles = when {
+            remoteFilesResponse == null -> {
+                throw BackendException("Could not query remote files")
+            }
+            remoteFilesResponse.isInvalidToken -> {
+                EventBus.getDefault().post(AuthenticatedEvent(false))
+                throw NotAuthenticatedException()
+            }
+            !remoteFilesResponse.isOK -> {
+                throw BackendException("Remote files query returned, ${remoteFilesResponse.errorDesc}")
+            }
+            else -> remoteFilesResponse.files!!.filter { it.isDocument && it.isEditable }
+        }
         deleteDisappearedDocuments(remoteFiles)
         val newVersionedDocuments = findNewVersionedDocuments(token, remoteFiles)
         val newDocuments = newVersionedDocuments.unzip().first
