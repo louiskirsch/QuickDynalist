@@ -68,9 +68,7 @@ class SyncStatusFragment : Fragment() {
                     alpha(1f)
                     duration = 800
                     interpolator = DecelerateInterpolator()
-                    withEndAction {
-                        Handler().postDelayed({nextWizardScreen()}, 800)
-                    }
+                    withEndAction { nextWizardScreen() }
                     start()
                 }
             }
@@ -91,6 +89,7 @@ class SyncStatusFragment : Fragment() {
     }
 
     private fun nextWizardScreen() {
+        if (context == null) return // This fragment is no longer active
         val dynalist = Dynalist(context!!)
         val fragment = if (dynalist.inbox == null) {
             InboxConfigurationFragment()
@@ -100,7 +99,7 @@ class SyncStatusFragment : Fragment() {
         activity!!.supportFragmentManager.beginTransaction().apply {
             setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
             replace(R.id.fragment_container, fragment)
-            commit()
+            commitAllowingStateLoss()
         }
     }
 
