@@ -38,16 +38,23 @@ interface DynalistService {
 
     @POST("pref/set")
     fun setPreference(@Body request: SetPreferenceRequest): Call<DynalistResponse>
+
+    @POST("upload")
+    fun uploadFile(@Body request: UploadFileRequest): Call<UploadResponse>
 }
 
 class AuthenticatedRequest(val token: String)
 class InboxRequest(val content: String, val note: String, val token: String)
 class ReadDocumentRequest(val file_id: String, val token: String)
 class VersionsRequest(val file_ids: Array<String>, val token: String)
+
 class PreferenceRequest(val key: String, val token: String)
 open class SetPreferenceRequest(val key: String, val value: String, val token: String)
 class SetInboxRequest(fileId: String, nodeId: String, token: String)
     : SetPreferenceRequest("inbox_location", "$fileId/$nodeId", token)
+
+class UploadFileRequest(val filename: String, val content_type: String,
+                        val data: String, val token: String)
 
 class InsertItemRequest(val file_id: String, parent_id: String,
                         content: String, note: String, val token: String, index: Int = -1) {
@@ -167,4 +174,14 @@ class Node(val id: String, val content: String, val note: String, val checked: B
 
 class DocumentResponse: DynalistResponse() {
     val nodes: List<Node>? = null
+}
+
+class UploadResponse: DynalistResponse() {
+    val url: String? = null
+
+    val isProNeeded: Boolean
+        get() = _code == "NeedPro"
+
+    val isQuotaExceeded: Boolean
+        get() = _code == "QuotaExceeded"
 }

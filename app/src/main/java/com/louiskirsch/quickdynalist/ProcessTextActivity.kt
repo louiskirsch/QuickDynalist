@@ -3,7 +3,10 @@ package com.louiskirsch.quickdynalist
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
+import android.util.Base64
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import android.webkit.URLUtil
@@ -14,18 +17,23 @@ import android.view.Gravity
 import android.view.WindowManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.louiskirsch.quickdynalist.network.UploadFileRequest
+import com.louiskirsch.quickdynalist.network.UploadResponse
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
 
 class ProcessTextActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
     private val speechRecognitionHelper = SpeechRecognitionHelper()
     private var text: String? = null
+    private var textList: List<String>? = null
     private var location: DynalistItem? = null
     private var bookmarks: List<DynalistItem> = emptyList()
+    private var afterAuthentication: (() -> Unit)? = null
 
-    @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -35,20 +43,107 @@ class ProcessTextActivity : AppCompatActivity() {
             bookmarks = it
         })
 
-        if (intent.action == getString(R.string.ACTION_RECORD_SPEECH)) {
-            speechRecognitionHelper.startSpeechRecognition(this)
-        } else {
-            text = deriveText()
-            if (text == null) {
-                finishWithError()
-            } else if(savedInstanceState == null) {
-                tryAddItem()
+        if (savedInstanceState == null) {
+            val action = intent.action
+            when {
+                action == getString(R.string.ACTION_RECORD_SPEECH) -> {
+                    speechRecognitionHelper.startSpeechRecognition(this)
+                }
+                isUploadIntent && action == Intent.ACTION_SEND -> {
+                    ensureAuthenticated { uploadSingle() }
+                }
+                isUploadIntent && action == Intent.ACTION_SEND_MULTIPLE -> {
+                    ensureAuthenticated { uploadMultiple() }
+                }
+                else -> {
+                    text = deriveText()
+                    if (text == null) {
+                        finishWithError()
+                    } else {
+                        ensureAuthenticated { showSnackbar() }
+                    }
+                }
             }
         }
     }
 
-    private fun finishWithError() {
-        toast(R.string.invalid_intent_error)
+    private val isUploadIntent: Boolean get() {
+        val action = intent.action
+        val type = intent.type
+        return (action == Intent.ACTION_SEND || action == Intent.ACTION_SEND_MULTIPLE)
+                && type != null
+                && (type.startsWith("image/") || type.startsWith("video/")
+                || type == "application/pdf")
+    }
+
+    private fun uploadUri(uri: Uri): Pair<UploadFileRequest, UploadResponse>? {
+        val service = DynalistApp.instance.dynalistService
+        val token = dynalist.token
+        val type = intent.type
+        val data = contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
+        val fileName = contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            cursor.moveToFirst()
+            cursor.getString(nameIndex)
+        }
+        if (type == null || data == null || fileName == null || token == null) {
+            return null
+        }
+        val base64Data = Base64.encodeToString(data, Base64.DEFAULT)
+        val request = UploadFileRequest(fileName, type, base64Data, token)
+        return service.uploadFile(request).execute().body()?.let { request to it }
+    }
+
+    private fun uploadSingle() {
+        val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+        val uploadingBar = showUploadingSnackbar()
+        doAsync {
+            val (request, response) = uploadUri(uri) ?: (null to null)
+            uiThread {
+                uploadingBar.dismiss()
+                if (handleUploadError(response)) {
+                    text = "![${request!!.filename}](${response!!.url})"
+                    showSnackbar()
+                }
+            }
+        }
+    }
+
+    private fun handleUploadError(response: UploadResponse?): Boolean {
+        return when {
+            response == null -> {
+                finishWithError()
+                false
+            }
+            response.isProNeeded -> {
+                finishWithError(R.string.upload_error_pro_needed)
+                false
+            }
+            response.isQuotaExceeded -> {
+                finishWithError(R.string.upload_error_quota_exceeded)
+                false
+            }
+            response.isOK -> true
+            else -> {
+                finishWithError()
+                false
+            }
+        }
+
+    }
+
+    private fun uploadMultiple() {
+        val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+        // TODO implement
+    }
+
+    private fun showUploadingSnackbar(): Snackbar {
+        return Snackbar.make(window.decorView, R.string.status_uploading,
+                Snackbar.LENGTH_INDEFINITE).apply { show() }
+    }
+
+    private fun finishWithError(error: Int? = null) {
+        toast(error ?: R.string.invalid_intent_error)
         finish()
     }
 
@@ -63,13 +158,14 @@ class ProcessTextActivity : AppCompatActivity() {
             text
     }
 
-    private fun tryAddItem() {
+    private fun ensureAuthenticated(callback: () -> Unit) {
         if (!dynalist.isAuthenticated || location == null) {
+            afterAuthentication = callback
             val configureOnlyInbox = dynalist.isAuthenticated
             startActivityForResult(dynalist.createAuthenticationIntent(configureOnlyInbox),
                     resources.getInteger(R.integer.request_code_authenticate))
         } else {
-            showSnackbar()
+            callback()
         }
     }
 
@@ -90,14 +186,15 @@ class ProcessTextActivity : AppCompatActivity() {
         speechRecognitionHelper.dispatchResult(this,
                 requestCode, resultCode, data, ::finish) {
             text = it
-            tryAddItem()
+            ensureAuthenticated { showSnackbar() }
         }
         when (requestCode) {
             resources.getInteger(R.integer.request_code_authenticate) -> {
                 if (resultCode == Activity.RESULT_OK) {
                     if (location == null)
                         location = dynalist.inbox
-                    showSnackbar()
+                    afterAuthentication?.invoke()
+                    afterAuthentication = null
                 } else {
                     finishWithError()
                 }
