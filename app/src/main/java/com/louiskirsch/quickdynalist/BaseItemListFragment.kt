@@ -364,8 +364,8 @@ abstract class BaseItemListFragment :Fragment(),
                 findFragmentById(R.id.insertBarFragment) as InsertBarFragment
         insertBarFragment.configure(this, hideIfNotEditing)
         insertBarFragment.registerListener(this)
-        adjustBottomBarPadding(insertBarFragment.view!!)
         updateAppBar()
+        view.post { adjustBottomBarPadding(insertBarFragment.view!!) }
     }
 
     private fun adjustBottomBarPadding(bottomBar: View) {
