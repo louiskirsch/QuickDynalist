@@ -211,6 +211,8 @@
     <string name="status_uploading">Uploading …</string>
     <string name="upload_error_quota_exceeded">Error: Quota exceeded</string>
     <string name="upload_error_pro_needed">Uploading files requires Dynalist Pro</string>
+    <string name="tile_quick_dialog">Quick Dialog</string>
+    <string name="tile_quick_dialog_content_desc">Add items to your Dynalist</string>
     <plurals name="date_repetition_d">
         <item quantity="zero">always</item>
         <item quantity="one">daily</item>

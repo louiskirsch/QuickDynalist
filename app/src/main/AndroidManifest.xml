@@ -14,10 +14,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".WizardActivity"
+        <service
+            android:name=".QuickDialogTileService"
+            android:icon="@drawable/ic_tile_quick_dialog"
+            android:label="@string/tile_quick_dialog"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action
+                    android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+        </service>
+
+        <activity
+            android:name=".WizardActivity"
             android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SearchActivity"
             android:exported="true"
@@ -92,6 +106,7 @@
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -110,6 +125,7 @@
                     android:pathPrefix="/d/"
                     android:scheme="https" />
             </intent-filter>
+
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
@@ -125,6 +141,7 @@
             android:windowSoftInputMode="stateVisible">
             <intent-filter>
                 <action android:name="com.louiskirsch.quickdynalist.SHOW_DIALOG" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
