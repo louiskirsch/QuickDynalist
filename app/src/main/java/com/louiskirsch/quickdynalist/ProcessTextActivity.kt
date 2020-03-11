@@ -23,13 +23,13 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import java.util.*
 
 
 class ProcessTextActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
     private val speechRecognitionHelper = SpeechRecognitionHelper()
-    private var text: String? = null
-    private var textList: List<String>? = null
+    private var text: List<String>? = null
     private var location: DynalistItem? = null
     private var bookmarks: List<DynalistItem> = emptyList()
     private var afterAuthentication: (() -> Unit)? = null
@@ -76,7 +76,7 @@ class ProcessTextActivity : AppCompatActivity() {
                 || type == "application/pdf")
     }
 
-    private fun uploadUri(uri: Uri): Pair<UploadFileRequest, UploadResponse>? {
+    private fun uploadUri(uri: Uri): Upload? {
         val service = DynalistApp.instance.dynalistService
         val token = dynalist.token
         val type = intent.type
@@ -92,39 +92,39 @@ class ProcessTextActivity : AppCompatActivity() {
         val encodingFlags = Base64.NO_PADDING or Base64.NO_WRAP
         val base64Data = Base64.encodeToString(data, encodingFlags)
         val request = UploadFileRequest(fileName, type, base64Data, token)
-        return service.uploadFile(request).execute().body()?.let { request to it }
+        return service.uploadFile(request).execute().body()?.let { Upload(request, it) }
     }
 
     private fun uploadSingle() {
         val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
         val uploadingBar = showUploadingSnackbar()
         doAsync {
-            val (request, response) = uploadUri(uri) ?: (null to null)
+            val upload = uploadUri(uri)
             uiThread {
                 uploadingBar.dismiss()
-                if (handleUploadError(response)) {
-                    text = "![${request!!.filename}](${response!!.url})"
+                if (handleUploadError(upload)) {
+                    text = listOf("![${upload!!.request.filename}](${upload.response.url})")
                     showSnackbar()
                 }
             }
         }
     }
 
-    private fun handleUploadError(response: UploadResponse?): Boolean {
+    private fun handleUploadError(upload: Upload?): Boolean {
         return when {
-            response == null -> {
+            upload == null -> {
                 finishWithError()
                 false
             }
-            response.isProNeeded -> {
+            upload.response.isProNeeded -> {
                 finishWithError(R.string.upload_error_pro_needed)
                 false
             }
-            response.isQuotaExceeded -> {
+            upload.response.isQuotaExceeded -> {
                 finishWithError(R.string.upload_error_quota_exceeded)
                 false
             }
-            response.isOK -> true
+            upload.response.isOK -> true
             else -> {
                 finishWithError()
                 false
@@ -135,7 +135,21 @@ class ProcessTextActivity : AppCompatActivity() {
 
     private fun uploadMultiple() {
         val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
-        // TODO implement
+        val uploadingBar = showUploadingSnackbar()
+        doAsync {
+            val uploads = LinkedList<Upload>()
+            for (uri in uris) {
+                val upload = uploadUri(uri)
+                if (!handleUploadError(upload))
+                    return@doAsync
+                uploads.add(upload!!)
+            }
+            uiThread {
+                uploadingBar.dismiss()
+                text = uploads.map { "![${it.request.filename}](${it.response.url})" }
+                showSnackbar()
+            }
+        }
     }
 
     private fun showUploadingSnackbar(): Snackbar {
@@ -148,15 +162,15 @@ class ProcessTextActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun deriveText(): String? {
+    private fun deriveText(): List<String>? {
         val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
                 ?: intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
                 ?: return null
         val subject = intent.getCharSequenceExtra(Intent.EXTRA_SUBJECT)
         return if (subject != null && URLUtil.isNetworkUrl(text))
-            "[$subject]($text)"
+            listOf("[$subject]($text)")
         else
-            text
+            text.split('\n')
     }
 
     private fun ensureAuthenticated(callback: () -> Unit) {
@@ -186,7 +200,7 @@ class ProcessTextActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         speechRecognitionHelper.dispatchResult(this,
                 requestCode, resultCode, data, ::finish) {
-            text = it
+            text = it.split(". ")
             ensureAuthenticated { showSnackbar() }
         }
         when (requestCode) {
@@ -207,15 +221,19 @@ class ProcessTextActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         if (isFinishing && text != null && location != null)
-            dynalist.addItem(text!!, location!!)
+            addItemsToDynalist()
     }
 
     override fun onStop() {
         super.onStop()
         if (!isFinishing && location != null) {
-            dynalist.addItem(text!!, location!!)
+            addItemsToDynalist()
             finish()
         }
+    }
+
+    private fun addItemsToDynalist() {
+        text?.forEach { dynalist.addItem(it, location!!) }
     }
 
     private fun showSnackbar() {
@@ -239,4 +257,6 @@ class ProcessTextActivity : AppCompatActivity() {
             show()
         }
     }
+
+    private class Upload(val request: UploadFileRequest, val response: UploadResponse)
 }
