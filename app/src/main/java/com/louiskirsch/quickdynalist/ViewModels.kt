@@ -35,9 +35,31 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
             equal(DynalistItem_.isBookmark, true)
             or()
             equal(DynalistItem_.serverItemId, "root")
+            orderDesc(DynalistItem_.isInbox)
             orderDesc(DynalistItem_.isBookmark)
             order(DynalistItem_.name)
         })
+    }
+
+    val recentLocationsLiveData: LiveData<List<DynalistItem>> by lazy {
+        val recentItemsQuery = box.query { orderDesc(DynalistItem_.modified) }
+        SubscriberOBLiveData(DynalistApp.instance.boxStore, DynalistItem::class.java,
+                recentItemsQuery) { query ->
+            query.find(0, 20).mapNotNull { it.parent.target }.distinct().take(5)
+        }
+    }
+
+    val targetLocationsLiveData: LiveData<List<DynalistItem>> by lazy {
+        MediatorLiveData<List<DynalistItem>>().apply {
+            addSource(bookmarksAndDocsLiveData) { bookmarks ->
+                value = recentLocationsLiveData.value?.let { (it + bookmarks).distinct() }
+                        ?: bookmarks
+            }
+            addSource(recentLocationsLiveData) { recentLocations ->
+                value = bookmarksAndDocsLiveData.value?.let { (recentLocations + it).distinct() }
+                        ?: recentLocations
+            }
+        }
     }
 
     val singleItem = MutableLiveData<DynalistItem>()
@@ -89,7 +111,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
     val searchTerm = MutableLiveData<String>()
     val searchItemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
         Transformations.switchMap(searchTerm) { search ->
-            TransformedOBLiveData(box.query {
+            val query = box.query {
                 if (search.isNotBlank()) {
                     contains(DynalistItem_.name, search)
                     or()
@@ -99,7 +121,10 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 equal(DynalistItem_.hidden, false)
                 orderDesc(DynalistItem_.modified)
                 eager(DynalistItem_.children, DynalistItem_.parent)
-            }) { createCachedDynalistItems(it.take(100), true) }
+            }
+            SubscriberOBLiveData(DynalistApp.instance.boxStore, DynalistItem::class.java, query) {
+                createCachedDynalistItems(it.find(0, 100), true)
+            }
         }
     }
 

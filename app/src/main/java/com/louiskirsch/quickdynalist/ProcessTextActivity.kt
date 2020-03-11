@@ -39,7 +39,7 @@ class ProcessTextActivity : AppCompatActivity() {
 
         location = dynalist.inbox
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> {
+        model.targetLocationsLiveData.observe(this, Observer<List<DynalistItem>> {
             bookmarks = it
         })
 
