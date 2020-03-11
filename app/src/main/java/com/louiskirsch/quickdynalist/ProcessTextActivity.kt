@@ -95,6 +95,13 @@ class ProcessTextActivity : AppCompatActivity() {
         return service.uploadFile(request).execute().body()?.let { Upload(request, it) }
     }
 
+    private fun formatUpload(upload: Upload): String {
+        val prefix = if (upload.request.content_type.startsWith("image/")) "!" else ""
+        val filename = upload.request.filename
+        val url = upload.response.url
+        return "$prefix[$filename]($url)"
+    }
+
     private fun uploadSingle() {
         val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
         val uploadingBar = showUploadingSnackbar()
@@ -103,7 +110,7 @@ class ProcessTextActivity : AppCompatActivity() {
             uiThread {
                 uploadingBar.dismiss()
                 if (handleUploadError(upload)) {
-                    text = listOf("![${upload!!.request.filename}](${upload.response.url})")
+                    text = listOf(formatUpload(upload!!))
                     showSnackbar()
                 }
             }
@@ -146,7 +153,7 @@ class ProcessTextActivity : AppCompatActivity() {
             }
             uiThread {
                 uploadingBar.dismiss()
-                text = uploads.map { "![${it.request.filename}](${it.response.url})" }
+                text = uploads.map { formatUpload(it) }
                 showSnackbar()
             }
         }
