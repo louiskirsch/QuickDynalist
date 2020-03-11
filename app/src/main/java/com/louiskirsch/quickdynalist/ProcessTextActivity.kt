@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -10,19 +11,19 @@ import android.util.Base64
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import android.webkit.URLUtil
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.toast
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Gravity
 import android.view.WindowManager
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.louiskirsch.quickdynalist.adapters.SectionedAdapter
 import com.louiskirsch.quickdynalist.network.UploadFileRequest
 import com.louiskirsch.quickdynalist.network.UploadResponse
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
+import org.jetbrains.anko.*
 import java.util.*
 
 
@@ -31,16 +32,30 @@ class ProcessTextActivity : AppCompatActivity() {
     private val speechRecognitionHelper = SpeechRecognitionHelper()
     private var text: List<String>? = null
     private var location: DynalistItem? = null
-    private var bookmarks: List<DynalistItem> = emptyList()
+    private lateinit var targetLocationsAdapter: SectionedAdapter<DynalistItem>
     private var afterAuthentication: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         location = dynalist.inbox
+        targetLocationsAdapter = SectionedAdapter(this, android.R.layout.simple_list_item_1,
+                ArrayList())
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
-        model.targetLocationsLiveData.observe(this, Observer<List<DynalistItem>> {
-            bookmarks = it
+        model.groupedTargetLocationsLiveData.observe(this,
+                Observer<DynalistItemViewModel.GroupedTargetLocations> { grouped ->
+            targetLocationsAdapter.apply {
+                clear()
+                grouped.recent?.let { locations ->
+                    addSection(getString(R.string.title_recent_list), locations)
+                }
+                grouped.bookmarks?.let { locations ->
+                    addSection(getString(R.string.title_bookmark_list), locations)
+                }
+                grouped.documents?.let { locations ->
+                    addSection(getString(R.string.title_documents_list), locations)
+                }
+            }
         })
 
         if (savedInstanceState == null) {
@@ -246,12 +261,12 @@ class ProcessTextActivity : AppCompatActivity() {
     private fun showSnackbar() {
         Snackbar.make(window.decorView, R.string.add_item_success, Snackbar.LENGTH_SHORT).apply {
             setAction(R.string.item_change_target_location) {
-                alert {
-                    items(bookmarks) { _, selectedLocation: DynalistItem, _ ->
-                        location = selectedLocation
+                AlertDialog.Builder(context).apply {
+                    setAdapter(targetLocationsAdapter) { _, which ->
+                        location = targetLocationsAdapter.getItemPayload(which)
                         finish()
                     }
-                    onCancelled { finish() }
+                    setOnCancelListener { finish() }
                     show()
                 }
             }

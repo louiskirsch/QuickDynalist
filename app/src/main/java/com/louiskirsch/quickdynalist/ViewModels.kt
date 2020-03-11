@@ -62,6 +62,24 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         }
     }
 
+    class GroupedTargetLocations(var recent: List<DynalistItem>?,
+                                 var bookmarks: List<DynalistItem>?,
+                                 var documents: List<DynalistItem>?)
+    val groupedTargetLocationsLiveData: LiveData<GroupedTargetLocations> by lazy {
+        MediatorLiveData<GroupedTargetLocations>().apply {
+            value = GroupedTargetLocations(null, null, null)
+            addSource(recentLocationsLiveData) {
+                value = value!!.apply { recent = it }
+            }
+            addSource(bookmarksLiveData) {
+                value = value!!.apply { bookmarks = it }
+            }
+            addSource(documentsLiveData) {
+                value = value!!.apply { documents = it }
+            }
+        }
+    }
+
     val singleItem = MutableLiveData<DynalistItem>()
     val singleItemLiveData: LiveData<List<DynalistItem>> by lazy {
         Transformations.switchMap(singleItem) { item ->

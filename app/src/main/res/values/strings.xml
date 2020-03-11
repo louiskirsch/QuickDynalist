@@ -32,6 +32,7 @@
     <string name="nav_header_subtitle">The quickest way to add your items.</string>
     <string name="nav_header_desc">Quick Dynalist Logo</string>
     <string name="advanced_item">Create advanced item</string>
+    <string name="title_recent_list">Recent</string>
     <string name="title_bookmark_list">Your inboxes</string>
     <string name="dialog_ask_discard">Are you sure you want to discard this item?</string>
     <string name="open_quick_dialog">Quick Dialog</string>
