@@ -89,7 +89,8 @@ class ProcessTextActivity : AppCompatActivity() {
         if (type == null || data == null || fileName == null || token == null) {
             return null
         }
-        val base64Data = Base64.encodeToString(data, Base64.DEFAULT)
+        val encodingFlags = Base64.NO_PADDING or Base64.NO_WRAP
+        val base64Data = Base64.encodeToString(data, encodingFlags)
         val request = UploadFileRequest(fileName, type, base64Data, token)
         return service.uploadFile(request).execute().body()?.let { request to it }
     }
