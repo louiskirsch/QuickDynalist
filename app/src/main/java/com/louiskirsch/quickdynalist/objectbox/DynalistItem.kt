@@ -15,6 +15,7 @@ import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.text.ThemedSpan
 import com.louiskirsch.quickdynalist.utils.*
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.annotation.*
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
@@ -420,11 +421,16 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         }
 
         fun updateLocally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
+            var updatedItem: DynalistItem? = null
             DynalistApp.instance.boxStore.runInTx {
-                box.get(item.clientId)?.apply {
-                    updater(this)
-                    box.put(this)
+                box.get(item.clientId)?.let {
+                    updater(it)
+                    box.put(it)
+                    updatedItem = it
                 }
+            }
+            updatedItem?.let {
+                ListAppWidget.notifyItemChanged(DynalistApp.instance, it)
             }
         }
 

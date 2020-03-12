@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.text.style.BackgroundColorSpan
+import android.text.style.StrikethroughSpan
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
@@ -69,6 +70,10 @@ class ListViewsFactory(private val context: Context, intent: Intent)
                     val span = BackgroundColorSpan(itemColors[item.color])
                     spannableText.setSpan(span, 0, spannableText.length, 0)
                 }
+                if (item.isChecked) {
+                    val span = StrikethroughSpan()
+                    spannableText.setSpan(span, 0, spannableText.length, 0)
+                }
             }
         }
         items.clear()
@@ -76,15 +81,18 @@ class ListViewsFactory(private val context: Context, intent: Intent)
     }
 
     private fun getDynalistItemChildren(parentId: Long): List<DynalistItem> {
-        val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+        val box = DynalistItem.box
+        val parent = box.get(parentId)
         return box.query {
             equal(DynalistItem_.parentId, parentId)
             and()
             notEqual(DynalistItem_.name, "")
             and()
             equal(DynalistItem_.hidden, false)
-            and()
-            equal(DynalistItem_.isChecked, false)
+            if (!parent.areCheckedItemsVisible) {
+                and()
+                equal(DynalistItem_.isChecked, false)
+            }
             order(DynalistItem_.position)
             if (displayParentText)
                 eager(DynalistItem_.children, DynalistItem_.parent)
