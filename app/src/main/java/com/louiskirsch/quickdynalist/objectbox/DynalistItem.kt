@@ -186,8 +186,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         spannable.replaceAll(dynalistLinkRegex) {
             SpannableString("∞ ${it.groupValues[1]}").apply {
                 val fileId = it.groupValues[2]
-                val itemId = it.groupValues[3]
-                val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
+                val itemId = it.groupValues[3].ifEmpty { "root" }
                 val item = box.query {
                     equal(DynalistItem_.serverFileId, fileId)
                     and()
@@ -333,7 +332,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var linkedItem: DynalistItem?
         get() = dynalistLinkRegex.find(name + note)?.groupValues?.let { values ->
             val fileId = values[2]
-            val itemId = values[3]
+            val itemId = values[3].ifEmpty { "root" }
             return byServerId(fileId, itemId)
         }
         set(value) {
@@ -376,7 +375,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 "y" to R.plurals.date_repetition_y
         )
         private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?(?: - ([0-9\-]+)[ ]?([0-9:]+)?)?[ |]*(?:([0-9]+)([dwmy]))?\)""")
-        private val tagRegex = Regex("""(^| )([#@][\d\w_-]+)""")
+        private val tagRegex = Regex("""(^| )([#@][\d\w()&_-]+)""")
         private val boldRegex = Regex("""\*\*(.*?)\*\*""")
         private val italicRegex = Regex("""__(.*?)__""")
         private val inlineCodeRegex = Regex("""`(.*?)`""")
@@ -384,7 +383,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         private val latexRegex = Regex("""\$\$(.*?)\$\$""")
         private val linkRegex = Regex("""\[(.*?)]\((.*?)\)""")
         private val imageRegex = Regex("""!\[(.*?)]\((.*?)\)""")
-        private val dynalistLinkRegex = Regex("""\[(.*?)]\(https://dynalist\.io/d/(.*?)#z=(.*?)\)""")
+        private val dynalistLinkRegex = Regex("""\[(.*?)]\(https://dynalist\.io/d/([^#]+?)(?:#z=([^&]+?))?\)""")
         private val whitespaceRegex = Regex("""(^\s+)|(\s+$)""")
 
         @Suppress("unused")
