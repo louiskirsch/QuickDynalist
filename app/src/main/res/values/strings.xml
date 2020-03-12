@@ -11,7 +11,7 @@
     <string name="error_update_server">So sorry! Failed to inform the server about this recent change.</string>
     <string name="error_update_server_retry">Something went wrong with a recent change. Retrying…</string>
     <string name="process_text_action_name">Add To Inbox</string>
-    <string name="bookmark_hint">Add the tag #quickdynalist or #inbox to items that should appear in this list. Updates might take a moment to take effect and require WIFI.</string>
+    <string name="bookmark_hint">Add the tag #quickdynalist or #inbox to items that should appear in this list.</string>
     <string name="open_large">Open in large window</string>
     <string name="item_date_hint">Date</string>
     <string name="item_time_hint">Time</string>
