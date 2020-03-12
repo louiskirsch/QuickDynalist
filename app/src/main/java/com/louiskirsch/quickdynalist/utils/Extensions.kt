@@ -214,3 +214,7 @@ fun TextView.scaleImageSpans() {
         it.drawable.setBounds(0, 0, width, (lineHeight * 1.3f).toInt())
     }
 }
+
+fun Spannable.clearSpans(types: List<Class<*>>, start: Int = 0, end: Int = length) {
+    types.forEach { type -> getSpans(start, end, type).forEach { removeSpan(it) } }
+}

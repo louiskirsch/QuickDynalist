@@ -213,6 +213,13 @@
     <string name="upload_error_pro_needed">Uploading files requires Dynalist Pro</string>
     <string name="tile_quick_dialog">Quick Dialog</string>
     <string name="tile_quick_dialog_content_desc">Add items to your Dynalist</string>
+    <string name="action_context_link_to">Link to item</string>
+    <string name="selection_bold"><b>Bold</b></string>
+    <string name="selection_italic"><i>Italic</i></string>
+    <string name="selection_strikethrough"><strike>Strikethrough</strike></string>
+    <string name="selection_code"><font fgcolor='#FFFF0000'>Code</font></string>
+    <string name="selection_regular">Regular</string>
+    <string name="action_context_change_color">Color</string>
     <plurals name="date_repetition_d">
         <item quantity="zero">always</item>
         <item quantity="one">daily</item>

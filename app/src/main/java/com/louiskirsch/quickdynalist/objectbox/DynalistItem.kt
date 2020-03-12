@@ -25,9 +25,11 @@ import org.scilab.forge.jlatexmath.TeXConstants
 import ru.noties.jlatexmath.JLatexMathDrawable
 import java.io.Serializable
 import java.lang.Exception
+import java.lang.Integer.min
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 @Entity
 class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: String?,
@@ -342,14 +344,30 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             return byServerId(fileId, itemId)
         }
         set(value) {
-            val stripped = note.replace(dynalistLinkRegex, "").trim()
-            note = if (value != null) {
-                val link = "[${value.name}](https://dynalist.io/d/${value.serverFileId}#z=${value.serverItemId})"
-                if (stripped.isNotBlank()) "$link\n$stripped" else link
-            } else {
-                stripped
+            val newLinkText = value?.linkText ?: ""
+            when {
+                name.contains(dynalistLinkRegex) -> {
+                    name = name.replaceFirst(dynalistLinkRegex, newLinkText)
+                }
+                note.contains(dynalistLinkRegex) -> {
+                    note = note.replaceFirst(dynalistLinkRegex, newLinkText)
+                }
+                name.isBlank() -> {
+                    name = newLinkText
+                }
+                note.isBlank() -> {
+                    note = newLinkText
+                }
+                else -> {
+                    note = "$newLinkText\n$note"
+                }
             }
         }
+
+    val linkText: String? get() {
+        if (serverFileId == null || serverItemId == null) return null
+        return "[${name}](https://dynalist.io/d/${serverFileId}#z=${serverItemId})"
+    }
 
     val symbol: String?
         get() = EmojiFactory.emojis.firstOrNull { it in name }
@@ -451,6 +469,39 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 equal(DynalistItem_.serverFileId, fileId)
                 equal(DynalistItem_.serverItemId, itemId)
             }.findFirst()
+        }
+
+        val markdownSpanTypes = listOf(
+                StyleSpan::class.java, StrikethroughSpan::class.java,
+                ForegroundColorSpan::class.java, BackgroundColorSpan::class.java
+        )
+
+        fun spannedToMarkdown(spanned: Spanned): String {
+            val stringBuilder = StringBuilder()
+            val appendMarkdown = { it: Any ->
+                stringBuilder.append(when {
+                    it is StyleSpan && it.style == Typeface.BOLD -> "**"
+                    it is StyleSpan && it.style == Typeface.ITALIC -> "__"
+                    it is StrikethroughSpan -> "~~"
+                    it is ForegroundColorSpan -> "`"
+                    else -> ""
+                })
+            }
+            var before = 0
+            var offset = spanned.nextSpanTransition(-1, spanned.length + 1, null)
+            while (offset <= spanned.length) {
+                stringBuilder.append(spanned, before, offset)
+                val spans = spanned.getSpans(offset, offset, Object::class.java).filter {
+                    it.javaClass in markdownSpanTypes
+                }.groupBy { spanned.getSpanEnd(it) == offset }.let {
+                    it[true]?.reversed().orEmpty() + it[false].orEmpty()
+                }
+                spans.forEach { appendMarkdown(it) }
+                before = offset
+                offset = spanned.nextSpanTransition(offset, spanned.length + 1, null)
+            }
+            stringBuilder.append(spanned, before, spanned.length)
+            return stringBuilder.toString()
         }
     }
 
