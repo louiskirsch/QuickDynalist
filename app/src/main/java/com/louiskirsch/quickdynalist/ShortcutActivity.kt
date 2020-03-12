@@ -30,7 +30,6 @@ import kotlinx.android.synthetic.main.activity_shortcut.*
 
 class ShortcutActivity : AppCompatActivity() {
 
-    private val shortcutIntent = Intent()
     private val emojiAdapter: EmojiAdapter = EmojiAdapter()
     private var location: Location? = null
 
@@ -134,20 +133,13 @@ class ShortcutActivity : AppCompatActivity() {
     }
 
     private fun createShortcut(): Boolean {
-        shortcutIntent.apply {
+        val shortcutIntent = Intent().apply {
             putExtra(location!!.extraIdKey, location!!.id)
             putExtra(DynalistApp.EXTRA_FROM_SHORTCUT, true)
-        }
-
-        val shortcutIntents = if (shortcutTypeQuickDialog.isChecked) {
-            shortcutIntent.action = "com.louiskirsch.quickdynalist.SHOW_DIALOG"
-            arrayOf(shortcutIntent)
-        } else {
-            shortcutIntent.action = "com.louiskirsch.quickdynalist.SHOW_LIST"
-            TaskStackBuilder.create(this).addNextIntentWithParentStack(shortcutIntent).intents
-        }
-
-        shortcutIntents[0].apply {
+            action = if (shortcutTypeQuickDialog.isChecked)
+                "com.louiskirsch.quickdynalist.SHOW_DIALOG"
+            else
+                "com.louiskirsch.quickdynalist.SHOW_LIST"
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
@@ -156,7 +148,7 @@ class ShortcutActivity : AppCompatActivity() {
         val id = "shortcut-${location!!.typeName}-${location!!.id}-$shortcutType"
         val shortcutInfo = ShortcutInfoCompat.Builder(this, id).run {
             setAlwaysBadged()
-            setIntents(shortcutIntents)
+            setIntent(shortcutIntent)
             setShortLabel(shortcutName.text)
             setIcon(IconCompat.createWithBitmap(
                     emojiAdapter.selectedValue.toBitmap(192f, Color.BLACK)))

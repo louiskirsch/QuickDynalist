@@ -109,14 +109,10 @@ class ListAppWidget : AppWidgetProvider() {
             return Intent("com.louiskirsch.quickdynalist.SHOW_LIST").apply {
                 locationId?.let { putExtra(extraKey, it) }
                 putExtra(DynalistApp.EXTRA_FROM_SHORTCUT, true)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }.let {
-                TaskStackBuilder.create(context).addNextIntentWithParentStack(it).intents
-            }.let {
-                it[0].apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                }
-                PendingIntent.getActivities(context, requestCode, it,
+                PendingIntent.getActivity(context, requestCode, it,
                         PendingIntent.FLAG_CANCEL_CURRENT)
             }
         }

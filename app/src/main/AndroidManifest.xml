@@ -62,6 +62,7 @@
             android:name=".SyncShortcutActivity"
             android:exported="true"
             android:label="@string/action_sync_now"
+            android:taskAffinity=""
             android:theme="@style/InvisibleTheme" />
 
         <receiver android:name=".widget.ListAppWidget">
@@ -147,6 +148,7 @@
         </activity>
         <activity
             android:name=".ProcessTextActivity"
+            android:taskAffinity=""
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/process_text_action_name"
             android:theme="@style/InvisibleTheme">
