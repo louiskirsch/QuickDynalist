@@ -136,9 +136,14 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                                        maxDepth: Int = 0, depth: Int = 0) {
         if (depth > maxDepth)
             return
-        children.sortedBy { it.position }.forEach { child ->
+        children.run {
+            if (areCheckedItemsVisible) this else filter { !it.isChecked }
+        }.sortedBy { it.position }.forEach { child ->
             repeat(depth) { sb.append("    ") }
-            sb.append("- ")
+            if (child.isChecked)
+                sb.append("\u2713 ")
+            else
+                sb.append("- ")
             sb.append(child.getSpannableText(context))
             sb.append("\n")
             child.recursivePlainChildren(context, sb, maxDepth, depth + 1)

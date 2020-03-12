@@ -157,8 +157,7 @@ class ItemListFragment : BaseItemListFragment() {
 
     private fun shareDynalistItem(): Boolean {
         doAsync {
-            val box = DynalistApp.instance.boxStore.boxFor<DynalistItem>()
-            val location = box.get(location.clientId)
+            val location = DynalistItem.box.get(location.clientId)
             val itemText = location.getSpannableText(context!!)
             val itemNotes = location.getSpannableNotes(context!!)
                     .prependIfNotBlank("\n\n")
