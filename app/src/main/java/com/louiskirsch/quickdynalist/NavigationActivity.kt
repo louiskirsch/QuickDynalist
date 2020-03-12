@@ -327,12 +327,6 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onDynalistFilterEvent(event: DynalistFilterEvent) {
-        val fragmentModel = ViewModelProviders.of(this)
-                .get(ItemListFragmentViewModel::class.java)
-        fragmentModel.selectedLocation.value?.let {
-            if (it is ItemLocation)
-                event.filter.parent.target = it.item
-        }
         openDynalistItemFilter(event.filter)
     }
 
