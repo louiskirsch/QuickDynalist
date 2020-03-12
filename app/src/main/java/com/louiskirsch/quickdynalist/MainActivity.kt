@@ -213,6 +213,7 @@ class MainActivity : AppCompatActivity() {
         val enabled = dynalist.isAuthenticated && itemContents!!.text.toString().isNotEmpty()
         submitButton!!.isEnabled = enabled
         submitCloseButton!!.isEnabled = enabled
+        setFinishOnTouchOutside(!enabled)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
