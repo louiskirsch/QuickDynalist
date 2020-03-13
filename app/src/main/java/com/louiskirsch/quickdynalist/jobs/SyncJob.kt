@@ -84,6 +84,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                 color = it.color
                 heading = it.heading
                 isBookmark = markedAsBookmark || isInbox
+                updateMetaData()
             }
         }
         val itemMap = serverItems.associateBy { it.serverAbsoluteId!! }
