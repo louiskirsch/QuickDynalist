@@ -75,8 +75,10 @@ abstract class BaseItemListFragment :Fragment(),
         adapter = ItemListAdapter(context!!, showAsChecklist, showItemParentText).apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                    if (itemCount == 1 && !adapter.moveInProgress)
+                    if (itemCount == 1 && !adapter.moveInProgress) {
+                        activity!!.appBar.setExpanded(false, false)
                         itemList.scrollToPosition(positionStart)
+                    }
                 }
             })
         }
