@@ -99,14 +99,12 @@ fun String.toBitmap(textSize: Float, textColor: Int): Bitmap {
 fun SpannableStringBuilder.replaceAll(regex: Regex, transform: (MatchResult) -> CharSequence): SpannableStringBuilder {
     var match: MatchResult? = regex.find(this) ?: return this
 
-    var lastStart: Int
     do {
         val foundMatch = match!!
-        replace(foundMatch.range.start, foundMatch.range.endInclusive + 1,
-                transform(foundMatch))
-        lastStart = foundMatch.range.endInclusive + 1
-        match = foundMatch.next()
-    } while (lastStart < length && match != null)
+        val replacement = transform(foundMatch)
+        replace(foundMatch.range.start, foundMatch.range.endInclusive + 1, replacement)
+        match = regex.find(this, foundMatch.range.start + replacement.length)
+    } while (match != null)
     return this
 }
 
