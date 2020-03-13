@@ -66,7 +66,10 @@ class InsertBarFragment : Fragment() {
         }
     var text: Editable
         get() = itemContents.text
-        set(value) { itemContents.text = value }
+        set(value) {
+            itemContents.text = DynalistItem.markdownToSpans(SpannableStringBuilder(value),
+                    context!!)
+        }
 
     private fun onClearEditingItem() {
         itemContents.text.clear()
@@ -76,8 +79,8 @@ class InsertBarFragment : Fragment() {
     }
 
     private fun onSetEditingItem(value: DynalistItem) {
+        setText(value.name)
         itemContents.apply {
-            setText(value.name)
             DynalistTag.highlightTags(context, text)
             requestFocus()
             setSelection(text.length)
@@ -330,7 +333,7 @@ class InsertBarFragment : Fragment() {
     }
 
     fun setText(text: CharSequence?) {
-        itemContents.setText(text)
+        itemContents.text = DynalistItem.markdownToSpans(SpannableStringBuilder(text), context!!)
     }
 
     private fun appendText(text: CharSequence) {

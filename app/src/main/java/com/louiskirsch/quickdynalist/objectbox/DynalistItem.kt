@@ -25,7 +25,6 @@ import org.scilab.forge.jlatexmath.TeXConstants
 import ru.noties.jlatexmath.JLatexMathDrawable
 import java.io.Serializable
 import java.lang.Exception
-import java.lang.Integer.min
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -156,12 +155,6 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         val spannable = SpannableStringBuilder(text).linkify()
         val dateFormat = DateFormat.getDateFormat(context)
         val timeFormat = DateFormat.getTimeFormat(context)
-        val highlightSpanCreator = { res: Resources ->
-            BackgroundColorSpan(res.getColor(R.color.spanHighlight))
-        }
-        val codeSpanCreator = { res: Resources ->
-            ForegroundColorSpan(res.getColor(R.color.codeColor))
-        }
 
         spannable.replaceAll(imageRegex) { "" }
         spannable.replaceAll(dateTimeRegex) {
@@ -216,26 +209,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             }
         }
 
-        val replace = { regex: Regex, createSpan: () -> Any ->
-            spannable.replaceAll(regex) {
-                SpannableString(it.groupValues[1]).apply {
-                    setSpan(createSpan(), 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                }
-            }
-        }
-        replace(boldRegex) { StyleSpan(Typeface.BOLD) }
-        replace(italicRegex) { StyleSpan(Typeface.ITALIC) }
-        replace(lineThroughRegex) { StrikethroughSpan() }
-
-        spannable.replaceAll(inlineCodeRegex) {
-            SpannableString(it.groupValues[1]).apply {
-                setSpan(ThemedSpan(highlightSpanCreator), 0, length,
-                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                setSpan(ThemedSpan(codeSpanCreator), 0, length,
-                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-            }
-        }
-
+        markdownToSpans(spannable)
         spannable.replaceAll(whitespaceRegex) { "" }
 
         latexRegex.findAll(spannable).forEach {
@@ -377,7 +351,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 ?: strippedMarkersName
 
     val nameWithoutDate: String
-        get() = name.replace(dateTimeRegex, "").trim()
+        get() = name.
+                replace(dateTimeRegex, "").trim()
 
     companion object {
         const val LOCATION_TYPE = "item"
@@ -475,6 +450,12 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 StyleSpan::class.java, StrikethroughSpan::class.java,
                 ForegroundColorSpan::class.java, BackgroundColorSpan::class.java
         )
+        private val highlightSpanCreator = { res: Resources ->
+            BackgroundColorSpan(res.getColor(R.color.spanHighlight))
+        }
+        private val codeSpanCreator = { res: Resources ->
+            ForegroundColorSpan(res.getColor(R.color.codeColor))
+        }
 
         fun spannedToMarkdown(spanned: Spanned): String {
             val stringBuilder = StringBuilder()
@@ -492,7 +473,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             while (offset <= spanned.length) {
                 stringBuilder.append(spanned, before, offset)
                 val spans = spanned.getSpans(offset, offset, Object::class.java).filter {
-                    it.javaClass in markdownSpanTypes
+                    it.javaClass in markdownSpanTypes &&
+                            (offset == spanned.getSpanStart(it) || offset == spanned.getSpanEnd(it))
                 }.groupBy { spanned.getSpanEnd(it) == offset }.let {
                     it[true]?.reversed().orEmpty() + it[false].orEmpty()
                 }
@@ -503,6 +485,33 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             stringBuilder.append(spanned, before, spanned.length)
             return stringBuilder.toString()
         }
+
+        fun markdownToSpans(spannable: SpannableStringBuilder,
+                            context: Context? = null): SpannableStringBuilder {
+            val replace = { regex: Regex, createSpan: () -> Any ->
+                spannable.replaceAll(regex) {
+                    SpannableString(it.groupValues[1]).apply {
+                        setSpan(createSpan(), 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                    }
+                }
+            }
+            replace(boldRegex) { StyleSpan(Typeface.BOLD) }
+            replace(italicRegex) { StyleSpan(Typeface.ITALIC) }
+            replace(lineThroughRegex) { StrikethroughSpan() }
+
+            spannable.replaceAll(inlineCodeRegex) {
+                SpannableString(it.groupValues[1]).apply {
+                    val highlight = context?.let { ctx -> highlightSpanCreator(ctx.resources) }
+                            ?: ThemedSpan(highlightSpanCreator)
+                    setSpan(highlight, 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                    val code = context?.let { ctx -> codeSpanCreator(ctx.resources) }
+                            ?: ThemedSpan(codeSpanCreator)
+                    setSpan(code, 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                }
+            }
+            return spannable
+        }
+
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
