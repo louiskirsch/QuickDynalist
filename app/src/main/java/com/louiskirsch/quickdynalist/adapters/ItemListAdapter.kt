@@ -227,13 +227,21 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
             Unit
         }
         val oldSize = items.size
-        if (newItems.take(oldSize) == items) {
-            val newCount = newItems.size - oldSize
-            update()
-            notifyItemRangeInserted(oldSize, newCount)
-        } else {
-            update()
-            notifyDataSetChanged()
+        when (items) {
+            newItems.take(oldSize) -> {
+                val newCount = newItems.size - oldSize
+                update()
+                notifyItemRangeInserted(oldSize, newCount)
+            }
+            newItems.takeLast(oldSize) -> {
+                val newCount = newItems.size - oldSize
+                update()
+                notifyItemRangeInserted(0, newCount)
+            }
+            else -> {
+                update()
+                notifyDataSetChanged()
+            }
         }
     }
 
