@@ -8,6 +8,12 @@
         android:icon="@drawable/ic_action_change_color"
         app:showAsAction="never" />
 
+    <item android:id="@+id/action_manage_tags"
+        android:title="@string/action_manage_tags"
+        app:iconTint="?attr/colorControlNormal"
+        android:icon="@drawable/ic_action_manage_tags"
+        app:showAsAction="never" />
+
     <item android:id="@+id/action_edit"
         android:title="@string/action_edit"
         app:iconTint="?attr/colorControlNormal"
@@ -71,11 +77,5 @@
                 app:showAsAction="never" />
         </menu>
     </item>
-
-    <item android:id="@+id/action_manage_tags"
-        android:title="@string/action_manage_tags"
-        app:iconTint="?attr/colorControlNormal"
-        android:icon="@drawable/ic_action_manage_tags"
-        app:showAsAction="never" />
 
 </menu>
