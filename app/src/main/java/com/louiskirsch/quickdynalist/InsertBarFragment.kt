@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat.getColor
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistTag
+import com.louiskirsch.quickdynalist.utils.DynalistEditActionHelper
 import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
 import com.louiskirsch.quickdynalist.utils.clearSpans
 import com.louiskirsch.quickdynalist.utils.setupGrowingMultiline
@@ -43,6 +44,7 @@ class InsertBarFragment : Fragment() {
     }
 
     private val speechRecognitionHelper = SpeechRecognitionHelper()
+    private val dynalistEditActionHelper = DynalistEditActionHelper(this)
     private var listeners = LinkedList<InteractionListener>()
     private lateinit var dynalist: Dynalist
 
@@ -165,13 +167,14 @@ class InsertBarFragment : Fragment() {
         advancedItemButton.setOnClickListener {
             if (locationProvider == null) return@setOnClickListener
             val intent = Intent(context, AdvancedItemActivity::class.java)
+            val text = DynalistItem.spannedToMarkdown(itemContents.text)
             if (editingItem != null) {
-                editingItem!!.name = itemContents.text.toString()
+                editingItem!!.name = text
                 intent.putExtra(AdvancedItemActivity.EXTRA_EDIT_ITEM, editingItem as Parcelable)
             } else {
                 intent.putExtra(DynalistApp.EXTRA_DISPLAY_ITEM,
                         locationProvider!!.addItemLocation as Parcelable)
-                intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, itemContents.text.toString())
+                intent.putExtra(AdvancedItemActivity.EXTRA_ITEM_TEXT, text)
             }
             clearItemContents()
             val activity = activity as AppCompatActivity
@@ -215,112 +218,15 @@ class InsertBarFragment : Fragment() {
             if (dynalist.speechAutoSubmit)
                 submit()
         }
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                resources.getInteger(R.integer.request_code_link) -> {
-                    val linkTarget = data!!.getParcelableExtra<DynalistItem>(
-                            DynalistApp.EXTRA_DISPLAY_ITEM)!!
-                    if (linkTarget.serverFileId != null && linkTarget.serverItemId != null) {
-                        itemContents.apply {
-                            text.insert(selectionStart, linkTarget.linkText)
-                        }
-                        submit()
-                    } else {
-                        context!!.toast(R.string.error_link_offline)
-                    }
-                }
-            }
+        dynalistEditActionHelper.dispatchResult(requestCode, resultCode, data) { _, newText ->
+            itemContents.apply { text.insert(selectionStart, newText) }
+            submit()
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            itemContents.customInsertionActionModeCallback = object: ActionMode.Callback2() {
-                override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                    return false
-                }
-                override fun onDestroyActionMode(mode: ActionMode?) {}
-                override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                    activity!!.menuInflater.inflate(R.menu.item_text_insert_context_menu, menu)
-                    return true
-                }
-                override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                    return when (item?.itemId) {
-                        R.id.action_link_to -> {
-                            startActivityForResult(Intent(context!!, SearchActivity::class.java),
-                                    resources.getInteger(R.integer.request_code_link), transitionBundle)
-                            true
-                        }
-                        else -> false
-                    }
-                }
-            }
-            itemContents.customSelectionActionModeCallback = object: ActionMode.Callback2() {
-                override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                    menu!!.findItem(android.R.id.shareText)?.isVisible = false
-                    (0 until menu.size()).map { menu.getItem(it) }.firstOrNull {
-                        it.intent?.component?.className == getString(R.string.ACTION_PROCESS_TEXT)
-                    }?.isVisible = false
-                    return true
-                }
-                override fun onDestroyActionMode(mode: ActionMode?) {}
-                override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                    activity!!.menuInflater.inflate(R.menu.item_text_selection_context_menu, menu)
-                    return true
-                }
-                override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                    val spanHighlight = getColor(context!!, R.color.spanHighlight)
-                    val codeColor = getColor(context!!, R.color.codeColor)
-                    val toggleSpan = { span: Any ->
-                        itemContents.apply {
-                            val spans = text.getSpans(selectionStart, selectionEnd,
-                                                        span.javaClass).filter {
-                                when {
-                                    it is StyleSpan && span is StyleSpan -> {
-                                        it.style == span.style
-                                    }
-                                    it is BackgroundColorSpan && span is BackgroundColorSpan -> {
-                                        it.backgroundColor == span.backgroundColor
-                                    }
-                                    it is ForegroundColorSpan && span is ForegroundColorSpan -> {
-                                        it.foregroundColor == span.foregroundColor
-                                    }
-                                    else -> true
-                                }
-                            }
-                            if (spans.isEmpty())
-                                text.setSpan(span, selectionStart, selectionEnd, 0)
-                            else
-                                spans.forEach { text.removeSpan(it) }
-                        }
-                        true
-                    }
-                    return when (item?.itemId) {
-                        R.id.selection_bold -> {
-                            toggleSpan(StyleSpan(Typeface.BOLD))
-                        }
-                        R.id.selection_italic -> {
-                            toggleSpan(StyleSpan(Typeface.ITALIC))
-                        }
-                        R.id.selection_strikethrough ->
-                        {
-                            toggleSpan(StrikethroughSpan())
-                        }
-                        R.id.selection_code -> {
-                            toggleSpan(BackgroundColorSpan(spanHighlight))
-                            toggleSpan(ForegroundColorSpan(codeColor))
-                        }
-                        R.id.selection_regular -> {
-                            itemContents.apply {
-                                text.clearSpans(DynalistItem.markdownSpanTypes,
-                                        selectionStart, selectionEnd)
-                            }
-                            true
-                        }
-                        else -> false
-                    }
-                }
-            }
+            dynalistEditActionHelper.setupEditActions(itemContents)
         }
     }
 

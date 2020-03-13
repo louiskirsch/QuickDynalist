@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.format.DateFormat
@@ -12,12 +13,14 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistTag
+import com.louiskirsch.quickdynalist.utils.DynalistEditActionHelper
 import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
 import com.louiskirsch.quickdynalist.utils.actionBarView
 import com.louiskirsch.quickdynalist.utils.fixedFinishAfterTransition
@@ -33,6 +36,7 @@ import kotlin.math.max
 class AdvancedItemActivity : AppCompatActivity() {
     private val dynalist: Dynalist = Dynalist(this)
     private val speechRecognitionHelper = SpeechRecognitionHelper()
+    private val dynalistEditActionHelper = DynalistEditActionHelper(this)
 
     private lateinit var adapter: ArrayAdapter<DynalistItem>
     private var location: DynalistItem? = null
@@ -62,12 +66,14 @@ class AdvancedItemActivity : AppCompatActivity() {
         editingItem = intent.getParcelableExtra(EXTRA_EDIT_ITEM)
         location = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)
         intent.getCharSequenceExtra(EXTRA_ITEM_TEXT)?.let {
-            itemContents.setText(it)
+            itemContents.text = DynalistItem.markdownToSpans(SpannableStringBuilder(it), this)
         }
 
         if (editingItem != null) {
-            itemContents.setText(editingItem!!.nameWithoutDate)
-            itemNotes.setText(editingItem!!.note)
+            itemContents.text = DynalistItem.markdownToSpans(
+                    SpannableStringBuilder(editingItem!!.nameWithoutDate), this)
+            itemNotes.text = DynalistItem.markdownToSpans(
+                    SpannableStringBuilder(editingItem!!.note), this)
 
             editingItem!!.date?.let {
                 calendar.time = it
@@ -102,6 +108,10 @@ class AdvancedItemActivity : AppCompatActivity() {
         DynalistTag.highlightTags(this, itemNotes.text)
         DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
         DynalistTag.setupTagDetection(itemNotes, dynalist.shouldDetectTags)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            dynalistEditActionHelper.setupEditActions(itemContents)
+            dynalistEditActionHelper.setupEditActions(itemNotes)
+        }
 
         setupDatePicker()
         setupTimePicker()
@@ -113,6 +123,9 @@ class AdvancedItemActivity : AppCompatActivity() {
             DynalistTag.highlightTags(this, sb)
             itemNotes.text.apply { if (isNotBlank()) appendln() }
             itemNotes.text.append(sb)
+        }
+        dynalistEditActionHelper.dispatchResult(requestCode, resultCode, data) { viewId, newText ->
+            findViewById<EditText>(viewId).apply { text.insert(selectionStart, newText) }
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
@@ -241,8 +254,9 @@ class AdvancedItemActivity : AppCompatActivity() {
         } else {
             ""
         }
-        val contents = itemContents.text.toString() + dateString
-        val note = itemNotes.text.toString()
+
+        val contents = DynalistItem.spannedToMarkdown(itemContents.text) + dateString
+        val note = DynalistItem.spannedToMarkdown(itemNotes.text)
 
         if (editingItem == null) {
             val targetLocation = if (itemLocation.visibility == View.VISIBLE)
