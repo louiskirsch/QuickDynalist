@@ -230,8 +230,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         }
 
         tagRegex.findAll(spannable).forEach {
-            val tag = DynalistTag.find(it.groupValues[2])
-            val range = it.groups[2]!!.range
+            val tag = DynalistTag.find(it.groupValues[1])
+            val range = it.groups[1]!!.range
 
             val bg = ThemedSpan(highlightSpanCreator)
             spannable.setSpan(bg, range.start, range.endInclusive + 1,
@@ -262,7 +262,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
     val tags: List<String> get() {
         return listOf(name, note).flatMap {
-            tagRegex.findAll(it).map { m -> m.groupValues[2].toLowerCase() } .toList()
+            tagRegex.findAll(it).map { m -> m.groupValues[1].toLowerCase() } .toList()
         }
     }
 
@@ -374,7 +374,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 "y" to R.plurals.date_repetition_y
         )
         private val dateTimeRegex = Regex("""!\(([0-9\-]+)[ ]?([0-9:]+)?(?: - ([0-9\-]+)[ ]?([0-9:]+)?)?[ |]*(?:([0-9]+)([dwmy]))?\)""")
-        private val tagRegex = Regex("""(^| )([#@][\d\w()&_-]+)""")
+        private val tagRegex = Regex("""(?:^|\s)([#@][^\s]*[^\s\d]+)""")
         private val boldRegex = Regex("""\*\*(.*?)\*\*""")
         private val italicRegex = Regex("""__(.*?)__""")
         private val inlineCodeRegex = Regex("""`(.*?)`""")
