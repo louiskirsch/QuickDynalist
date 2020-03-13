@@ -260,10 +260,38 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 ?: imageRegex.find(note)?.groupValues?.get(2)
     }
 
-    val tags: List<String> get() {
-        return listOf(name, note).flatMap {
-            tagRegex.findAll(it).map { m -> m.groupValues[1].toLowerCase() } .toList()
+    var tags: List<String>
+        get() {
+            return listOf(name, note).flatMap {
+                tagRegex.findAll(it).map { m -> m.groupValues[1].toLowerCase() } .toList()
+            }
         }
+        set(value) {
+            val currentTags = tags
+            removeTags(currentTags - value)
+            addTags(value - currentTags)
+        }
+
+    private fun addTags(tags: List<String>) {
+        val joinedTags = tags.joinToString(" ")
+        note = when {
+            note.isBlank() -> joinedTags
+            note.startsWith('#') || note.startsWith('@') -> "$joinedTags $note"
+            else -> "$joinedTags\n$note"
+        }
+    }
+
+    private fun removeTags(tags: List<String>) {
+        val regexes = tags.map { Regex("""\s*$it""") }
+        val remove = { str: String ->
+            StringBuilder(str).apply {
+                regexes.forEach { regex ->
+                    regex.find(this)?.let { replace(it.range.first, it.range.last + 1, "") }
+                }
+            }.toString()
+        }
+        name = remove(name)
+        note = remove(note)
     }
 
     var markedAsBookmark: Boolean

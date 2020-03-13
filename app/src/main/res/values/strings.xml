@@ -222,6 +222,11 @@
     <string name="selection_code"><font fgcolor='#FFFF0000'>Code</font></string>
     <string name="selection_regular">Regular</string>
     <string name="action_context_change_color">Color</string>
+    <string name="manage_tags_current">Current tags</string>
+    <string name="manage_tags_suggested">Suggested tags</string>
+    <string name="manage_tags_search_hint">Search tags</string>
+    <string name="manage_tags_title">Manage tags</string>
+    <string name="action_manage_tags">Tags</string>
     <plurals name="date_repetition_d">
         <item quantity="zero">always</item>
         <item quantity="one">daily</item>

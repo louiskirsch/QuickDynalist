@@ -124,6 +124,10 @@ abstract class BaseItemListFragment :Fragment(),
                     val requestCode = resources.getInteger(R.integer.request_code_link)
                     showItemPicker(requestCode, item)
                 }
+                R.id.action_manage_tags -> {
+                    val transaction = fragmentManager!!.beginTransaction().addToBackStack(null)
+                    TagManagerFragment.newInstance(item).show(transaction, "manage_tags")
+                }
             }
             true
         }

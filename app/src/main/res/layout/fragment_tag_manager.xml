@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:clipChildren="false"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TagManagerFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/manage_tags_current"
+        android:layout_marginBottom="4dp"
+        style="?android:attr/listSeparatorTextViewStyle" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/currentTagsChipGroup"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        app:chipSpacingVertical="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/manage_tags_suggested"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        style="?android:attr/listSeparatorTextViewStyle" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/suggestedTagsChipGroup"
+        android:clipChildren="false"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        app:chipSpacingVertical="4dp"
+        android:animateLayoutChanges="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/addTagsInputLayout"
+        android:hint="@string/manage_tags_search_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <AutoCompleteTextView
+            android:id="@+id/addTagsInput"
+            android:completionThreshold="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:ignore="LabelFor" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>
