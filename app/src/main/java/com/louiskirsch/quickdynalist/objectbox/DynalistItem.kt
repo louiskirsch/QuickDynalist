@@ -279,12 +279,12 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             isBookmark = value
         }
 
-    val strippedMarkersName: String get() = removeMarkers(name)
-    val strippedMarkersNote: String get() = removeMarkers(note)
+    val strippedMarkersName: String get() = removeMarkers(name).ifEmpty { name }
+    private val strippedMarkersNote: String get() = removeMarkers(note)
 
     private fun removeMarkers(text: String) = tagMarkers.fold(text) { acc, marker ->
         acc.replace(marker, "", true)
-    }.trim().ifEmpty { text }
+    }.trim()
 
     var date: Date?
         get() = dateTimeRegex.find(name)?.groupValues?.get(1)?.let { date ->
