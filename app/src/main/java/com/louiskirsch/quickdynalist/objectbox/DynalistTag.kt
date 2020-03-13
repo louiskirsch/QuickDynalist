@@ -132,7 +132,7 @@ class DynalistTag(): Serializable {
             return s[0] == '@' || s[0] == '#'
         }
 
-        fun setupTagDetection(editText: EditText, autoDetectTagNames: Boolean) {
+        fun setupTagDetection(editText: EditText, autoDetectTagNames: () -> Boolean) {
             class TagCandidate(val tag: DynalistTag)
             editText.movementMethod = EnhancedMovementMethod.instance
             editText.addTextChangedListener(object: TextWatcher {
@@ -171,7 +171,7 @@ class DynalistTag(): Serializable {
                         val manualTag = looksLikeTag(tagName)
                         val tag = cache[tagName] ?: if (manualTag) {
                             DynalistTag(tagName)
-                        } else null ?: if (autoDetectTagNames) {
+                        } else null ?: if (autoDetectTagNames()) {
                             cache["#$tagName"] ?: cache["@$tagName"]
                         } else null
                         tag?.let {

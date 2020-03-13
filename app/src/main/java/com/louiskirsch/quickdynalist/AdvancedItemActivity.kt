@@ -106,8 +106,8 @@ class AdvancedItemActivity : AppCompatActivity() {
 
         DynalistTag.highlightTags(this, itemContents.text)
         DynalistTag.highlightTags(this, itemNotes.text)
-        DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
-        DynalistTag.setupTagDetection(itemNotes, dynalist.shouldDetectTags)
+        DynalistTag.setupTagDetection(itemContents) { dynalist.shouldDetectTags }
+        DynalistTag.setupTagDetection(itemNotes) { dynalist.shouldDetectTags }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             dynalistEditActionHelper.setupEditActions(itemContents)
             dynalistEditActionHelper.setupEditActions(itemNotes)

@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
             speechRecognitionHelper.startSpeechRecognition(this)
         }
 
-        DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
+        DynalistTag.setupTagDetection(itemContents) { dynalist.shouldDetectTags }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

@@ -192,7 +192,7 @@ class InsertBarFragment : Fragment() {
         }
 
         DynalistTag.highlightTags(context!!, itemContents.text)
-        DynalistTag.setupTagDetection(itemContents, dynalist.shouldDetectTags)
+        DynalistTag.setupTagDetection(itemContents) { dynalist.shouldDetectTags }
     }
 
     override fun onAttach(context: Context) {
