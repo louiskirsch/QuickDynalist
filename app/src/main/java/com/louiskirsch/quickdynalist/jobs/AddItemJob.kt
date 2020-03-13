@@ -6,6 +6,7 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
+import org.greenrobot.eventbus.EventBus
 
 
 class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob() {
@@ -29,6 +30,7 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
             }
         }
         ListAppWidget.notifyItemChanged(applicationContext, newItem)
+        EventBus.getDefault().post(ItemAddedEvent(newItem))
     }
 
     private fun insertAPIRequest(): DynalistResponse {

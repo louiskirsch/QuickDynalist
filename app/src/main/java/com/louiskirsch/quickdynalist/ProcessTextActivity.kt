@@ -23,6 +23,9 @@ import com.louiskirsch.quickdynalist.network.UploadFileRequest
 import com.louiskirsch.quickdynalist.network.UploadResponse
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.*
 import java.util.*
 
@@ -242,7 +245,7 @@ class ProcessTextActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        if (isFinishing && text != null && location != null)
+        if (isFinishing && location != null)
             addItemsToDynalist()
     }
 
@@ -264,11 +267,47 @@ class ProcessTextActivity : AppCompatActivity() {
                 AlertDialog.Builder(context).apply {
                     setAdapter(targetLocationsAdapter) { _, which ->
                         location = targetLocationsAdapter.getItemPayload(which)
-                        finish()
+                        showLocationSnackbar()
                     }
-                    setOnCancelListener { finish() }
+                    setOnCancelListener { showLocationSnackbar() }
                     show()
                 }
+            }
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    if (event != DISMISS_EVENT_ACTION)
+                        finish()
+                }
+            })
+            show()
+        }
+    }
+
+    private fun showLocationSnackbar() {
+        val message = getString(R.string.add_item_with_location_success,
+                location?.getSpannableText(this))
+        Snackbar.make(window.decorView, message, Snackbar.LENGTH_SHORT).apply {
+            setAction(R.string.goto_location) {
+                val listener = object {
+                    @Subscribe(threadMode = ThreadMode.MAIN)
+                    fun onItemAddedEvent(event: ItemAddedEvent) {
+                        EventBus.getDefault().unregister(this)
+                        if (!isFinishing) {
+                            val intent = Intent().apply {
+                                putExtra(DynalistApp.EXTRA_DISPLAY_ITEM_ID, location!!.clientId)
+                                putExtra(DynalistApp.EXTRA_SCROLL_TO_ITEM_ID, event.item.clientId)
+                                action = "com.louiskirsch.quickdynalist.SHOW_LIST"
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            }
+                            finish()
+                            startActivity(intent)
+                        }
+                    }
+                }
+                EventBus.getDefault().register(listener)
+                addItemsToDynalist()
+                text = null
             }
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {

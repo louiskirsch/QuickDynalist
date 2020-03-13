@@ -144,7 +144,10 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 return FilteredItemListFragment.newInstance(filter)
         }
         val parent = intent.extras?.let { dynalist.resolveItemInBundle(it) } ?: dynalist.inbox
-        return parent?.let { ItemListFragment.newInstance(it, itemText) }
+        val scrollTo = intent.extras?.getLong(DynalistApp.EXTRA_SCROLL_TO_ITEM_ID)?.let { id ->
+            if(id != 0L) DynalistItem.box.get(id) else null
+        }
+        return parent?.let { ItemListFragment.newInstance(it, itemText, scrollTo) }
     }
 
     private fun SubMenu.fillMenuWithItems(items: List<Location>,

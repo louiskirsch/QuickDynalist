@@ -11,6 +11,7 @@ class RateLimitDelay(val delay: Long, val jobTag: String)
 class DynalistLocateEvent(val item: DynalistItem)
 class DynalistFilterEvent(val filter: DynalistItemFilter)
 class ForbiddenImageEvent(val uri: Uri)
+class ItemAddedEvent(val item: DynalistItem)
 
 enum class SyncStatus { RUNNING, NOT_RUNNING, SUCCESS, NO_SUCCESS }
 class SyncEvent(val status: SyncStatus, val isManual: Boolean)

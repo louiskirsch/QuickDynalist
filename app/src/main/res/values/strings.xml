@@ -8,6 +8,7 @@
     <string name="content_hint">Item text</string>
     <string name="btn_add_item">Add item</string>
     <string name="add_item_success">Item added to inbox</string>
+    <string name="add_item_with_location_success">Item added to %1$s</string>
     <string name="error_update_server">So sorry! Failed to inform the server about this recent change.</string>
     <string name="error_update_server_retry">Something went wrong with a recent change. Retrying…</string>
     <string name="process_text_action_name">Add To Inbox</string>
@@ -128,6 +129,7 @@
     <string name="action_change_date_remove">Remove</string>
     <string name="move_item_success">Moved item</string>
     <string name="goto_move_location">Go to location</string>
+    <string name="goto_location">Go to location</string>
     <string name="toggle_saved">Save filter</string>
     <string name="action_edit_filter">Edit filter</string>
     <string name="filter_name_generic">Filter</string>
