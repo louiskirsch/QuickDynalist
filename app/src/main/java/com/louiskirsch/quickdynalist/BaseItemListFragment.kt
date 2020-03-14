@@ -8,6 +8,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.*
 import android.view.*
 import android.widget.TextView
@@ -52,6 +53,16 @@ abstract class BaseItemListFragment :Fragment(),
     protected abstract val showAsChecklist: Boolean
     protected abstract val showItemParentText: Boolean
 
+    private val preferences: SharedPreferences
+        get() = context!!.getSharedPreferences("ITEM_LIST_FRAGMENT", Context.MODE_PRIVATE)
+
+    private var userHasSwipedToEdit: Boolean
+        get() = preferences.getBoolean("USER_SWIPED_TO_EDIT", false)
+        set(value) {
+            if (userHasSwipedToEdit != value)
+                preferences.edit().putBoolean("USER_SWIPED_TO_EDIT", value).apply()
+        }
+
     override fun onEditingItemChanged(view: TextView, editingItem: DynalistItem?) {
         adapter.selectedItem = editingItem
         if (editingItem != null) {
@@ -83,6 +94,9 @@ abstract class BaseItemListFragment :Fragment(),
             })
         }
         adapter.onClickListener = { openDynalistItem(it) }
+        adapter.onPopupOpenListener = { menu ->
+            menu.findItem(R.id.action_edit).isVisible = !userHasSwipedToEdit
+        }
         adapter.onPopupItemClickListener = { item, menuItem ->
             when (menuItem.itemId) {
                 R.id.action_edit -> insertBarFragment.editingItem = item
@@ -137,6 +151,7 @@ abstract class BaseItemListFragment :Fragment(),
                 true
             } else {
                 insertBarFragment.editingItem = item
+                userHasSwipedToEdit = true
                 false
             }
         }

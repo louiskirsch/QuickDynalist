@@ -39,6 +39,7 @@ class DynalistItemPopupMenu(context: Context, anchor: View, isImage: Boolean) {
         width = WindowManager.LayoutParams.WRAP_CONTENT
         height = WindowManager.LayoutParams.WRAP_CONTENT
     }
+    var onPopupOpenListener: ((Menu) -> Unit)? = null
 
     init {
         popup.inflate(R.menu.item_list_popup_menu)
@@ -50,6 +51,7 @@ class DynalistItemPopupMenu(context: Context, anchor: View, isImage: Boolean) {
             true
         }
         anchor.setOnClickListener {
+            onPopupOpenListener?.invoke(popup.menu)
             popup.show()
         }
     }
@@ -164,6 +166,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
 
     var onClickListener: ((DynalistItem) -> Unit)? = null
     var onLongClickListener: ((DynalistItem) -> Boolean)? = null
+    var onPopupOpenListener: ((Menu) -> Unit)? = null
     var onPopupItemClickListener: ((DynalistItem, MenuItem) -> Boolean)? = null
     var onRowMovedListener: ((DynalistItem, Int) -> Unit)? = null
     var onRowMovedOnDropoffListener: ((DynalistItem, Int) -> Boolean)? = null
@@ -260,6 +263,8 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
                 itemText.setOnTouchListener(OnLinkTouchListener())
                 itemNotes.setOnTouchListener(OnLinkTouchListener())
                 itemChildren.setOnTouchListener(OnLinkTouchListener())
+                menuPopup.onPopupOpenListener = { onPopupOpenListener?.invoke(it) }
+                imagePopup.onPopupOpenListener = { onPopupOpenListener?.invoke(it) }
             }
         } else {
             DropOffViewHolder(inflater.inflate(R.layout.item_list_dropoff,
