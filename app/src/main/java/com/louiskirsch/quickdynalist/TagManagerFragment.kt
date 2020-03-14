@@ -126,7 +126,8 @@ class TagManagerFragment : DialogFragment() {
                     interpolator = DecelerateInterpolator()
                     withEndAction {
                         newChip.visibility = View.VISIBLE
-                        suggestedTagsChipGroup.removeView(chip as View)
+                        if (isAdded)
+                            suggestedTagsChipGroup.removeView(chip as View)
                     }
                     start()
                 }
