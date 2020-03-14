@@ -29,7 +29,7 @@ class TagManagerFragment : DialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        item = arguments?.getParcelable(DynalistApp.EXTRA_DISPLAY_ITEM)!!
+        item = (savedInstanceState ?: arguments)?.getParcelable(DynalistApp.EXTRA_DISPLAY_ITEM)!!
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -85,13 +85,22 @@ class TagManagerFragment : DialogFragment() {
         }
     }
 
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-        DynalistItem.updateGlobally(item) {
-            it.tags = currentTagsChipGroup.children.map { view ->
-                (view.getTag(R.id.tag_dynalist_tag) as DynalistTag).fullName
-            }
+    override fun onStop() {
+        super.onStop()
+        if (isRemoving)
+            DynalistItem.updateGlobally(item) { updateTags(it) }
+    }
+
+    private fun updateTags(item: DynalistItem): DynalistItem {
+        item.tags = currentTagsChipGroup.children.map { view ->
+            (view.getTag(R.id.tag_dynalist_tag) as DynalistTag).fullName
         }
+        return item
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable(DynalistApp.EXTRA_DISPLAY_ITEM, updateTags(item))
     }
 
     private fun addTag(tag: DynalistTag): View {
