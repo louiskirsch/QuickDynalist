@@ -110,6 +110,8 @@
     <string name="pref_description_display_children_count">Items are shown with the first %1$s children.</string>
     <string name="pref_description_display_children_count_none">Items are shown without a preview of their children.</string>
     <string name="pref_description_display_children_count_all">Items are shown with all their children as a preview.</string>
+    <string name="pref_title_display_children_depth">Levels of child items to preview</string>
+    <string name="pref_description_display_children_depth">Items are previewed with their %1$s.</string>
     <string name="pref_title_edit_detect_tags">Detect and highlight possible tags</string>
     <string name="pref_description_edit_detect_tags">Automatically detect words that match tag names while typing.</string>
     <string name="pref_title_edit_speech_auto_submit">Submit voice recording immediately</string>

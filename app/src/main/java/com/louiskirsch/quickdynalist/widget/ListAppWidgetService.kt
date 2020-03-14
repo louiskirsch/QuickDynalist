@@ -60,10 +60,11 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             DynalistItemFilter.LOCATION_TYPE -> true
             else -> throw Exception("Invalid location")
         }
-        val maxChildren = Dynalist(context).displayChildrenCount
+        val dynalist = Dynalist(context)
+        val maxChildren = dynalist.displayChildrenCount
         val newItems = queryResult.map { item ->
             item.children.sortBy { child -> child.position }
-            CachedDynalistItem(item, context, maxChildren).apply {
+            CachedDynalistItem(item, context, maxChildren, 0).apply {
                 eagerInitialize(displayParentText)
                 applyTheme(context, displayParentText)
                 if (item.color > 0) {

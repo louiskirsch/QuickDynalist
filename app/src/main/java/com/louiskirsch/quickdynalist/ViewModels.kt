@@ -1,6 +1,7 @@
 package com.louiskirsch.quickdynalist
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.*
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
 import com.louiskirsch.quickdynalist.objectbox.*
@@ -117,9 +118,12 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
 
     private fun createCachedDynalistItems(items: List<DynalistItem>,
                                           includeParent: Boolean): List<CachedDynalistItem> {
-        val maxChildren = Dynalist(getApplication()).displayChildrenCount
+        val context: Context = getApplication()
+        val dynalist = Dynalist(context)
+        val maxChildren = dynalist.displayChildrenCount
+        val maxDepth = dynalist.displayChildrenDepth
         items.forEach { item -> item.children.sortBy { child -> child.position } }
-        return items.map { CachedDynalistItem(it, getApplication(), maxChildren) }.apply {
+        return items.map { CachedDynalistItem(it, context, maxChildren, maxDepth) }.apply {
             // The first few visible items should be eagerly initialized
             take(50).forEach { it.eagerInitialize(includeParent) }
             doAsync { forEach { it.eagerInitialize(includeParent) } }

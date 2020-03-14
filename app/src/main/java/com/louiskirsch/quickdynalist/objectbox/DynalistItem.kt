@@ -13,6 +13,7 @@ import android.text.style.*
 import android.util.Log
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
+import com.louiskirsch.quickdynalist.text.IndentedBulletSpan
 import com.louiskirsch.quickdynalist.text.ThemedSpan
 import com.louiskirsch.quickdynalist.utils.*
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
@@ -101,17 +102,30 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     fun getSpannableText(context: Context) = parseText(name, context)
     fun getSpannableNotes(context: Context) = parseText(note, context)
 
-    fun getSpannableChildren(context: Context, maxItems: Int): Spannable {
+    fun getSpannableChildren(context: Context, maxItems: Int, maxDepth: Int = 0): Spannable {
         val sb = SpannableStringBuilder()
-        if (maxItems == 0)
-            return sb
-        val children = children.filter { !it.isChecked && !it.hidden }.let {
+        recursiveSpannableChildren(context, sb, maxItems, maxDepth, 0)
+        if (sb.isNotEmpty())
+            sb.delete(sb.length - 1, sb.length)
+        return sb
+    }
+
+    private val visibleChildren
+        get() = children.filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
+
+    private fun recursiveSpannableChildren(context: Context, sb: SpannableStringBuilder,
+                                           maxItems: Int, maxDepth: Int = 0, depth: Int = 0) {
+        if (maxItems == 0 || depth > maxDepth)
+            return
+        visibleChildren.let {
             if (maxItems == -1) it else it.take(maxItems)
-        }
-        children.mapIndexed { idx, child ->
-            child.getSpannableText(context).run {
+        }.forEach { child ->
+            child.getSpannableText(context).apply {
                 if (isNotBlank()) {
-                    setSpan(BulletSpan(15), 0, length, 0)
+                    if (depth == 0)
+                        setSpan(BulletSpan(15), 0, length, 0)
+                    else
+                        setSpan(IndentedBulletSpan(15, 30 * depth), 0, length, 0)
                     if (child.color > 0) {
                         val span = ThemedSpan {
                             val colors = it.getIntArray(R.array.itemColors)
@@ -119,27 +133,30 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                         }
                         setSpan(span, 0, length, 0)
                     }
+                    if (child.isChecked) {
+                        setSpan(StrikethroughSpan(), 0, length, 0)
+                    }
                     sb.append(this)
-                    if (idx < children.size - 1) sb.append("\n")
+                    sb.append("\n")
+                    child.recursiveSpannableChildren(context, sb, maxItems, maxDepth, depth + 1)
                 }
             }
         }
-        return sb
     }
 
     fun getPlainChildren(context: Context, maxDepth: Int = 0): CharSequence {
-        val sb = SpannableStringBuilder()
+        val sb = StringBuilder()
         recursivePlainChildren(context, sb, maxDepth, 0)
-        return sb.dropLast(1)
+        if (sb.isNotEmpty())
+            sb.delete(sb.length - 1, sb.length)
+        return sb.toString()
     }
 
-    private fun recursivePlainChildren(context: Context, sb: SpannableStringBuilder,
+    private fun recursivePlainChildren(context: Context, sb: StringBuilder,
                                        maxDepth: Int = 0, depth: Int = 0) {
         if (depth > maxDepth)
             return
-        children.run {
-            if (areCheckedItemsVisible) this else filter { !it.isChecked }
-        }.sortedBy { it.position }.forEach { child ->
+        visibleChildren.sortedBy { it.position }.forEach { child ->
             repeat(depth) { sb.append("    ") }
             if (child.isChecked)
                 sb.append("\u2713 ")

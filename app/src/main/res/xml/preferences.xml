@@ -14,6 +14,14 @@
             app:title="@string/pref_title_display_children_count" />
 
         <ListPreference
+            app:defaultValue="0"
+            app:entries="@array/pref_entries_display_children_depth"
+            app:entryValues="@array/pref_values_display_children_depth"
+            app:key="display_children_depth"
+            app:summary="@string/pref_description_display_children_depth"
+            app:title="@string/pref_title_display_children_depth" />
+
+        <ListPreference
             app:defaultValue="@integer/pref_default_display_theme"
             app:entries="@array/pref_entries_display_theme"
             app:entryValues="@array/pref_values_display_theme"

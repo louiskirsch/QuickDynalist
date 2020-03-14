@@ -88,7 +88,8 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
 class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
 
-class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChildren: Int) {
+class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChildren: Int,
+                         displayMaxDepth: Int) {
     val spannableParent by lazy {
         item.parent.target?.getSpannableText(context)?.append(" >") as? Spannable
                 ?: SpannableString("")
@@ -102,7 +103,9 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
         }
     }
     val spannableNotes by lazy { item.getSpannableNotes(context) }
-    val spannableChildren by lazy { item.getSpannableChildren(context, displayMaxChildren) }
+    val spannableChildren by lazy {
+        item.getSpannableChildren(context, displayMaxChildren, displayMaxDepth)
+    }
 
     private val identifier = hashKode(item.modified, item.children.map { it.modified })
 
