@@ -231,6 +231,7 @@
     <string name="action_manage_tags">Tags</string>
     <string name="pref_title_display_links_inline">Display links and backlinks inline</string>
     <string name="pref_description_display_links_inline">Whether to show children of linked items and references to the current item inline.</string>
+    <string name="invalid_link">Invalid link</string>
     <plurals name="date_repetition_d">
         <item quantity="zero">always</item>
         <item quantity="one">daily</item>

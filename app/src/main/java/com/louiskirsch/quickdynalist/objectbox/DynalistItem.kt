@@ -256,6 +256,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             }
         }
 
+        val invalidLinkText by lazy { context.getString(R.string.invalid_link) }
         spannable.replaceAll(dynalistLinkRegex) {
             val fileId = it.groupValues[2]
             val itemId = it.groupValues[3].ifEmpty { "root" }
@@ -265,7 +266,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 equal(DynalistItem_.serverItemId, itemId)
             }.findFirst()
             if (item != null && displayParent == item) return@replaceAll ""
-            SpannableString("∞ ${it.groupValues[1]}").apply {
+            val title = it.groupValues[1].ifBlank { item?.name ?: invalidLinkText }
+            SpannableString("∞ $title").apply {
                 item?.apply {
                     val span = DynalistLinkSpan(this)
                     setSpan(span, 2, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
