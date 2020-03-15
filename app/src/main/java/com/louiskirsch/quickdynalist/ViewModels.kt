@@ -133,7 +133,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
             } else {
                 list
             }
-            createCachedDynalistItems(transformed, false, parent)
+            createCachedDynalistItems(transformed, false, displayLinksInline, parent)
         }
     }
 
@@ -145,12 +145,13 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
     }
 
     private fun createCachedDynalistItems(items: List<DynalistItem>, includeParent: Boolean,
+                                          displayLinksInline: Boolean? = null,
                                           displayParent: DynalistItem? = null): List<CachedDynalistItem> {
         val context: Context = getApplication()
         val dynalist = Dynalist(context)
         val maxChildren = dynalist.displayChildrenCount
         val maxDepth = dynalist.displayChildrenDepth
-        val linksInline = dynalist.displayLinksInline
+        val linksInline = displayLinksInline ?: dynalist.displayLinksInline
         val newDisplayParent = if (linksInline) displayParent else null
         items.forEach { item -> item.children.sortBy { child -> child.position } }
         return items.map {
