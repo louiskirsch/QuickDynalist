@@ -95,6 +95,7 @@ abstract class BaseItemListFragment :Fragment(),
         }
         adapter.onClickListener = {
             when {
+                !dynalist.displayLinksInline -> openDynalistItem(it)
                 // If this is a forward linking item just follow the link
                 it.metaLinkedItems.size == 1 && it.note.isBlank() && it.children.isEmpty() ->
                     openDynalistItem(it.metaLinkedItem!!)
