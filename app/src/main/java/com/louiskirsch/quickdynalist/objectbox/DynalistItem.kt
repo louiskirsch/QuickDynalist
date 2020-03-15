@@ -109,10 +109,10 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             = parseText(name, context, displayParent)
     fun getSpannableNotes(context: Context) = parseText(note, context)
 
-    fun getSpannableChildren(context: Context, maxItems: Int, maxDepth: Int = 0,
-                             displayParent: DynalistItem? = null): Spannable {
+    fun getSpannableChildren(context: Context, maxItems: Int, showLinking: Boolean,
+                             maxDepth: Int = 0, displayParent: DynalistItem? = null): Spannable {
         val sb = SpannableStringBuilder()
-        recursiveSpannableChildren(context, sb, maxItems, maxDepth, 0, true, displayParent)
+        recursiveSpannableChildren(context, sb, maxItems, maxDepth, 0, showLinking, displayParent)
         if (sb.isNotEmpty())
             sb.delete(sb.length - 1, sb.length)
         return sb

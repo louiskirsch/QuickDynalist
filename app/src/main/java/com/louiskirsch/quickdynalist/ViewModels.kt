@@ -94,14 +94,17 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
     val itemsParent = MutableLiveData<DynalistItem>()
     val itemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
         Transformations.switchMap(itemsParent) { parent ->
+            val dynalist = Dynalist(getApplication())
             TransformedOBLiveData(box.query {
                 equal(DynalistItem_.parentId, parent.clientId)
-                // Forward links
-                if (!parent.metaLinkedItem.isNull) {
-                    or().equal(DynalistItem_.parentId, parent.metaLinkedItem.targetId)
+                if (dynalist.displayLinksInline) {
+                    // Forward links
+                    if (!parent.metaLinkedItem.isNull) {
+                        or().equal(DynalistItem_.parentId, parent.metaLinkedItem.targetId)
+                    }
+                    // Backward links
+                    or().equal(DynalistItem_.metaLinkedItemId, parent.clientId)
                 }
-                // Backward links
-                or().equal(DynalistItem_.metaLinkedItemId, parent.clientId)
 
                 notEqual(DynalistItem_.name, "")
                 equal(DynalistItem_.hidden, false)
@@ -109,20 +112,23 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                     equal(DynalistItem_.isChecked, false)
                 }
 
-                // Ordering doesn't make much sense here, we do it manually later
-                //order(DynalistItem_.position)
+                // Ordering doesn't make much sense with inline links, we do it manually later
+                if (!dynalist.displayLinksInline)
+                    order(DynalistItem_.position)
                 eager(DynalistItem_.children)
             }) { list ->
-                val backwardLink = DynalistItem.LinkingChildType.BACKWARD_LINK
-                val transformed = list
-                        .mapNotNull {
-                            if (it.getLinkingChildType(parent) == backwardLink)
-                                it.parent.target
-                            else
-                                it
-                        }
-                        .distinct()
-                        .sortedWith(compareBy({ it.getLinkingChildType(parent) }, { it.position }))
+                val transformed = if (dynalist.displayLinksInline) {
+                    val backwardLink = DynalistItem.LinkingChildType.BACKWARD_LINK
+                    list.mapNotNull {
+                        if (it.getLinkingChildType(parent) == backwardLink)
+                            it.parent.target
+                        else
+                            it
+                    }.distinct()
+                    .sortedWith(compareBy({ it.getLinkingChildType(parent) }, { it.position }))
+                } else {
+                    list
+                }
                 createCachedDynalistItems(transformed, false, parent)
             }
         }
@@ -141,9 +147,11 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         val dynalist = Dynalist(context)
         val maxChildren = dynalist.displayChildrenCount
         val maxDepth = dynalist.displayChildrenDepth
+        val linksInline = dynalist.displayLinksInline
+        val newDisplayParent = if (linksInline) displayParent else null
         items.forEach { item -> item.children.sortBy { child -> child.position } }
         return items.map {
-            CachedDynalistItem(it, context, maxChildren, maxDepth, displayParent)
+            CachedDynalistItem(it, context, maxChildren, linksInline, maxDepth, newDisplayParent)
         }.apply {
             // The first few visible items should be eagerly initialized
             take(50).forEach { it.eagerInitialize(includeParent) }

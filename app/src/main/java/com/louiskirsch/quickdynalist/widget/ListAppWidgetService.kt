@@ -8,7 +8,6 @@ import android.text.style.StrikethroughSpan
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import androidx.appcompat.app.AppCompatDelegate
 import com.louiskirsch.quickdynalist.Dynalist
 import com.louiskirsch.quickdynalist.DynalistApp
 import com.louiskirsch.quickdynalist.R
@@ -55,6 +54,10 @@ class ListViewsFactory(private val context: Context, intent: Intent)
             DynalistItemFilter.LOCATION_TYPE -> getDynalistFilterItems(locationId)
             else -> throw Exception("Invalid location")
         }
+        val rootItem = when (locationType) {
+            DynalistItem.LOCATION_TYPE -> DynalistItem.box.get(locationId)
+            else -> null
+        }
         displayParentText = when (locationType) {
             DynalistItem.LOCATION_TYPE -> false
             DynalistItemFilter.LOCATION_TYPE -> true
@@ -62,9 +65,11 @@ class ListViewsFactory(private val context: Context, intent: Intent)
         }
         val dynalist = Dynalist(context)
         val maxChildren = dynalist.displayChildrenCount
+        val linksInline = dynalist.displayLinksInline
+        val displayParent = if (linksInline) rootItem else null
         val newItems = queryResult.map { item ->
             item.children.sortBy { child -> child.position }
-            CachedDynalistItem(item, context, maxChildren, 0).apply {
+            CachedDynalistItem(item, context, maxChildren, linksInline, 0, displayParent).apply {
                 eagerInitialize(displayParentText)
                 applyTheme(context, displayParentText)
                 if (item.color > 0) {
