@@ -104,7 +104,7 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
     }
     val spannableNotes by lazy { item.getSpannableNotes(context) }
     val spannableChildren by lazy {
-        item.getSpannableChildren(context, displayMaxChildren, displayMaxDepth)
+        item.getSpannableChildren(context, displayMaxChildren, displayMaxDepth, displayParent)
     }
     val linkingChildType = item.getLinkingChildType(displayParent)
 

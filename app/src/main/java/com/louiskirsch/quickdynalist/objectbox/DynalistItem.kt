@@ -112,8 +112,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     fun getSpannableChildren(context: Context, maxItems: Int, maxDepth: Int = 0,
                              displayParent: DynalistItem? = null): Spannable {
         val sb = SpannableStringBuilder()
-        val showLinking = displayParent == null || displayParent.clientId != metaLinkedItem.targetId
-        recursiveSpannableChildren(context, sb, maxItems, maxDepth, 0, showLinking)
+        recursiveSpannableChildren(context, sb, maxItems, maxDepth, 0, true, displayParent)
         if (sb.isNotEmpty())
             sb.delete(sb.length - 1, sb.length)
         return sb
@@ -122,11 +121,15 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     private val visibleChildren
         get() = children.filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
 
-    private val visibleChildrenIncludingLinking
-        get() = (children +
-                    (metaLinkedItem.target?.children?.sortedBy { it.position } ?: emptyList()) +
-                    metaBacklinks.sortedBy { it.position }
-                ).filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
+    private val visibleChildrenIncludingLinking: List<DynalistItem>
+        get() {
+            val forwardLinks = metaLinkedItem.target?.children?.sortedBy { it.position }
+                    ?: emptyList()
+            val backwardLinks = metaBacklinks.mapNotNull { it.parent.target }.distinct()
+                    .sortedBy { it.position }
+            return (children + forwardLinks + backwardLinks)
+                    .filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
+        }
 
     enum class LinkingChildType { NON_LINKING, FORWARD_LINK, BACKWARD_LINK }
     fun getLinkingChildType(displayParent: DynalistItem?): LinkingChildType {
@@ -134,7 +137,10 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             displayParent == null -> LinkingChildType.NON_LINKING
             parent.targetId == displayParent.metaLinkedItem.targetId ->
                 LinkingChildType.FORWARD_LINK
-            metaLinkedItem.targetId == displayParent.clientId -> LinkingChildType.BACKWARD_LINK
+            metaLinkedItem.targetId == displayParent.clientId ->
+                LinkingChildType.BACKWARD_LINK
+            displayParent.clientId in children.map { it.metaLinkedItem.targetId } ->
+                LinkingChildType.BACKWARD_LINK
             else -> LinkingChildType.NON_LINKING
         }
     }
@@ -157,15 +163,17 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
     private fun recursiveSpannableChildren(context: Context, sb: SpannableStringBuilder,
                                            maxItems: Int, maxDepth: Int, depth: Int,
-                                           showLinking: Boolean) {
+                                           showLinking: Boolean, displayParent: DynalistItem?) {
         if (maxItems == 0 || depth > maxDepth)
             return
-        val children = if (showLinking) visibleChildrenIncludingLinking else visibleChildren
+        val showLinkingUpdated = showLinking && (displayParent == null ||
+                        displayParent.clientId != metaLinkedItem.targetId)
+        val children = if (showLinkingUpdated) visibleChildrenIncludingLinking else visibleChildren
         children.let {
             if (maxItems == -1) it else it.take(maxItems)
         }.forEach { child ->
             child.getSpannableText(context, this).apply {
-                if (isNotBlank() && trim() != linkingChildTypeIcon) {
+                if (isNotBlank() && trim().toString() != linkingChildTypeIcon) {
                     if (depth == 0)
                         setSpan(BulletSpan(15), 0, length, 0)
                     else
@@ -183,7 +191,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                     sb.append(this)
                     sb.append("\n")
                     child.recursiveSpannableChildren(context, sb, maxItems, maxDepth, depth + 1,
-                                                     showLinking)
+                                                     showLinkingUpdated, displayParent)
                 }
             }
         }

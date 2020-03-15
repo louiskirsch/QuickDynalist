@@ -113,9 +113,17 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 //order(DynalistItem_.position)
                 eager(DynalistItem_.children)
             }) { list ->
-                val sorted = list.sortedWith(compareBy(
-                        { it.getLinkingChildType(parent) }, { it.position }))
-                createCachedDynalistItems(sorted, false, parent)
+                val backwardLink = DynalistItem.LinkingChildType.BACKWARD_LINK
+                val transformed = list
+                        .mapNotNull {
+                            if (it.getLinkingChildType(parent) == backwardLink)
+                                it.parent.target
+                            else
+                                it
+                        }
+                        .distinct()
+                        .sortedWith(compareBy({ it.getLinkingChildType(parent) }, { it.position }))
+                createCachedDynalistItems(transformed, false, parent)
             }
         }
     }
