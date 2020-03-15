@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.network.DynalistResponse
+import com.louiskirsch.quickdynalist.text.TintedImageSpan
 import retrofit2.Call
 import retrofit2.Response
 
@@ -209,7 +210,8 @@ fun TextView.scaleImageSpans() {
     val spannable = text as SpannedString
     spannable.getSpans(0, text.length, ImageSpan::class.java).forEach {
         val width = it.drawable.bounds.width()
-        it.drawable.setBounds(0, 0, width, (lineHeight * 1.3f).toInt())
+        val height = lineHeight * ((it as? TintedImageSpan)?.lineHeight ?: 1.0f)
+        it.drawable.setBounds(0, 0, width, height.toInt())
     }
 }
 

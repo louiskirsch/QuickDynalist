@@ -11,6 +11,9 @@
     <color name="chipIconTint">#E0E0E0</color>
     <color name="chipIconAddTint">#4CAF50</color>
 
+    <color name="forwardLink">#2196F3</color>
+    <color name="backwardLink">#4CAF50</color>
+
     <color name="deleteColor">#F44336</color>
     <color name="editColor">#4CAF50</color>
 

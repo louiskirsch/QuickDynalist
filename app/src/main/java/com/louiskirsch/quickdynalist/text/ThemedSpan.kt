@@ -4,13 +4,13 @@ import android.content.Context
 import android.content.res.Resources
 import android.text.Spannable
 
-class ThemedSpan(private val spanCreator: (Resources) -> Any) {
+class ThemedSpan(private val spanCreator: (Context) -> Any) {
 
     fun apply(context: Context, spannable: Spannable) {
         val start = spannable.getSpanStart(this)
         val end = spannable.getSpanEnd(this)
         val flags = spannable.getSpanFlags(this)
-        val newSpan = spanCreator(context.resources)
+        val newSpan = spanCreator(context)
         spannable.removeSpan(this)
         spannable.setSpan(newSpan, start, end, flags)
     }

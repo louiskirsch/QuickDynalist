@@ -86,12 +86,9 @@ class ListViewsFactory(private val context: Context, intent: Intent)
         val parent = box.get(parentId)
         return box.query {
             equal(DynalistItem_.parentId, parentId)
-            and()
             notEqual(DynalistItem_.name, "")
-            and()
             equal(DynalistItem_.hidden, false)
             if (!parent.areCheckedItemsVisible) {
-                and()
                 equal(DynalistItem_.isChecked, false)
             }
             order(DynalistItem_.position)

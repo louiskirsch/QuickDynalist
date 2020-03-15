@@ -99,11 +99,6 @@ class DynalistApp : Application() {
                 val now = Date()
                 box.put(box.all.apply { forEach { it.notifyModified(now) } })
             }, null)
-        } else if (version == 21) {
-            val box = DynalistItem.box
-            boxStore.runInTxAsync({
-                box.put(box.all.apply { forEach { it.updateMetaData() } })
-            }, null)
         }
         if (version in 2..26) {
             val itemBox = DynalistItem.box
@@ -141,6 +136,12 @@ class DynalistApp : Application() {
             }.remove()
             if (dynalist.isAuthenticated)
                 SyncJob.forceSync(false)
+        }
+        if (version in 21..47) {
+            val box = DynalistItem.box
+            boxStore.runInTxAsync({
+                box.put(box.all.apply { forEach { it.updateMetaData() } })
+            }, null)
         }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE
     }

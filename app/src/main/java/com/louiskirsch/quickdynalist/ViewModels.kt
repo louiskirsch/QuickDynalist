@@ -9,6 +9,7 @@ import io.objectbox.Box
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import io.objectbox.query.OrderFlags
 import org.jetbrains.anko.doAsync
 
 class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
@@ -95,17 +96,27 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         Transformations.switchMap(itemsParent) { parent ->
             TransformedOBLiveData(box.query {
                 equal(DynalistItem_.parentId, parent.clientId)
-                and()
+                // Forward links
+                if (!parent.metaLinkedItem.isNull) {
+                    or().equal(DynalistItem_.parentId, parent.metaLinkedItem.targetId)
+                }
+                // Backward links
+                or().equal(DynalistItem_.metaLinkedItemId, parent.clientId)
+
                 notEqual(DynalistItem_.name, "")
-                and()
                 equal(DynalistItem_.hidden, false)
                 if (!parent.areCheckedItemsVisible) {
-                    and()
                     equal(DynalistItem_.isChecked, false)
                 }
-                order(DynalistItem_.position)
+
+                // Ordering doesn't make much sense here, we do it manually later
+                //order(DynalistItem_.position)
                 eager(DynalistItem_.children)
-            }) { createCachedDynalistItems(it, false) }
+            }) { list ->
+                val sorted = list.sortedWith(compareBy(
+                        { it.getLinkingChildType(parent) }, { it.position }))
+                createCachedDynalistItems(sorted, false, parent)
+            }
         }
     }
 
@@ -116,14 +127,16 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         }
     }
 
-    private fun createCachedDynalistItems(items: List<DynalistItem>,
-                                          includeParent: Boolean): List<CachedDynalistItem> {
+    private fun createCachedDynalistItems(items: List<DynalistItem>, includeParent: Boolean,
+                                          displayParent: DynalistItem? = null): List<CachedDynalistItem> {
         val context: Context = getApplication()
         val dynalist = Dynalist(context)
         val maxChildren = dynalist.displayChildrenCount
         val maxDepth = dynalist.displayChildrenDepth
         items.forEach { item -> item.children.sortBy { child -> child.position } }
-        return items.map { CachedDynalistItem(it, context, maxChildren, maxDepth) }.apply {
+        return items.map {
+            CachedDynalistItem(it, context, maxChildren, maxDepth, displayParent)
+        }.apply {
             // The first few visible items should be eagerly initialized
             take(50).forEach { it.eagerInitialize(includeParent) }
             doAsync { forEach { it.eagerInitialize(includeParent) } }

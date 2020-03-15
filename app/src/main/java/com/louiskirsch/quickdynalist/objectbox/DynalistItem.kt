@@ -2,8 +2,10 @@ package com.louiskirsch.quickdynalist.objectbox
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.os.Parcel
 import android.os.Parcelable
@@ -11,10 +13,12 @@ import android.text.*
 import android.text.format.DateFormat
 import android.text.style.*
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.text.IndentedBulletSpan
 import com.louiskirsch.quickdynalist.text.ThemedSpan
+import com.louiskirsch.quickdynalist.text.TintedImageSpan
 import com.louiskirsch.quickdynalist.utils.*
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.annotation.*
@@ -61,6 +65,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var metaImage: String? = null
     var metaSymbol: String? = null
     lateinit var metaTags: ToMany<DynalistTag>
+    @Backlink(to = "metaLinkedItem")
+    lateinit var metaBacklinks: ToMany<DynalistItem>
     lateinit var metaLinkedItem: ToOne<DynalistItem>
 
     fun notifyModified(time: Date = Date()) {
@@ -113,22 +119,59 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     private val visibleChildren
         get() = children.filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
 
+    private val visibleChildrenIncludingLinking
+        get() = (children +
+                    (metaLinkedItem.target?.children?.sortedBy { it.position } ?: emptyList()) +
+                    metaBacklinks.sortedBy { it.position }
+                ).filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
+
+    fun getLinkingChildType(displayParent: DynalistItem?): Int {
+        return when {
+            displayParent == null -> 0
+            // Forward link
+            parent.targetId == displayParent.metaLinkedItem.targetId -> 1
+            // Backward link
+            metaLinkedItem.targetId == displayParent.clientId -> 2
+            // Normal child
+            else -> 0
+        }
+    }
+
+    fun markLinkingChildType(spannable: SpannableStringBuilder, displayParent: DynalistItem) {
+        val marker = when {
+            // Forward link
+            parent.targetId == displayParent.metaLinkedItem.targetId -> R.drawable.ic_forward_link
+            // Backward link
+            metaLinkedItem.targetId == displayParent.clientId -> R.drawable.ic_backward_link
+            else -> return
+        }
+        val imageSpan = ThemedSpan {
+            val drawable = it.getDrawable(marker)!!.apply {
+                setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+            }
+            ImageSpan(drawable)
+        }
+        spannable.insert(0, "\uD83D\uDD17 ")
+        spannable.setSpan(imageSpan, 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+
     private fun recursiveSpannableChildren(context: Context, sb: SpannableStringBuilder,
                                            maxItems: Int, maxDepth: Int = 0, depth: Int = 0) {
         if (maxItems == 0 || depth > maxDepth)
             return
-        visibleChildren.let {
+        visibleChildrenIncludingLinking.let {
             if (maxItems == -1) it else it.take(maxItems)
         }.forEach { child ->
             child.getSpannableText(context).apply {
                 if (isNotBlank()) {
+                    child.markLinkingChildType(this, this@DynalistItem)
                     if (depth == 0)
                         setSpan(BulletSpan(15), 0, length, 0)
                     else
                         setSpan(IndentedBulletSpan(15, 30 * depth), 0, length, 0)
                     if (child.color > 0) {
                         val span = ThemedSpan {
-                            val colors = it.getIntArray(R.array.itemColors)
+                            val colors = it.resources.getIntArray(R.array.itemColors)
                             BackgroundColorSpan(colors[child.color])
                         }
                         setSpan(span, 0, length, 0)
@@ -241,7 +284,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 align(JLatexMathDrawable.ALIGN_LEFT)
             }.build()
 
-            val span = ImageSpan(drawable, ImageSpan.ALIGN_BOTTOM)
+            val span = TintedImageSpan(drawable, ImageSpan.ALIGN_BOTTOM, lineHeight = 1.3f)
             spannable.setSpan(span, range.start, range.endInclusive + 1,
                     Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         }
@@ -495,11 +538,11 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 StyleSpan::class.java, StrikethroughSpan::class.java,
                 ForegroundColorSpan::class.java, BackgroundColorSpan::class.java
         )
-        private val highlightSpanCreator = { res: Resources ->
-            BackgroundColorSpan(res.getColor(R.color.spanHighlight))
+        private val highlightSpanCreator = { context: Context ->
+            BackgroundColorSpan(ContextCompat.getColor(context, R.color.spanHighlight))
         }
-        private val codeSpanCreator = { res: Resources ->
-            ForegroundColorSpan(res.getColor(R.color.codeColor))
+        private val codeSpanCreator = { context: Context ->
+            ForegroundColorSpan(ContextCompat.getColor(context, R.color.codeColor))
         }
 
         fun spannedToMarkdown(spanned: Spanned): String {
@@ -546,10 +589,10 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
             spannable.replaceAll(inlineCodeRegex) {
                 SpannableString(it.groupValues[1]).apply {
-                    val highlight = context?.let { ctx -> highlightSpanCreator(ctx.resources) }
+                    val highlight = context?.let { ctx -> highlightSpanCreator(ctx) }
                             ?: ThemedSpan(highlightSpanCreator)
                     setSpan(highlight, 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                    val code = context?.let { ctx -> codeSpanCreator(ctx.resources) }
+                    val code = context?.let { ctx -> codeSpanCreator(ctx) }
                             ?: ThemedSpan(codeSpanCreator)
                     setSpan(code, 0, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
                 }

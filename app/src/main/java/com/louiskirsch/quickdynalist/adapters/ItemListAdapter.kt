@@ -17,6 +17,7 @@ import com.louiskirsch.quickdynalist.OnLinkTouchListener
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.text.ThemedSpan
+import com.louiskirsch.quickdynalist.text.TintedImageSpan
 import com.louiskirsch.quickdynalist.utils.*
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
@@ -89,23 +90,24 @@ class ItemListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 class DropOffViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)
 
 class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChildren: Int,
-                         displayMaxDepth: Int) {
+                         displayMaxDepth: Int, displayParent: DynalistItem? = null) {
     val spannableParent by lazy {
         item.parent.target?.getSpannableText(context)?.append(" >") as? Spannable
                 ?: SpannableString("")
     }
     val spannableText: Spannable by lazy {
         item.getSpannableText(context).run {
+            displayParent?.let { item.markLinkingChildType(this, it) }
             if (isBlank() && item.image != null)
-                SpannableString(context.getString(R.string.placeholder_image))
-            else
-                this as Spannable
+                append(context.getString(R.string.placeholder_image))
+            this as Spannable
         }
     }
     val spannableNotes by lazy { item.getSpannableNotes(context) }
     val spannableChildren by lazy {
         item.getSpannableChildren(context, displayMaxChildren, displayMaxDepth)
     }
+    val linkingChildType = item.getLinkingChildType(displayParent)
 
     private val identifier = hashKode(item.modified, item.children.map { it.modified })
 
@@ -137,7 +139,7 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
                 Pair(spannableNotes, secondaryColor))
 
         list.forEach { (text, color) ->
-            text.getSpans(0, text.length, ImageSpan::class.java).forEach {
+            text.getSpans(0, text.length, TintedImageSpan::class.java).forEach {
                 it.drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
             }
         }
@@ -163,6 +165,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
     private val items = ArrayList<CachedDynalistItem>()
     private val idToItem = HashMap<Long, CachedDynalistItem>()
     private val itemColors = context.resources.getIntArray(R.array.itemColors)
+    private var nonLinkingChildCount: Int = 0
 
     var moveInProgress: Boolean = false
         private set
@@ -230,17 +233,27 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
             items.addAll(newItems)
             idToItem.clear()
             idToItem.putAll(newItems.map { Pair(it.item.clientId, it) })
+            nonLinkingChildCount = items.indexOfFirst { it.linkingChildType > 0 }.let {
+                if (it == -1) newItems.size else it
+            }
             Unit
         }
         val oldSize = items.size
+        val newCount = newItems.size - oldSize
         when (items) {
+            // Inserted at the bottom
             newItems.take(oldSize) -> {
-                val newCount = newItems.size - oldSize
                 update()
                 notifyItemRangeInserted(oldSize, newCount)
             }
+            // Inserted at the bottom of non-linking children
+            newItems.take(nonLinkingChildCount) +
+                    newItems.takeLast(oldSize - nonLinkingChildCount) -> {
+                update()
+                notifyItemRangeInserted(nonLinkingChildCount, newCount)
+            }
+            // Inserted at the top
             newItems.takeLast(oldSize) -> {
-                val newCount = newItems.size - oldSize
                 update()
                 notifyItemRangeInserted(0, newCount)
             }
@@ -463,7 +476,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
     }
 
     override fun canDropOver(position: Int): Boolean {
-        return position in startDropOffs.size until (itemCount - endDropOffs.size)
+        return position in startDropOffs.size until nonLinkingChildCount
     }
 
     override fun onLongClick(position: Int) {
