@@ -96,8 +96,7 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
                 ?: SpannableString("")
     }
     val spannableText: Spannable by lazy {
-        item.getSpannableText(context).run {
-            displayParent?.let { item.markLinkingChildType(this, it) }
+        item.getSpannableText(context, displayParent).run {
             if (isBlank() && item.image != null)
                 append(context.getString(R.string.placeholder_image))
             this as Spannable
@@ -233,7 +232,9 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
             items.addAll(newItems)
             idToItem.clear()
             idToItem.putAll(newItems.map { Pair(it.item.clientId, it) })
-            nonLinkingChildCount = items.indexOfFirst { it.linkingChildType > 0 }.let {
+            nonLinkingChildCount = items.indexOfFirst {
+                it.linkingChildType != DynalistItem.LinkingChildType.NON_LINKING
+            }.let {
                 if (it == -1) newItems.size else it
             }
             Unit

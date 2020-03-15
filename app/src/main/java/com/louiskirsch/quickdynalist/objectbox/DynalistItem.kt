@@ -105,12 +105,15 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
     val shortenedName get() = strippedMarkersName.ellipsis(30)
 
-    fun getSpannableText(context: Context) = parseText(name, context)
+    fun getSpannableText(context: Context, displayParent: DynalistItem? = null)
+            = parseText(name, context, displayParent)
     fun getSpannableNotes(context: Context) = parseText(note, context)
 
-    fun getSpannableChildren(context: Context, maxItems: Int, maxDepth: Int = 0): Spannable {
+    fun getSpannableChildren(context: Context, maxItems: Int, maxDepth: Int = 0,
+                             displayParent: DynalistItem? = null): Spannable {
         val sb = SpannableStringBuilder()
-        recursiveSpannableChildren(context, sb, maxItems, maxDepth, 0)
+        val showLinking = displayParent == null || displayParent.clientId != metaLinkedItem.targetId
+        recursiveSpannableChildren(context, sb, maxItems, maxDepth, 0, showLinking)
         if (sb.isNotEmpty())
             sb.delete(sb.length - 1, sb.length)
         return sb
@@ -125,24 +128,21 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                     metaBacklinks.sortedBy { it.position }
                 ).filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
 
-    fun getLinkingChildType(displayParent: DynalistItem?): Int {
+    enum class LinkingChildType { NON_LINKING, FORWARD_LINK, BACKWARD_LINK }
+    fun getLinkingChildType(displayParent: DynalistItem?): LinkingChildType {
         return when {
-            displayParent == null -> 0
-            // Forward link
-            parent.targetId == displayParent.metaLinkedItem.targetId -> 1
-            // Backward link
-            metaLinkedItem.targetId == displayParent.clientId -> 2
-            // Normal child
-            else -> 0
+            displayParent == null -> LinkingChildType.NON_LINKING
+            parent.targetId == displayParent.metaLinkedItem.targetId ->
+                LinkingChildType.FORWARD_LINK
+            metaLinkedItem.targetId == displayParent.clientId -> LinkingChildType.BACKWARD_LINK
+            else -> LinkingChildType.NON_LINKING
         }
     }
 
-    fun markLinkingChildType(spannable: SpannableStringBuilder, displayParent: DynalistItem) {
-        val marker = when {
-            // Forward link
-            parent.targetId == displayParent.metaLinkedItem.targetId -> R.drawable.ic_forward_link
-            // Backward link
-            metaLinkedItem.targetId == displayParent.clientId -> R.drawable.ic_backward_link
+    private fun markLinkingChildType(spannable: SpannableStringBuilder, type: LinkingChildType) {
+        val marker = when (type) {
+            LinkingChildType.FORWARD_LINK -> R.drawable.ic_forward_link
+            LinkingChildType.BACKWARD_LINK -> R.drawable.ic_backward_link
             else -> return
         }
         val imageSpan = ThemedSpan {
@@ -151,20 +151,21 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             }
             ImageSpan(drawable)
         }
-        spannable.insert(0, "\uD83D\uDD17 ")
+        spannable.insert(0, "$linkingChildTypeIcon ")
         spannable.setSpan(imageSpan, 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 
     private fun recursiveSpannableChildren(context: Context, sb: SpannableStringBuilder,
-                                           maxItems: Int, maxDepth: Int = 0, depth: Int = 0) {
+                                           maxItems: Int, maxDepth: Int, depth: Int,
+                                           showLinking: Boolean) {
         if (maxItems == 0 || depth > maxDepth)
             return
-        visibleChildrenIncludingLinking.let {
+        val children = if (showLinking) visibleChildrenIncludingLinking else visibleChildren
+        children.let {
             if (maxItems == -1) it else it.take(maxItems)
         }.forEach { child ->
-            child.getSpannableText(context).apply {
-                if (isNotBlank()) {
-                    child.markLinkingChildType(this, this@DynalistItem)
+            child.getSpannableText(context, this).apply {
+                if (isNotBlank() && trim() != linkingChildTypeIcon) {
                     if (depth == 0)
                         setSpan(BulletSpan(15), 0, length, 0)
                     else
@@ -181,7 +182,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                     }
                     sb.append(this)
                     sb.append("\n")
-                    child.recursiveSpannableChildren(context, sb, maxItems, maxDepth, depth + 1)
+                    child.recursiveSpannableChildren(context, sb, maxItems, maxDepth, depth + 1,
+                                                     showLinking)
                 }
             }
         }
@@ -211,7 +213,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         }
     }
 
-    private fun parseText(text: String, context: Context): SpannableStringBuilder {
+    private fun parseText(text: String, context: Context, displayParent: DynalistItem? = null)
+            : SpannableStringBuilder {
         val spannable = SpannableStringBuilder(text).linkify()
         val dateFormat = DateFormat.getDateFormat(context)
         val timeFormat = DateFormat.getTimeFormat(context)
@@ -245,14 +248,15 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         }
 
         spannable.replaceAll(dynalistLinkRegex) {
+            val fileId = it.groupValues[2]
+            val itemId = it.groupValues[3].ifEmpty { "root" }
+            val item = box.query {
+                equal(DynalistItem_.serverFileId, fileId)
+                and()
+                equal(DynalistItem_.serverItemId, itemId)
+            }.findFirst()
+            if (item != null && displayParent == item) return@replaceAll ""
             SpannableString("∞ ${it.groupValues[1]}").apply {
-                val fileId = it.groupValues[2]
-                val itemId = it.groupValues[3].ifEmpty { "root" }
-                val item = box.query {
-                    equal(DynalistItem_.serverFileId, fileId)
-                    and()
-                    equal(DynalistItem_.serverItemId, itemId)
-                }.findFirst()
                 item?.apply {
                     val span = DynalistLinkSpan(this)
                     setSpan(span, 2, length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
@@ -300,6 +304,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             spannable.setSpan(tagSpan, range.start + 1, range.endInclusive + 1,
                     Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
         }
+
+        markLinkingChildType(spannable, getLinkingChildType(displayParent))
         return spannable
     }
 
@@ -472,6 +478,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         private val imageRegex = Regex("""!\[(.*?)]\((.*?)\)""")
         private val dynalistLinkRegex = Regex("""\[(.*?)]\(https://dynalist\.io/d/([^#]+?)(?:#z=([^&]+?))?\)""")
         private val whitespaceRegex = Regex("""(^\s+)|(\s+$)""")
+
+        private val linkingChildTypeIcon = "\uD83D\uDD17"
 
         @Suppress("unused")
         @JvmField
