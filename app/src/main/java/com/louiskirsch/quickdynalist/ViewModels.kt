@@ -120,7 +120,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 val transformed = if (dynalist.displayLinksInline) {
                     val backwardLink = DynalistItem.LinkingChildType.BACKWARD_LINK
                     list.mapNotNull {
-                        if (it.getLinkingChildType(parent) == backwardLink)
+                        if (it.getLinkingChildType(parent) == backwardLink && it.note.isBlank())
                             it.parent.target
                         else
                             it

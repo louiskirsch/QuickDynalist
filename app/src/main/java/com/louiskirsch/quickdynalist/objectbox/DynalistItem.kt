@@ -125,8 +125,9 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         get() {
             val forwardLinks = metaLinkedItem.target?.children?.sortedBy { it.position }
                     ?: emptyList()
-            val backwardLinks = metaBacklinks.mapNotNull { it.parent.target }.distinct()
-                    .sortedBy { it.position }
+            val backwardLinks = metaBacklinks.mapNotNull {
+                if (it.note.isBlank()) it.parent.target else it
+            }.distinct().sortedBy { it.position }
             return (children + forwardLinks + backwardLinks)
                     .filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
         }
