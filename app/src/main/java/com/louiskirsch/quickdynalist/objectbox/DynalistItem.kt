@@ -65,9 +65,11 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var metaImage: String? = null
     var metaSymbol: String? = null
     lateinit var metaTags: ToMany<DynalistTag>
-    @Backlink(to = "metaLinkedItem")
+    @Backlink(to = "metaLinkedItems")
     lateinit var metaBacklinks: ToMany<DynalistItem>
-    lateinit var metaLinkedItem: ToOne<DynalistItem>
+    lateinit var metaLinkedItems: ToMany<DynalistItem>
+
+    val metaLinkedItem: DynalistItem? get() = metaLinkedItems.firstOrNull()
 
     fun notifyModified(time: Date = Date()) {
         modified = time
@@ -80,7 +82,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         metaSymbol = symbol
         metaTags.clear()
         metaTags.addAll(tags.map { DynalistTag.find(it) })
-        metaLinkedItem.target = linkedItem
+        metaLinkedItems.clear()
+        metaLinkedItems.addAll(linkedItems)
     }
 
     fun hasParent(parentId: Long, maxDepth: Int = 1): Boolean {
@@ -121,10 +124,14 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     private val visibleChildren
         get() = children.filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
 
+    val visibleBacklinks
+        get() = metaBacklinks.mapNotNull { if (it.note.isBlank()) it.parent.target else it }
+                .distinct().filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
+
     private val visibleChildrenIncludingLinking: List<DynalistItem>
         get() {
-            val forwardLinks = metaLinkedItem.target?.children?.sortedBy { it.position }
-                    ?: emptyList()
+            val forwardLinks = metaLinkedItems.flatMap { linked ->
+                linked.children.sortedBy { it.position } }
             val backwardLinks = metaBacklinks.mapNotNull {
                 if (it.note.isBlank()) it.parent.target else it
             }.distinct().sortedBy { it.position }
@@ -136,11 +143,11 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     fun getLinkingChildType(displayParent: DynalistItem?): LinkingChildType {
         return when {
             displayParent == null -> LinkingChildType.NON_LINKING
-            parent.targetId == displayParent.metaLinkedItem.targetId ->
+            parent.target in displayParent.metaLinkedItems ->
                 LinkingChildType.FORWARD_LINK
-            metaLinkedItem.targetId == displayParent.clientId ->
+            metaLinkedItems.any { it == displayParent } ->
                 LinkingChildType.BACKWARD_LINK
-            displayParent.clientId in children.map { it.metaLinkedItem.targetId } ->
+            displayParent in children.flatMap { it.metaLinkedItems } ->
                 LinkingChildType.BACKWARD_LINK
             else -> LinkingChildType.NON_LINKING
         }
@@ -168,7 +175,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         if (maxItems == 0 || depth > maxDepth)
             return
         val showLinkingUpdated = showLinking && (displayParent == null ||
-                        displayParent.clientId != metaLinkedItem.targetId)
+                        displayParent !in metaLinkedItems)
         val children = if (showLinkingUpdated) visibleChildrenIncludingLinking else visibleChildren
         children.let {
             if (maxItems == -1) it else it.take(maxItems)
@@ -414,6 +421,13 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                 timeReader.get()!!.parse(time)
             else
                 null
+        }
+
+    val linkedItems: Sequence<DynalistItem>
+        get() = dynalistLinkRegex.findAll(name + note).mapNotNull {
+            val fileId = it.groupValues[2]
+            val itemId = it.groupValues[3].ifEmpty { "root" }
+            byServerId(fileId, itemId)
         }
 
     var linkedItem: DynalistItem?

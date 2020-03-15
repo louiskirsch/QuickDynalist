@@ -8,6 +8,7 @@ import com.louiskirsch.quickdynalist.objectbox.*
 import io.objectbox.Box
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
+import io.objectbox.kotlin.inValues
 import io.objectbox.kotlin.query
 import io.objectbox.query.OrderFlags
 import org.jetbrains.anko.doAsync
@@ -107,11 +108,11 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
             equal(DynalistItem_.parentId, parent.clientId)
             if (displayLinksInline) {
                 // Forward links
-                if (!parent.metaLinkedItem.isNull) {
-                    or().equal(DynalistItem_.parentId, parent.metaLinkedItem.targetId)
+                if (parent.metaLinkedItems.isNotEmpty()) {
+                    or().inValues(DynalistItem_.parentId,
+                            parent.metaLinkedItems.map { it.clientId }.toLongArray())
                 }
-                // Backward links
-                or().equal(DynalistItem_.metaLinkedItemId, parent.clientId)
+                // Backward links later
             }
 
             notEqual(DynalistItem_.name, "")
@@ -123,17 +124,12 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
             // Ordering doesn't make much sense with inline links, we do it manually later
             if (!displayLinksInline)
                 order(DynalistItem_.position)
-            eager(DynalistItem_.children)
+            eager(DynalistItem_.children, DynalistItem_.metaLinkedItems,
+                    DynalistItem_.metaBacklinks)
         }) { list ->
             val transformed = if (displayLinksInline) {
-                val backwardLink = DynalistItem.LinkingChildType.BACKWARD_LINK
-                list.mapNotNull {
-                    if (it.getLinkingChildType(parent) == backwardLink && it.note.isBlank())
-                        it.parent.target
-                    else
-                        it
-                }.distinct()
-                .sortedWith(compareBy({ it.getLinkingChildType(parent) }, { it.position }))
+                (list + parent.visibleBacklinks)
+                        .sortedWith(compareBy({ it.getLinkingChildType(parent) }, { it.position }))
             } else {
                 list
             }

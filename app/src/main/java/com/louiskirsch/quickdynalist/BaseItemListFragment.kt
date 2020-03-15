@@ -96,13 +96,14 @@ abstract class BaseItemListFragment :Fragment(),
         adapter.onClickListener = {
             when {
                 // If this is a forward linking item just follow the link
-                !it.metaLinkedItem.isNull && it.note.isBlank() && it.children.isEmpty() ->
-                    openDynalistItem(it.metaLinkedItem.target)
+                it.metaLinkedItems.size == 1 && it.note.isBlank() && it.children.isEmpty() ->
+                    openDynalistItem(it.metaLinkedItem!!)
                 // If this is backward linking item, scroll to link
                 it.getLinkingChildType(addItemLocation)
                         == DynalistItem.LinkingChildType.BACKWARD_LINK -> {
+                    val parent = addItemLocation
                     val scrollTo = it.children.firstOrNull { linker ->
-                        linker.metaLinkedItem.targetId == addItemLocation?.clientId
+                        parent != null && parent in linker.metaLinkedItems
                     }
                     openDynalistItem(it, scrollTo)
                 }
