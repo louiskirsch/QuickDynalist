@@ -161,7 +161,8 @@ class ItemListFragment : BaseItemListFragment() {
             val itemText = location.getSpannableText(context!!)
             val itemNotes = location.getSpannableNotes(context!!)
                     .prependIfNotBlank("\n\n")
-            val itemChildren = location.getPlainChildren(context!!, dynalist.displayChildrenDepth)
+            val depth = dynalist.displayChildrenDepth + 1
+            val itemChildren = location.getPlainChildren(context!!, depth)
                     .prependIfNotBlank("\n\n")
             val text = TextUtils.concat(itemText, itemNotes, itemChildren)
             val sendIntent = Intent().apply {
