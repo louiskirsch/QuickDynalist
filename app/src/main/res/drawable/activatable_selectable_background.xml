@@ -11,4 +11,20 @@
         </selector>
     </item>
     <item android:drawable="?attr/selectableItemBackground"/>
+    <item android:gravity="fill_vertical|left">
+        <level-list>
+            <item android:maxLevel="1" android:minLevel="1">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/forwardLink" />
+                    <size android:width="2dp" />
+                </shape>
+            </item>
+            <item android:maxLevel="2" android:minLevel="2">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/backwardLink" />
+                    <size android:width="2dp" />
+                </shape>
+            </item>
+        </level-list>
+    </item>
 </layer-list>

@@ -372,6 +372,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
             holder.itemView.background.setTint(itemColors[color])
         else
             holder.itemView.background.setTintList(null)
+        holder.itemView.background.level = item.linkingChildType.ordinal
 
         val popupListener = { menuItem: MenuItem ->
             onPopupItemClickListener?.invoke(idToItem[clientId]!!.item, menuItem) ?: false
