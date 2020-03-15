@@ -94,11 +94,20 @@ abstract class BaseItemListFragment :Fragment(),
             })
         }
         adapter.onClickListener = {
-            // If this is a forward linking item just follow the link
-            if (!it.metaLinkedItem.isNull && it.note.isBlank() && it.children.isEmpty())
-                openDynalistItem(it.metaLinkedItem.target)
-            else
-                openDynalistItem(it)
+            when {
+                // If this is a forward linking item just follow the link
+                !it.metaLinkedItem.isNull && it.note.isBlank() && it.children.isEmpty() ->
+                    openDynalistItem(it.metaLinkedItem.target)
+                // If this is backward linking item, scroll to link
+                it.getLinkingChildType(addItemLocation)
+                        == DynalistItem.LinkingChildType.BACKWARD_LINK -> {
+                    val scrollTo = it.children.firstOrNull { linker ->
+                        linker.metaLinkedItem.targetId == addItemLocation?.clientId
+                    }
+                    openDynalistItem(it, scrollTo)
+                }
+                else -> openDynalistItem(it)
+            }
         }
         adapter.onPopupOpenListener = { menu ->
             menu.findItem(R.id.action_edit).isVisible = !userHasSwipedToEdit
