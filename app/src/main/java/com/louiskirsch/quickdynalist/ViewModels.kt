@@ -92,45 +92,52 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
     }
 
     val itemsParent = MutableLiveData<DynalistItem>()
+    val itemsDisplayLinksInline = MutableLiveData<Boolean>()
     val itemsLiveData: LiveData<List<CachedDynalistItem>> by lazy {
         Transformations.switchMap(itemsParent) { parent ->
-            val dynalist = Dynalist(getApplication())
-            TransformedOBLiveData(box.query {
-                equal(DynalistItem_.parentId, parent.clientId)
-                if (dynalist.displayLinksInline) {
-                    // Forward links
-                    if (!parent.metaLinkedItem.isNull) {
-                        or().equal(DynalistItem_.parentId, parent.metaLinkedItem.targetId)
-                    }
-                    // Backward links
-                    or().equal(DynalistItem_.metaLinkedItemId, parent.clientId)
-                }
-
-                notEqual(DynalistItem_.name, "")
-                equal(DynalistItem_.hidden, false)
-                if (!parent.areCheckedItemsVisible) {
-                    equal(DynalistItem_.isChecked, false)
-                }
-
-                // Ordering doesn't make much sense with inline links, we do it manually later
-                if (!dynalist.displayLinksInline)
-                    order(DynalistItem_.position)
-                eager(DynalistItem_.children)
-            }) { list ->
-                val transformed = if (dynalist.displayLinksInline) {
-                    val backwardLink = DynalistItem.LinkingChildType.BACKWARD_LINK
-                    list.mapNotNull {
-                        if (it.getLinkingChildType(parent) == backwardLink && it.note.isBlank())
-                            it.parent.target
-                        else
-                            it
-                    }.distinct()
-                    .sortedWith(compareBy({ it.getLinkingChildType(parent) }, { it.position }))
-                } else {
-                    list
-                }
-                createCachedDynalistItems(transformed, false, parent)
+            Transformations.switchMap(itemsDisplayLinksInline) { displayLinksInline ->
+                createItemsLiveData(parent, displayLinksInline)
             }
+        }
+    }
+
+    private fun createItemsLiveData(parent: DynalistItem, displayLinksInline: Boolean)
+            : TransformedOBLiveData<DynalistItem, CachedDynalistItem> {
+        return TransformedOBLiveData(box.query {
+            equal(DynalistItem_.parentId, parent.clientId)
+            if (displayLinksInline) {
+                // Forward links
+                if (!parent.metaLinkedItem.isNull) {
+                    or().equal(DynalistItem_.parentId, parent.metaLinkedItem.targetId)
+                }
+                // Backward links
+                or().equal(DynalistItem_.metaLinkedItemId, parent.clientId)
+            }
+
+            notEqual(DynalistItem_.name, "")
+            equal(DynalistItem_.hidden, false)
+            if (!parent.areCheckedItemsVisible) {
+                equal(DynalistItem_.isChecked, false)
+            }
+
+            // Ordering doesn't make much sense with inline links, we do it manually later
+            if (!displayLinksInline)
+                order(DynalistItem_.position)
+            eager(DynalistItem_.children)
+        }) { list ->
+            val transformed = if (displayLinksInline) {
+                val backwardLink = DynalistItem.LinkingChildType.BACKWARD_LINK
+                list.mapNotNull {
+                    if (it.getLinkingChildType(parent) == backwardLink && it.note.isBlank())
+                        it.parent.target
+                    else
+                        it
+                }.distinct()
+                .sortedWith(compareBy({ it.getLinkingChildType(parent) }, { it.position }))
+            } else {
+                list
+            }
+            createCachedDynalistItems(transformed, false, parent)
         }
     }
 

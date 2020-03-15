@@ -137,6 +137,7 @@ class ItemListFragment : BaseItemListFragment() {
         menu.findItem(R.id.goto_parent).isVisible = !location.parent.isNull
         menu.findItem(R.id.toggle_bookmark).isChecked = location.isBookmark
         menu.findItem(R.id.toggle_show_checked_items).isChecked = location.areCheckedItemsVisible
+        menu.findItem(R.id.toggle_links_inline).isChecked = dynalist.displayLinksInline
         if (location.serverItemId == null) {
             menu.findItem(R.id.open_in_dynalist).isVisible = false
         }
@@ -186,6 +187,7 @@ class ItemListFragment : BaseItemListFragment() {
             R.id.share -> shareDynalistItem()
             R.id.toggle_bookmark -> toggleBookmark(item)
             R.id.toggle_show_checked_items -> toggleShowChecked(item)
+            R.id.toggle_links_inline -> toggleLinksInline(item)
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -197,6 +199,7 @@ class ItemListFragment : BaseItemListFragment() {
     override val itemsLiveData: LiveData<List<CachedDynalistItem>> get() {
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.itemsParent.value = location
+        model.itemsDisplayLinksInline.value = dynalist.displayLinksInline
         return model.itemsLiveData
     }
 
@@ -207,6 +210,15 @@ class ItemListFragment : BaseItemListFragment() {
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.itemsParent.value = location
         doAsync { DynalistItem.updateLocally(location) { it.areCheckedItemsVisible = checked }}
+        return true
+    }
+
+    private fun toggleLinksInline(menuItem: MenuItem): Boolean {
+        val checked = !menuItem.isChecked
+        menuItem.isChecked = checked
+        dynalist.displayLinksInline = checked
+        val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
+        model.itemsDisplayLinksInline.value = checked
         return true
     }
 

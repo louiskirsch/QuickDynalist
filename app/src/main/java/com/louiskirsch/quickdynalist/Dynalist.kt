@@ -44,8 +44,9 @@ class Dynalist(private val context: Context) {
     val displayChildrenDepth
         get() = settings.getString("display_children_depth", "0")!!.toInt()
 
-    val displayLinksInline
+    var displayLinksInline
         get() = settings.getBoolean("display_links_inline", false)
+        set(value) = settings.edit().putBoolean("display_links_inline", value).apply()
 
     val addToTopOfList
         get() = settings.getString("edit_insert_position", "bottom") == "top"

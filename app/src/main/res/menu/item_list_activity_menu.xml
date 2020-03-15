@@ -41,6 +41,11 @@
             android:checkable="true"
             android:title="@string/toggle_show_checked_items"
             app:showAsAction="never" />
+
+        <item android:id="@+id/toggle_links_inline"
+            android:checkable="true"
+            android:title="@string/toggle_links_inline"
+            app:showAsAction="never" />
     </group>
 
 </menu>
