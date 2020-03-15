@@ -482,6 +482,10 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
         return position in startDropOffs.size until nonLinkingChildCount
     }
 
+    override fun canDrag(position: Int): Boolean {
+        return position in 0 until nonLinkingChildCount
+    }
+
     override fun onLongClick(position: Int) {
         val index = correctPositionForDropOffs(position)!!
         onLongClickListener?.invoke(items[index].item)
