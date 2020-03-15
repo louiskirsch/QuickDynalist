@@ -93,7 +93,13 @@ abstract class BaseItemListFragment :Fragment(),
                 }
             })
         }
-        adapter.onClickListener = { openDynalistItem(it) }
+        adapter.onClickListener = {
+            // If this is a forward linking item just follow the link
+            if (!it.metaLinkedItem.isNull && it.note.isBlank() && it.children.isEmpty())
+                openDynalistItem(it.metaLinkedItem.target)
+            else
+                openDynalistItem(it)
+        }
         adapter.onPopupOpenListener = { menu ->
             menu.findItem(R.id.action_edit).isVisible = !userHasSwipedToEdit
         }
