@@ -88,7 +88,7 @@ class ListViewsFactory(private val context: Context, intent: Intent)
 
     private fun getDynalistItemChildren(parentId: Long): List<DynalistItem> {
         val box = DynalistItem.box
-        val parent = box.get(parentId)
+        val parent = box.get(parentId) ?: return emptyList()
         return box.query {
             equal(DynalistItem_.parentId, parentId)
             notEqual(DynalistItem_.name, "")
