@@ -441,6 +441,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
         if (onRowSwipedListener?.invoke(item, direction) == true) {
             items.removeAt(position)
             notifyItemRemoved(position)
+            nonLinkingChildCount -= 1
         }
     }
 
@@ -470,6 +471,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
             if (result) {
                 items.removeAt(fromIndex)
                 notifyItemRemoved(fromPosition)
+                nonLinkingChildCount -= 1
             }
         } else {
             val intoIndex = correctPositionForDropOffs(intoPosition)!!
@@ -477,6 +479,7 @@ class ItemListAdapter(context: Context, showChecklist: Boolean,
             onRowMovedIntoListener?.invoke(fromItem, intoItem)
             items.removeAt(fromIndex)
             notifyItemRemoved(fromPosition)
+            nonLinkingChildCount -= 1
         }
     }
 
