@@ -347,7 +347,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var tags: List<String>
         get() {
             return listOf(name, note).flatMap {
-                tagRegex.findAll(it).map { m -> m.groupValues[1].toLowerCase() } .toList()
+                tagRegex.findAll(it.replace(linkRegex, ""))
+                        .map { m -> m.groupValues[1].toLowerCase() } .toList()
             }
         }
         set(value) {

@@ -19,7 +19,6 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.inputMethodManager
 import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.android.synthetic.main.app_bar_navigation.*
-import kotlinx.android.synthetic.main.fragment_item_list.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -28,8 +27,6 @@ import org.jetbrains.anko.okButton
 import org.jetbrains.anko.toast
 import android.content.Intent
 import android.net.Uri
-import androidx.core.content.FileProvider
-import java.io.File
 import android.content.ActivityNotFoundException
 import android.graphics.PorterDuff
 import androidx.fragment.app.Fragment
@@ -49,6 +46,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     companion object {
         const val EXTRA_ITEM_TEXT = "EXTRA_ITEM_TEXT"
         private const val MAX_SUBMENU_ITEMS = 1000
+        private val dynalistLinkFragmentPattern = Regex("""(?:z=([^&]+))?&?(?:q=([^&]+))?""")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,7 +129,13 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         val itemText = intent.getCharSequenceExtra(EXTRA_ITEM_TEXT) ?: ""
         if (intent.action == Intent.ACTION_VIEW && intent.data != null) {
             val fileId = intent.data!!.lastPathSegment!!
-            val itemId = intent.data!!.fragment?.substring(2) ?: "root"
+            val match = intent.data!!.fragment?.let { dynalistLinkFragmentPattern.find(it) }
+            val itemId = match?.groups?.get(1)?.value ?: "root"
+            match?.groups?.let {
+                if (it[2] != null) {
+                    toast(R.string.error_search_link_not_supported)
+                }
+            }
             val item = DynalistItem.byServerId(fileId, itemId) ?: dynalist.inbox.apply {
                 toast(R.string.error_invalid_url)
             }
