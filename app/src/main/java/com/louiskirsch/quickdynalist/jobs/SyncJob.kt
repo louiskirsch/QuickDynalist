@@ -59,11 +59,13 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
             clientItem?.apply {
                 childrenIds = it.children ?: emptyList()
                 val hasChanged = it.modified > modified.time
+                if (syncJob == null) {
+                    checkbox = it.checkbox
+                }
                 if (hasChanged && syncJob == null) {
                     serverFileId = file.id
                     serverItemId = it.id
                     isChecked = it.checked
-                    checkbox = it.checkbox
                     position = 0  // Will be set later when populating children
                     name = it.content
                     note = it.note
