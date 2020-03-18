@@ -40,7 +40,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
 
     override fun onAdded() {}
 
-    private fun syncDocument(service: DynalistService, token: String, file: File,
+    private fun syncDocument(service: DynalistService, token: String, file: File, syncStart: Long,
                              notAssociatedClientItems: MutableSet<DynalistItem>,
                              itemsWithInvalidMetaData: LinkedList<DynalistItem>) {
         val contents = service.readDocument(ReadDocumentRequest(file.id!!, token))
@@ -94,7 +94,15 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         serverItems.forEach { it.populateChildren(itemMap) }
 
         // Store new items in database
-        DynalistItem.box.put(serverItems)
+        val modified = getModifiedAfterSync(syncStart, file.id).toSet()
+        DynalistItem.box.put(serverItems.filter { it.clientId !in modified })
+    }
+
+    private fun getModifiedAfterSync(syncStart: Long, file: String): LongArray {
+        return DynalistItem.box.query {
+            equal(DynalistItem_.serverFileId, file)
+            greater(DynalistItem_.modified, syncStart)
+        }.findIds()
     }
 
     @Throws(Throwable::class)
@@ -126,21 +134,24 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         val newDocuments = newVersionedDocuments.unzip().first
 
         // Query items from local database
+        val syncStart = System.currentTimeMillis()
+        val newFileIds = newDocuments.map { it.id!! }.toTypedArray()
         val clientItems = DynalistItem.box.query {
-            inValues(DynalistItem_.serverFileId, newDocuments.map { it.id!! }.toTypedArray())
+            inValues(DynalistItem_.serverFileId, newFileIds)
         }.find()
         val notAssociatedClientItems = clientItems.toMutableSet()
         val itemsWithInvalidMetaData = LinkedList<DynalistItem>()
 
         newDocuments.forEachWithIndex { idx, doc ->
-            syncDocument(service, token, doc, notAssociatedClientItems, itemsWithInvalidMetaData)
+            syncDocument(service, token, doc, syncStart,
+                    notAssociatedClientItems, itemsWithInvalidMetaData)
             // Report progress
             val progress = (idx + 1).toFloat() / newDocuments.size
             EventBus.getDefault().post(SyncProgressEvent(progress))
         }
 
         // Persist deleted items
-        DynalistItem.box.remove(notAssociatedClientItems.filter { it.syncJob == null })
+        box.remove(notAssociatedClientItems.filter { it.syncJob == null })
 
         // Update meta data
         itemsWithInvalidMetaData.forEach { it.updateMetaData() }
