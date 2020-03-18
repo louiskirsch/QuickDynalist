@@ -143,6 +143,14 @@ class DynalistApp : Application() {
                 box.put(box.all.apply { forEach { it.updateMetaData() } })
             }, null)
         }
+        if (version in 2..50) {
+            val box = DynalistItem.box
+            boxStore.runInTxAsync({
+                box.put(box.all.apply { forEach {
+                    it.checkbox = false
+                } })
+            }, null)
+        }
         dynalist.preferencesVersion = BuildConfig.VERSION_CODE
     }
 

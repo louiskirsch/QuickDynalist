@@ -25,6 +25,8 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
                     (maxPosition(parent.clientId) ?: -1) + 1
                 }
                 newItem.parent.target = parent
+                newItem.isChecklist = parent.isChecklist
+                newItem.checkbox = parent.isChecklist
                 newItem.notifyModified()
                 box.put(newItem)
             }
@@ -38,7 +40,8 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
         val token = dynalist.token
         requireItemId(parent)
         val request = InsertItemRequest(parent.serverFileId!!, parent.serverItemId!!,
-                newItem.name, newItem.note, token!!, dynalist.insertPosition)
+                newItem.name, newItem.note, parent.isChecklist, token!!,
+                index = dynalist.insertPosition)
         return dynalistService.addToDocument(request).execute().body()!!
     }
 

@@ -27,7 +27,8 @@ class AddItemTreeService(private val itemJob: ItemJob) {
         val children = item.children.sortedBy { it.position }.reversed()
         val changes = children.mapIndexed { i: Int, it ->
             // TODO we could define the index here, but the API is bugged
-            InsertItemRequest.InsertSpec(item.serverItemId!!, it.name, it.note)
+            InsertItemRequest.InsertSpec(item.serverItemId!!, it.name, it.note, it.checkbox,
+                    it.color)
         }.toTypedArray()
         val request = BulkInsertItemRequest(item.serverFileId!!, token, changes)
         val response = dynalistService.addToDocument(request)
@@ -41,7 +42,7 @@ class AddItemTreeService(private val itemJob: ItemJob) {
 
     fun insert(item: DynalistItem): List<DynalistItem> {
         val request = InsertItemRequest(item.serverFileId!!, item.serverParentId!!, item.name,
-                item.note, token, dynalist.insertPosition)
+                item.note, item.checkbox, token, item.color, dynalist.insertPosition)
         val response = dynalistService.addToDocument(request)
                 .execRespectRateLimit(delayCallback).body()!!
         itemJob.requireSuccess(response)

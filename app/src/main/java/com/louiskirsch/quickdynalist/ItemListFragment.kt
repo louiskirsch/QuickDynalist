@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.adapters.CachedDynalistItem
+import com.louiskirsch.quickdynalist.jobs.BulkEditItemJob
 import com.louiskirsch.quickdynalist.jobs.MoveItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.ImageCache
@@ -227,7 +228,19 @@ class ItemListFragment : BaseItemListFragment() {
         menuItem.isChecked = checked
         adapter.showChecklist = checked
         location.isChecklist = checked
-        doAsync { DynalistItem.updateGlobally(location) { it.isChecklist = checked }}
+        doAsync {
+            DynalistItem.updateLocally(location, false) { it.isChecklist = checked }
+            val updatedChildren = location.children.run {
+                reset()
+                filter { it.checkbox != checked }.apply {
+                    forEach { it.checkbox = checked }
+                }
+            }
+            if (updatedChildren.isNotEmpty()) {
+                val job = BulkEditItemJob(updatedChildren)
+                DynalistApp.instance.jobManager.addJobInBackground(job)
+            }
+        }
         return true
     }
 

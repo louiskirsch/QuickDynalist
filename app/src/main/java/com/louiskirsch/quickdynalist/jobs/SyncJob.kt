@@ -63,6 +63,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                     serverFileId = file.id
                     serverItemId = it.id
                     isChecked = it.checked
+                    checkbox = it.checkbox
                     position = 0  // Will be set later when populating children
                     name = it.content
                     note = it.note
@@ -82,6 +83,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
                 modified = Date(it.modified)
                 color = it.color
                 heading = it.heading
+                checkbox = it.checkbox
                 isBookmark = markedAsBookmark || isInbox
                 itemsWithInvalidMetaData.add(this)
             }

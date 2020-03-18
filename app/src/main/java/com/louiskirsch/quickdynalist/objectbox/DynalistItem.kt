@@ -15,6 +15,7 @@ import android.text.style.*
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.louiskirsch.quickdynalist.*
+import com.louiskirsch.quickdynalist.jobs.BulkEditItemJob
 import com.louiskirsch.quickdynalist.jobs.EditItemJob
 import com.louiskirsch.quickdynalist.text.IndentedBulletSpan
 import com.louiskirsch.quickdynalist.text.ThemedSpan
@@ -54,6 +55,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     var created: Date = Date()
     var color: Int = 0
     var heading: Int = 0
+    var checkbox: Boolean = false
 
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistItem>
@@ -328,15 +330,16 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
     }
 
     fun populateChildren(itemMap: Map<Pair<String, String>, DynalistItem>) {
-        childrenIds!!.forEachIndexed { idx, childId ->
-            itemMap[Pair(serverFileId, childId)]?.let { child ->
-                if (child.syncJob == null) {
-                    child.serverParentId = serverItemId
-                    child.parent.target = this
-                    child.position = idx
-                }
+        val children = childrenIds!!.mapNotNull { itemMap[Pair(serverFileId, it)] }
+        children.forEachIndexed { idx, child ->
+            if (child.syncJob == null) {
+                child.serverParentId = serverItemId
+                child.parent.target = this
+                child.position = idx
             }
         }
+        if (children.isNotEmpty())
+            isChecklist = children.all { it.checkbox }
     }
 
     val image: String? get() {
@@ -533,6 +536,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                         created = Date(readLong())
                         color = readInt()
                         heading = readInt()
+                        checkbox = readInt() > 0
                         parent.targetId = readLong()
                     }
                 }
@@ -540,7 +544,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             override fun newArray(size: Int) = arrayOfNulls<DynalistItem>(size)
         }
 
-        fun updateLocally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
+        fun updateLocally(item: DynalistItem, notifyChanges: Boolean = true,
+                          updater: (DynalistItem) -> Unit) {
             var updatedItem: DynalistItem? = null
             DynalistApp.instance.boxStore.runInTx {
                 box.get(item.clientId)?.let {
@@ -549,15 +554,22 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
                     updatedItem = it
                 }
             }
-            updatedItem?.let {
-                ListAppWidget.notifyItemChanged(DynalistApp.instance, it)
-            }
+            if (notifyChanges && updatedItem != null)
+                ListAppWidget.notifyItemChanged(DynalistApp.instance, updatedItem!!)
         }
 
         fun updateGlobally(item: DynalistItem, updater: (DynalistItem) -> Unit) {
             box.get(item.clientId)?.apply {
                 updater(this)
                 DynalistApp.instance.jobManager.addJobInBackground(EditItemJob(this))
+            }
+        }
+
+        fun updateGlobally(items: List<DynalistItem>,
+                           updater: (List<DynalistItem>) -> List<DynalistItem>) {
+            box.get(items.map { it.clientId })?.apply {
+                val job = BulkEditItemJob(updater(this))
+                DynalistApp.instance.jobManager.addJobInBackground(job)
             }
         }
 
@@ -657,6 +669,7 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             writeLong(created.time)
             writeInt(color)
             writeInt(heading)
+            writeInt(checkbox.int)
             writeLong(parent.targetId)
         }
     }

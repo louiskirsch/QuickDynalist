@@ -30,6 +30,9 @@ interface DynalistService {
     @POST("doc/edit")
     fun editItem(@Body request: EditItemRequest): Call<DynalistResponse>
 
+    @POST("doc/edit")
+    fun editItems(@Body request: BulkEditItemRequest): Call<DynalistResponse>
+
     @POST("doc/check_for_updates")
     fun checkForUpdates(@Body request: VersionsRequest): Call<VersionResponse>
 
@@ -56,15 +59,15 @@ class SetInboxRequest(fileId: String, nodeId: String, token: String)
 class UploadFileRequest(val filename: String, val content_type: String,
                         val data: String, val token: String)
 
-class InsertItemRequest(val file_id: String, parent_id: String,
-                        content: String, note: String, val token: String, index: Int = -1) {
+class InsertItemRequest(val file_id: String, parent_id: String, content: String, note: String,
+                        checkbox: Boolean, val token: String, color: Int = 0, index: Int = -1) {
 
     class InsertSpec(val parent_id: String, val content: String, val note: String,
-                     val index: Int = -1) {
+                     val checkbox: Boolean, val color: Int = 0, val index: Int = -1) {
         val action: String = "insert"
     }
 
-    val changes = arrayOf(InsertSpec(parent_id, content, note, index))
+    val changes = arrayOf(InsertSpec(parent_id, content, note, checkbox, color, index))
 }
 
 class BulkInsertItemRequest(val file_id: String, val token: String,
@@ -81,6 +84,8 @@ class EditItemRequest(val file_id: String, node_id: String,
 
     val changes = arrayOf(EditSpec(node_id, content, note, checked, checkbox, heading, color))
 }
+class BulkEditItemRequest(val file_id: String, val token: String,
+                          val changes: Array<EditItemRequest.EditSpec>)
 
 class MoveItemRequest(val file_id: String, parent_id: String, node_id: String,
                       index: Int, val token: String) {
