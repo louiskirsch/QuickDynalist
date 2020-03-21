@@ -123,6 +123,9 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
         return sb
     }
 
+    val recursiveChildren: List<DynalistItem>
+        get() = children + children.flatMap { it.recursiveChildren }
+
     private val visibleChildren
         get() = children.filter { !it.hidden && (areCheckedItemsVisible || !it.isChecked) }
 

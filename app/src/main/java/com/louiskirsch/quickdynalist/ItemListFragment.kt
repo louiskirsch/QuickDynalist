@@ -18,6 +18,7 @@ import com.louiskirsch.quickdynalist.jobs.MoveItemJob
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.prependIfNotBlank
+import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import io.objectbox.kotlin.boxFor
@@ -210,7 +211,17 @@ class ItemListFragment : BaseItemListFragment() {
         location.areCheckedItemsVisible = checked
         val model = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         model.itemsParent.value = location
-        doAsync { DynalistItem.updateLocally(location) { it.areCheckedItemsVisible = checked }}
+        doAsync {
+            val affectedItems = DynalistApp.instance.boxStore.callInTx {
+                DynalistItem.box.get(location.clientId)?.let { loc ->
+                    (loc.recursiveChildren + loc).apply {
+                        forEach { it.areCheckedItemsVisible = checked }
+                        DynalistItem.box.put(this)
+                    }.map { it.clientId }
+                } ?: emptyList()
+            }
+            ListAppWidget.notifyItemsChanged(context!!, affectedItems)
+        }
         return true
     }
 

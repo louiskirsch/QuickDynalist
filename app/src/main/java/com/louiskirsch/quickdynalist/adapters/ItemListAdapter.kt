@@ -111,7 +111,7 @@ class CachedDynalistItem(val item: DynalistItem, context: Context, displayMaxChi
     val linkingChildType = item.getLinkingChildType(displayParent)
 
     private val identifier = hashKode(item.modified, item.children.map { it.modified },
-            displayMaxChildren, showLinkingChildren, displayMaxDepth)
+            displayMaxChildren, showLinkingChildren, displayMaxDepth, item.areCheckedItemsVisible)
 
     fun eagerInitialize(includeParent: Boolean = false) {
         if (includeParent)

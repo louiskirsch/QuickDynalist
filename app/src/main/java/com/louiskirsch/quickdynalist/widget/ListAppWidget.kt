@@ -47,8 +47,14 @@ class ListAppWidget : AppWidgetProvider() {
         }
 
         fun notifyItemChanged(context: Context, item: DynalistItem) {
-            val affectedItems = listOf(item.clientId, item.parent.targetId,
+            val affectedItems = listOfNotNull(item.clientId, item.parent.targetId,
                     item.parent.target?.parent?.targetId)
+            notifyItemsChanged(context, affectedItems)
+        }
+
+        fun notifyItemsChanged(context: Context, itemIds: List<Long>) {
+            if (itemIds.isEmpty()) return
+            val affectedItems = itemIds.toSet()
             AppWidgetManager.getInstance(context).apply {
                 val component = ComponentName(context, ListAppWidget::class.java)
                 val changedWidgets = getAppWidgetIds(component).filter {
