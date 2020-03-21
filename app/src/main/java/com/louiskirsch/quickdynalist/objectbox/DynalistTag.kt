@@ -132,6 +132,7 @@ class DynalistTag(): Serializable {
             return s[0] == '@' || s[0] == '#'
         }
 
+        private val TAG_SEPARATORS = charArrayOf(' ', '!', '?', ',', '.')
         fun setupTagDetection(editText: EditText, autoDetectTagNames: () -> Boolean) {
             class TagCandidate(val tag: DynalistTag)
             editText.movementMethod = EnhancedMovementMethod.instance
@@ -162,9 +163,10 @@ class DynalistTag(): Serializable {
                     if (processingCandidates) return
                     val end = start + count
                     val newText = s.substring(start, end)
-                    if (newText.contains(' ')) {
+                    if (TAG_SEPARATORS.any { newText.contains(it) }) {
                         val prevText = s.substring(0, end)
-                        val prevWord = prevText.trim().takeLastWhile { it != ' ' }
+                        val prevWord = prevText.trim(*TAG_SEPARATORS)
+                                .takeLastWhile { it !in TAG_SEPARATORS }
                         if (prevWord.isEmpty())
                             return
                         val tagName = prevWord.toLowerCase()
