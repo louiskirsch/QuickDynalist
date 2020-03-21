@@ -2,6 +2,7 @@ package com.louiskirsch.quickdynalist.utils
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.ShortcutManager
 import android.content.res.Resources
 import android.text.util.Linkify
 import android.view.View
@@ -14,6 +15,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
+import android.os.Build
 import android.os.Parcel
 import android.text.*
 import android.text.style.ImageSpan
@@ -23,6 +25,7 @@ import android.widget.TextView
 import kotlin.math.roundToInt
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
 import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
@@ -75,6 +78,10 @@ fun <T: Spannable> T.linkify(mask: Int = Linkify.ALL): T
 
 val Context.inputMethodManager: InputMethodManager
     get() = this.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+
+val Context.shortcutManager: ShortcutManager?
+    @RequiresApi(Build.VERSION_CODES.N_MR1)
+    get() = this.getSystemService(ShortcutManager::class.java)
 
 fun CharSequence.ellipsis(maxLength: Int): CharSequence {
     return if (length > maxLength)

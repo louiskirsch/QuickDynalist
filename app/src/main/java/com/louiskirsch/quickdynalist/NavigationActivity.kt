@@ -122,6 +122,14 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                         .add(R.id.fragment_container, it, MAIN_UI_FRAGMENT)
                         .commit()
             }
+
+            if (dynalist.isAuthenticated && !DialogSetupFragment.wasShownBefore(this)) {
+                Intent(this, WizardActivity::class.java).apply {
+                    putExtra(WizardActivity.EXTRA_DIALOG_SETUP_ONLY, true)
+                    addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    startActivity(this)
+                }
+            }
         }
     }
 

@@ -8,6 +8,7 @@ class WizardActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_CONFIG_INBOX_ONLY = "EXTRA_CONFIG_INBOX_ONLY"
+        const val EXTRA_DIALOG_SETUP_ONLY = "EXTRA_DIALOG_SETUP_ONLY"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,11 +16,12 @@ class WizardActivity : AppCompatActivity() {
         setContentView(R.layout.activity_wizard)
 
         if (savedInstanceState == null) {
-            val configureInboxOnly = intent.getBooleanExtra(EXTRA_CONFIG_INBOX_ONLY, false)
-            val fragment = if (configureInboxOnly) {
-                InboxConfigurationFragment.newInstance(finishAfter = true)
-            } else {
-                LoginFragment()
+            val fragment = when {
+                intent.getBooleanExtra(EXTRA_CONFIG_INBOX_ONLY, false) ->
+                    InboxConfigurationFragment.newInstance(finishAfter = true)
+                intent.getBooleanExtra(EXTRA_DIALOG_SETUP_ONLY, false) ->
+                    DialogSetupFragment()
+                else -> LoginFragment()
             }
             supportFragmentManager.beginTransaction()
                     .add(R.id.fragment_container, fragment).commit()

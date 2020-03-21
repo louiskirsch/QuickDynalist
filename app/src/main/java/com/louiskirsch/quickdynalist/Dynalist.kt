@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.EditText
 import androidx.core.content.FileProvider
+import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import com.louiskirsch.quickdynalist.jobs.AddItemJob
 import com.louiskirsch.quickdynalist.jobs.SyncJob
