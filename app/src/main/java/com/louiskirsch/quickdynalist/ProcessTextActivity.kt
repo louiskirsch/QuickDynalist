@@ -1,6 +1,5 @@
 package com.louiskirsch.quickdynalist
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
@@ -14,14 +13,13 @@ import android.webkit.URLUtil
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Gravity
 import android.view.WindowManager
-import android.widget.ArrayAdapter
-import android.widget.ListAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.louiskirsch.quickdynalist.adapters.SectionedAdapter
 import com.louiskirsch.quickdynalist.network.UploadFileRequest
 import com.louiskirsch.quickdynalist.network.UploadResponse
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem
+import com.louiskirsch.quickdynalist.utils.ImageCache
 import com.louiskirsch.quickdynalist.utils.SpeechRecognitionHelper
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -110,7 +108,18 @@ class ProcessTextActivity : AppCompatActivity() {
         val encodingFlags = Base64.NO_PADDING or Base64.NO_WRAP
         val base64Data = Base64.encodeToString(data, encodingFlags)
         val request = UploadFileRequest(fileName, type, base64Data, token)
-        return service.uploadFile(request).execute().body()?.let { Upload(request, it) }
+        return service.uploadFile(request).execute().body()?.let {
+            putIntoCache(it, uri)
+            Upload(request, it)
+        }
+    }
+
+    private fun putIntoCache(response: UploadResponse, uri: Uri) {
+        if (!response.url.isNullOrEmpty() && intent.type!!.startsWith("image/")) {
+            contentResolver.openInputStream(uri)?.use { stream ->
+                ImageCache(this).putInCache(response.url, stream)
+            }
+        }
     }
 
     private fun formatUpload(upload: Upload): String {

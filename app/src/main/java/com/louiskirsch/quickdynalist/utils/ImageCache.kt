@@ -16,24 +16,35 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.lang.Exception
 
 class ImageCache(private val context: Context) {
+
+    companion object {
+        private const val ENCODING_FLAGS = Base64.NO_PADDING or Base64.NO_WRAP
+    }
 
     private val cachePath = File(context.cacheDir, "image-cache")
 
     fun putInCache(source: String, bitmap: Bitmap) {
         doAsync {
-            val identifier = Base64.encodeToString(source.toByteArray(), 0)
+            val identifier = Base64.encodeToString(source.toByteArray(), ENCODING_FLAGS)
             cachePath.mkdir()
-            val file = cachePath.resolve("$identifier.png")
+            val file = cachePath.resolve(identifier)
             if (!file.exists()) {
                 val stream = FileOutputStream(file)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                Log.d("ImageCache", "Saved: $source")
-            } else {
-                Log.d("ImageCache", "Already exists: $source")
             }
+        }
+    }
+
+    fun putInCache(source: String, inputStream: InputStream) {
+        val identifier = Base64.encodeToString(source.toByteArray(), ENCODING_FLAGS)
+        cachePath.mkdir()
+        val file = cachePath.resolve(identifier)
+        if (!file.exists()) {
+            FileOutputStream(file).use { inputStream.copyTo(it) }
         }
     }
 
@@ -48,15 +59,15 @@ class ImageCache(private val context: Context) {
     }
 
     fun getFile(source: String): File? {
-        val identifier = Base64.encodeToString(source.toByteArray(), 0)
-        val file = cachePath.resolve("$identifier.png")
+        val identifier = Base64.encodeToString(source.toByteArray(), ENCODING_FLAGS)
+        val file = cachePath.resolve(identifier)
         return if (file.exists())
             file
         else
             null
     }
 
-    fun getUri(source: String): Uri? {
+    private fun getUri(source: String): Uri? {
         return getFile(source)?.let {
             FileProvider.getUriForFile(context,
                     "com.louiskirsch.quickdynalist.fileprovider", it)
