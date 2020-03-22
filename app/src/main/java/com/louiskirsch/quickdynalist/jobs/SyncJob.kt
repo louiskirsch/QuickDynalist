@@ -4,10 +4,7 @@ import com.birbit.android.jobqueue.*
 import com.louiskirsch.quickdynalist.*
 import com.louiskirsch.quickdynalist.R
 import com.louiskirsch.quickdynalist.network.*
-import com.louiskirsch.quickdynalist.objectbox.DynalistDocument
-import com.louiskirsch.quickdynalist.objectbox.DynalistDocument_
-import com.louiskirsch.quickdynalist.objectbox.DynalistItem
-import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
+import com.louiskirsch.quickdynalist.objectbox.*
 import com.louiskirsch.quickdynalist.utils.execRespectRateLimit
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.inValues
@@ -127,10 +124,12 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
             !remoteFilesResponse.isOK -> {
                 throw BackendException("Remote files query returned, ${remoteFilesResponse.errorDesc}")
             }
-            else -> remoteFilesResponse.files!!.filter { it.isDocument && it.isEditable }
+            else -> remoteFilesResponse.files!!
         }
-        deleteDisappearedDocuments(remoteFiles)
-        val newVersionedDocuments = findNewVersionedDocuments(token, remoteFiles)
+        val remoteFolders = remoteFiles.filter { it.isFolder }
+        val remoteDocuments = remoteFiles.filter { it.isDocument && it.isEditable }
+        deleteDisappearedDocuments(remoteDocuments)
+        val newVersionedDocuments = findNewVersionedDocuments(token, remoteDocuments)
         val newDocuments = newVersionedDocuments.unzip().first
 
         // Query items from local database
@@ -150,21 +149,54 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
             EventBus.getDefault().post(SyncProgressEvent(progress))
         }
 
-        // Persist deleted items
-        box.remove(notAssociatedClientItems.filter { it.syncJob == null })
+        // Determine deleted items
+        val deletedItems = notAssociatedClientItems.filter { it.syncJob == null }
 
         // Update meta data
         itemsWithInvalidMetaData.forEach { it.updateMetaData() }
-        DynalistItem.box.put(itemsWithInvalidMetaData)
 
         // Update versions
         val localDocuments = DynalistDocument.box.all.associateBy { it.serverFileId!! }
-        val updatedDocs = newVersionedDocuments.map { (remoteDoc, version) ->
-            val localDoc = localDocuments[remoteDoc.id] ?: DynalistDocument(remoteDoc.id)
+                .toMutableMap()
+        newVersionedDocuments.forEach { (remoteDoc, version) ->
+            val localDoc = localDocuments[remoteDoc.id] ?: DynalistDocument(remoteDoc.id).also {
+                localDocuments[it.serverFileId!!] = it
+            }
             localDoc.version = version
-            localDoc
         }
-        DynalistDocument.box.put(updatedDocs)
+
+        // Update folder structure
+        val localFolders = DynalistFolder.box.all.associateBy { it.serverFolderId!! }.toMutableMap()
+        val removeFolders = localFolders - remoteFolders.map { it.id!! }
+        localFolders.keys.removeAll(removeFolders.keys)
+        remoteFolders.forEach { folder ->
+            (localFolders[folder.id] ?: DynalistFolder(folder.id)).apply {
+                title = folder.title
+                val anyChildren = folder.children?.map {
+                    localFolders[it] ?: localDocuments[it] ?: DynalistFolder(it).also { newFolder ->
+                        localFolders[it] = newFolder
+                    }
+                } ?: emptyList()
+                anyChildren.filterIsInstance<DynalistFolder>().forEachIndexed { idx, it ->
+                    it.position = idx
+                    it.parent.target = this
+                }
+                anyChildren.filterIsInstance<DynalistDocument>().forEachIndexed { idx, it ->
+                    it.position = idx
+                    it.folder.target = this
+                }
+                localFolders[folder.id!!] = this
+            }
+        }
+
+        // Persist previous changes
+        DynalistApp.instance.boxStore.runInTx {
+            box.remove(deletedItems)
+            box.put(itemsWithInvalidMetaData)
+            DynalistFolder.box.remove(removeFolders.values)
+            DynalistFolder.box.put(localFolders.values)
+            DynalistDocument.box.put(localDocuments.values)
+        }
 
         // Configure inbox
         val newInbox = queryInbox(token)

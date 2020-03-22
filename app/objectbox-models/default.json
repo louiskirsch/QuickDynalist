@@ -350,7 +350,7 @@
     },
     {
       "id": "5:2290256578766004807",
-      "lastPropertyId": "3:8749843008041710753",
+      "lastPropertyId": "5:4449749248425692668",
       "name": "DynalistDocument",
       "properties": [
         {
@@ -369,13 +369,65 @@
           "id": "3:8749843008041710753",
           "name": "serverFileId",
           "type": 9
+        },
+        {
+          "id": "4:3108860744762971673",
+          "name": "position",
+          "type": 5,
+          "flags": 4
+        },
+        {
+          "id": "5:4449749248425692668",
+          "name": "folderId",
+          "indexId": "15:5284629061595761952",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "DynalistFolder"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "6:1434057076369704296",
+      "lastPropertyId": "5:6825693859462213775",
+      "name": "DynalistFolder",
+      "properties": [
+        {
+          "id": "1:9210346148983316522",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:480952127653393243",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "3:4436159791475301165",
+          "name": "position",
+          "type": 5,
+          "flags": 4
+        },
+        {
+          "id": "4:3733508132027154900",
+          "name": "serverFolderId",
+          "type": 9
+        },
+        {
+          "id": "5:6825693859462213775",
+          "name": "parentId",
+          "indexId": "14:6473506801822486995",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "DynalistFolder"
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "5:2290256578766004807",
-  "lastIndexId": "13:5532784840759966418",
+  "lastEntityId": "6:1434057076369704296",
+  "lastIndexId": "15:5284629061595761952",
   "lastRelationId": "4:564364276555648424",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

@@ -160,16 +160,21 @@ class File {
     val title: String? = null
     val type: String? = null
     val permission: Int? = null
+    val children: List<String>? = null
 
     val isEditable: Boolean
         get() = permission!! >= 2
 
     val isDocument: Boolean
         get() = type == "document"
+
+    val isFolder: Boolean
+        get() = type == "folder"
 }
 
 class FilesResponse: DynalistResponse() {
     val files: List<File>? = null
+    val root_file_id: String? = null
 }
 
 class Node(val id: String, val content: String, val note: String, val checked: Boolean,

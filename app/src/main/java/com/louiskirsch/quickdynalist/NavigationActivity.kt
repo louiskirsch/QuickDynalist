@@ -29,10 +29,13 @@ import android.content.Intent
 import android.net.Uri
 import android.content.ActivityNotFoundException
 import android.graphics.PorterDuff
+import android.text.Spannable
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.louiskirsch.quickdynalist.DynalistApp.Companion.MAIN_UI_FRAGMENT
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
+import com.louiskirsch.quickdynalist.text.ThemedSpan
 import com.louiskirsch.quickdynalist.utils.resolveColorAttribute
 
 
@@ -40,7 +43,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     private val dynalist: Dynalist = Dynalist(this)
 
     private var inboxes: List<ItemLocation>? = null
-    private var documents: List<ItemLocation>? = null
+    private var documents: List<Location>? = null
     private var filters: List<FilterLocation>? = null
 
     companion object {
@@ -74,6 +77,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         val itemsModel = ViewModelProviders.of(this).get(DynalistItemViewModel::class.java)
         val filtersModel = ViewModelProviders.of(this).get(DynalistItemFilterViewModel::class.java)
         val fragmentModel = ViewModelProviders.of(this).get(ItemListFragmentViewModel::class.java)
+        val documentModel = ViewModelProviders.of(this).get(DynalistDocumentViewModel::class.java)
 
         itemsModel.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> { newInboxes ->
             val entries = newInboxes.map { ItemLocation(it) }
@@ -87,11 +91,10 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 }
             }
         })
-        itemsModel.documentsLiveData.observe(this, Observer<List<DynalistItem>> { docs ->
-            val entries = docs.map { ItemLocation(it) }
-            this.documents = entries
+        documentModel.folderedDocumentsLiveData.observe(this, Observer<List<Location>> { docs ->
+            this.documents = docs
             nav_view.menu.findItem(R.id.submenu_documents_list).subMenu.run {
-                fillMenuWithItems(entries, R.id.group_documents_list, 1)
+                fillMenuWithItems(docs, R.id.group_documents_list, 1)
             }
         })
         filtersModel.filtersLiveData.observe(this, Observer { filters ->
@@ -167,8 +170,12 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         clear()
         items.forEachIndexed { i, item ->
             val itemId = i + menuIndex * MAX_SUBMENU_ITEMS
-            add(groupId, itemId, i, item.shortenedName).apply {
-                isCheckable = true
+            val title = item.shortenedName
+            if (title is Spannable)
+                ThemedSpan.applyAll(this@NavigationActivity, title)
+            add(groupId, itemId, i, title).apply {
+                isCheckable = item !is FolderLocation
+                isEnabled = item !is FolderLocation
             }
         }
         ViewModelProviders.of(this@NavigationActivity)
@@ -229,8 +236,11 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         when (item.groupId) {
             R.id.group_bookmarks_list ->
                 openDynalistItem(inboxes!![item.itemId].item)
-            R.id.group_documents_list ->
-                openDynalistItem(documents!![item.itemId % MAX_SUBMENU_ITEMS].item)
+            R.id.group_documents_list -> {
+                val location = documents!![item.itemId % MAX_SUBMENU_ITEMS]
+                if (location is ItemLocation)
+                    openDynalistItem(location.item)
+            }
             R.id.group_filters_list ->
                 openDynalistItemFilter(filters!![item.itemId % MAX_SUBMENU_ITEMS].filter)
         }

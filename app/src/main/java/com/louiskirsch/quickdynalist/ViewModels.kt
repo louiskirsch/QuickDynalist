@@ -10,7 +10,6 @@ import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.inValues
 import io.objectbox.kotlin.query
-import io.objectbox.query.OrderFlags
 import org.jetbrains.anko.doAsync
 
 class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
@@ -226,6 +225,27 @@ class DynalistTagViewModel(app: Application): AndroidViewModel(app) {
             order(DynalistTag_.type)
             order(DynalistTag_.name)
         })
+    }
+}
+
+class DynalistDocumentViewModel(app: Application): AndroidViewModel(app) {
+
+    val folderedDocumentsLiveData: LiveData<List<Location>> by lazy {
+        val query = DynalistFolder.box.query { equal(DynalistFolder_.parentId, 0) }
+        SubscriberOBLiveData(DynalistApp.instance.boxStore, DynalistFolder::class.java,
+                query) {
+            val root = it.findFirst()
+            root?.getRecursiveLocations(-1)?.drop(1) ?: emptyList()
+        }
+    }
+
+    private fun DynalistFolder.getRecursiveLocations(depth: Int): List<Location> {
+        val context: Context = getApplication()
+        children.setComparator(compareBy { it.position })
+        documents.setComparator(compareBy { it.position })
+        return listOf(FolderLocation(this, context, depth)) +
+                documents.map { DocumentLocation(it.rootItem!!, depth + 1) } +
+                children.flatMap { it.getRecursiveLocations(depth + 1) }
     }
 }
 

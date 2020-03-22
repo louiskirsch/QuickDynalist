@@ -234,6 +234,7 @@
     <string name="invalid_link">Invalid link</string>
     <string name="toggle_links_inline">Links inline</string>
     <string name="error_search_link_not_supported">Dynalist search links are not yet supported. You can create a Quick Dynalist filter instead.</string>
+    <string name="folder_unnamed">Unnamed folder</string>
     <plurals name="date_repetition_d">
         <item quantity="zero">always</item>
         <item quantity="one">daily</item>
