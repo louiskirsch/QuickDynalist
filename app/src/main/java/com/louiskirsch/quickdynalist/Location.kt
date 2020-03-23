@@ -22,6 +22,7 @@ interface Location {
     val extraIdKey: String
     val supportsInsertion: Boolean
     val typeName: String
+    val depth: Int get() = 0
 }
 open class ItemLocation(val item: DynalistItem): Location {
     override val id: Long get() = item.clientId
@@ -61,7 +62,7 @@ class FilterLocation(val filter: DynalistItemFilter,
     }
 }
 class FolderLocation(val folder: DynalistFolder,
-                     context: Context, private val depth: Int): Location {
+                     context: Context, override val depth: Int): Location {
     private val defaultName = context.getString(R.string.folder_unnamed)
 
     override val id: Long get() = folder.id
@@ -85,7 +86,7 @@ class FolderLocation(val folder: DynalistFolder,
             setSpan(LeadingMarginSpan.Standard(30 * depth), 0, length, 0)
             val span = ThemedSpan {
                 val iconTint = it.resolveColorAttribute(R.attr.colorControlNormal)
-                val drawable = it.getDrawable(R.drawable.ic_folder)!!.apply {
+                val drawable = it.getDrawable(R.drawable.ic_folder_stateful)!!.apply {
                     mutate()
                     setBounds(0, 0, intrinsicWidth, intrinsicHeight)
                     setTint(iconTint)
@@ -96,7 +97,7 @@ class FolderLocation(val folder: DynalistFolder,
         }
     }
 }
-class DocumentLocation(item: DynalistItem, private val depth: Int) : ItemLocation(item) {
+class DocumentLocation(item: DynalistItem, override val depth: Int) : ItemLocation(item) {
     override val shortenedName: CharSequence get() {
         return SpannableString(super.shortenedName).apply {
             setSpan(LeadingMarginSpan.Standard(30 * depth), 0, length, 0)

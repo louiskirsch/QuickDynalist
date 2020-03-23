@@ -30,12 +30,14 @@ import android.net.Uri
 import android.content.ActivityNotFoundException
 import android.graphics.PorterDuff
 import android.text.Spannable
+import android.text.style.ImageSpan
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.louiskirsch.quickdynalist.DynalistApp.Companion.MAIN_UI_FRAGMENT
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 import com.louiskirsch.quickdynalist.text.ThemedSpan
+import com.louiskirsch.quickdynalist.utils.int
 import com.louiskirsch.quickdynalist.utils.resolveColorAttribute
 
 
@@ -168,6 +170,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     private fun SubMenu.fillMenuWithItems(items: List<Location>,
                                           groupId: Int, menuIndex: Int) {
         clear()
+        val visibilities = BooleanArray(items.size)
         items.forEachIndexed { i, item ->
             val itemId = i + menuIndex * MAX_SUBMENU_ITEMS
             val title = item.shortenedName
@@ -175,7 +178,28 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                 ThemedSpan.applyAll(this@NavigationActivity, title)
             add(groupId, itemId, i, title).apply {
                 isCheckable = item !is FolderLocation
-                isEnabled = item !is FolderLocation
+                isVisible = item.depth == 0
+                if (item is FolderLocation) {
+                    setOnMenuItemClickListener {
+                        val isOpen = toggleFolderState(title as Spannable)
+                        nav_view.post {
+                            for (idx in i + 1 until items.size) {
+                                val depth = items[idx].depth
+                                if (depth <= item.depth)
+                                    break
+                                val menuItem = getItem(idx)
+                                if (isOpen) {
+                                    menuItem.isVisible = (depth == item.depth + 1) ||
+                                            visibilities[idx]
+                                } else {
+                                    visibilities[idx] = menuItem.isVisible
+                                    menuItem.isVisible = false
+                                }
+                            }
+                        }
+                        true
+                    }
+                }
             }
         }
         ViewModelProviders.of(this@NavigationActivity)
@@ -184,6 +208,14 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
                         updateCheckedBookmark(this, it, items)
                     }
                 }
+    }
+
+    private fun toggleFolderState(folder: Spannable): Boolean {
+        val folderSpan = folder.getSpans(0, 1, ImageSpan::class.java)[0]
+        val wasOpen = folderSpan.drawable.level == 1
+        val isOpen = !wasOpen
+        folderSpan.drawable.level = isOpen.int
+        return isOpen
     }
 
     private fun updateCheckedBookmark(menu: Menu, item: Location,
