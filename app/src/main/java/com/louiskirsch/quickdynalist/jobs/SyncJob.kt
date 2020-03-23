@@ -167,23 +167,20 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
 
         // Update folder structure
         val localFolders = DynalistFolder.box.all.associateBy { it.serverFolderId!! }.toMutableMap()
-        val removeFolders = localFolders - remoteFolders.map { it.id!! }
+        val remoteFolderIds = remoteFolders.map { it.id!! }.toSet()
+        val removeFolders = localFolders - remoteFolderIds
         localFolders.keys.removeAll(removeFolders.keys)
         remoteFolders.forEach { folder ->
             (localFolders[folder.id] ?: DynalistFolder(folder.id)).apply {
                 title = folder.title
-                val anyChildren = folder.children?.map {
-                    localFolders[it] ?: localDocuments[it] ?: DynalistFolder(it).also { newFolder ->
-                        localFolders[it] = newFolder
-                    }
+                val anyChildren = folder.children?.mapNotNull {
+                    localFolders[it] ?: localDocuments[it] ?: if (it in remoteFolderIds)
+                        DynalistFolder(it).also { newFolder -> localFolders[it] = newFolder }
+                    else null
                 } ?: emptyList()
-                anyChildren.filterIsInstance<DynalistFolder>().forEachIndexed { idx, it ->
+                anyChildren.forEachIndexed { idx, it ->
                     it.position = idx
                     it.parent.target = this
-                }
-                anyChildren.filterIsInstance<DynalistDocument>().forEachIndexed { idx, it ->
-                    it.position = idx
-                    it.folder.target = this
                 }
                 localFolders[folder.id!!] = this
             }

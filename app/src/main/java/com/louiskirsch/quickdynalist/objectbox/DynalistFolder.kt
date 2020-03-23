@@ -10,15 +10,15 @@ import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 
 @Entity
-class DynalistFolder(var serverFolderId: String?) {
+class DynalistFolder(var serverFolderId: String?): DocumentTreeNode {
 
     constructor() : this(null)
 
     @Id
     var id: Long = 0
     var title: String? = null
-    var position: Int = 0
-    lateinit var parent: ToOne<DynalistFolder>
+    override var position: Int = 0
+    override lateinit var parent: ToOne<DynalistFolder>
     @Backlink(to = "parent")
     lateinit var children: ToMany<DynalistFolder>
     @Backlink(to = "folder")

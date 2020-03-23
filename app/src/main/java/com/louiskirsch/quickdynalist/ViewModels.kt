@@ -241,11 +241,12 @@ class DynalistDocumentViewModel(app: Application): AndroidViewModel(app) {
 
     private fun DynalistFolder.getRecursiveLocations(depth: Int): List<Location> {
         val context: Context = getApplication()
-        children.setComparator(compareBy { it.position })
-        documents.setComparator(compareBy { it.position })
-        return listOf(FolderLocation(this, context, depth)) +
-                documents.map { DocumentLocation(it.rootItem!!, depth + 1) } +
-                children.flatMap { it.getRecursiveLocations(depth + 1) }
+        val anyChildren = (documents + children).sortedBy { it.position }
+        return listOf(FolderLocation(this, context, depth)) + anyChildren.flatMap { when (it) {
+            is DynalistDocument -> listOf(DocumentLocation(it.rootItem!!, depth + 1))
+            is DynalistFolder -> it.getRecursiveLocations(depth + 1)
+            else -> emptyList()
+        }}
     }
 }
 
