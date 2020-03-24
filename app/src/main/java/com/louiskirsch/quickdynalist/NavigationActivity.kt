@@ -32,7 +32,6 @@ import android.graphics.PorterDuff
 import android.text.Spannable
 import android.text.style.ImageSpan
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.louiskirsch.quickdynalist.DynalistApp.Companion.MAIN_UI_FRAGMENT
 import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
@@ -60,18 +59,20 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         setSupportActionBar(toolbar)
         window.allowEnterTransitionOverlap = true
 
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        drawer_layout.addDrawerListener(object : DrawerLayout.DrawerListener {
-            override fun onDrawerStateChanged(newState: Int) {}
-            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
-            override fun onDrawerClosed(drawerView: View) {}
-            override fun onDrawerOpened(drawerView: View) {
-                inputMethodManager.hideSoftInputFromWindow(drawerView.windowToken, 0)
-            }
-        })
-        toggle.syncState()
+        drawer_layout?.let { drawer_layout ->
+            val toggle = ActionBarDrawerToggle(
+                    this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+            drawer_layout.addDrawerListener(toggle)
+            drawer_layout.addDrawerListener(object : DrawerLayout.DrawerListener {
+                override fun onDrawerStateChanged(newState: Int) {}
+                override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+                override fun onDrawerClosed(drawerView: View) {}
+                override fun onDrawerOpened(drawerView: View) {
+                    inputMethodManager.hideSoftInputFromWindow(drawerView.windowToken, 0)
+                }
+            })
+            toggle.syncState()
+        }
 
         nav_view.setNavigationItemSelectedListener(this)
         itemNotes.setOnTouchListener(OnLinkTouchListener())
@@ -252,8 +253,8 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
     }
 
     override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
-            drawer_layout.closeDrawer(GravityCompat.START)
+        if (drawer_layout?.isDrawerOpen(GravityCompat.START) == true) {
+            drawer_layout?.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }
@@ -290,7 +291,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.action_create_filter -> createDynalistItemFilter()
             R.id.action_search -> searchDynalistItem()
         }
-        drawer_layout.closeDrawer(GravityCompat.START)
+        drawer_layout?.closeDrawer(GravityCompat.START)
         return true
     }
 

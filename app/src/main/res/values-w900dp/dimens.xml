@@ -1,0 +1,3 @@
+<resources>
+    <dimen name="nav_header_height">@dimen/abc_action_bar_default_height_material</dimen>
+</resources>
