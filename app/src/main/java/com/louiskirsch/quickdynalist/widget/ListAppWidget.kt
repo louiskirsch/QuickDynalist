@@ -119,7 +119,7 @@ class ListAppWidget : AppWidgetProvider() {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }.let {
                 PendingIntent.getActivity(context, requestCode, it,
-                        PendingIntent.FLAG_CANCEL_CURRENT)
+                        PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE)
             }
         }
     }

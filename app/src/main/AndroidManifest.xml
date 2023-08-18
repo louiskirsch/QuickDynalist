@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.louiskirsch.quickdynalist">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -13,11 +12,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:theme="@style/AppTheme">
         <service
             android:name=".QuickDialogTileService"
             android:icon="@drawable/ic_tile_quick_dialog"
             android:label="@string/tile_quick_dialog"
+            android:exported="true"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action
@@ -65,7 +66,8 @@
             android:taskAffinity=""
             android:theme="@style/InvisibleTheme" />
 
-        <receiver android:name=".widget.ListAppWidget">
+        <receiver android:name=".widget.ListAppWidget"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -77,6 +79,7 @@
 
         <activity
             android:name=".widget.ListAppWidgetConfigureActivity"
+            android:exported="true"
             android:label="@string/activity_list_app_widget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
@@ -92,6 +95,7 @@
             android:label="@string/activity_details"
             android:parentActivityName=".NavigationActivity" />
         <activity
+            android:exported="true"
             android:name=".ShortcutActivity"
             android:label="@string/activity_shortcut">
             <intent-filter>
@@ -103,6 +107,7 @@
         <activity
             android:name=".NavigationActivity"
             android:label="@string/app_name"
+            android:exported="true"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
@@ -138,6 +143,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:theme="@style/AppTheme.Dialog"
             android:windowSoftInputMode="stateVisible">
             <intent-filter>
@@ -149,6 +155,7 @@
         <activity
             android:name=".ProcessTextActivity"
             android:taskAffinity=""
+            android:exported="true"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/process_text_action_name"
             android:theme="@style/InvisibleTheme">

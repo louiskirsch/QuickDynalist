@@ -10,6 +10,7 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.Box
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.doAsync
 
@@ -56,7 +57,9 @@ abstract class ItemJob: Job(Params(1)
     }
 
     protected val jobItems: List<DynalistItem>
-        get() = box.query { equal(DynalistItem_.syncJob, id) }.find()
+        get() = box.query {
+            equal(DynalistItem_.syncJob, id, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+        }.find()
 
     protected fun markItemsCompleted() {
         DynalistApp.instance.boxStore.runInTx {

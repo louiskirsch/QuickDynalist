@@ -6,6 +6,7 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 import org.jetbrains.anko.collections.forEachWithIndex
 import retrofit2.Response
 
@@ -41,7 +42,9 @@ class DeleteItemJob(val item: DynalistItem): ItemJob() {
         val body = response.body()!!
         requireSuccess(body)
         DynalistApp.instance.boxStore.runInTx {
-            val items = box.query { equal(DynalistItem_.syncJob, id) }.find()
+            val items = box.query {
+                equal(DynalistItem_.syncJob, id, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+            }.find()
             box.remove(items)
         }
     }

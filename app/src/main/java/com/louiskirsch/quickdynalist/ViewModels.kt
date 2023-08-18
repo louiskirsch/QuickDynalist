@@ -10,6 +10,7 @@ import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.inValues
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 import org.jetbrains.anko.doAsync
 
 class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
@@ -27,7 +28,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
 
     val documentsLiveData: ObjectBoxLiveData<DynalistItem> by lazy {
         ObjectBoxLiveData(box.query {
-            equal(DynalistItem_.serverItemId, "root")
+            equal(DynalistItem_.serverItemId, "root", QueryBuilder.StringOrder.CASE_INSENSITIVE)
             order(DynalistItem_.name)
         })
     }
@@ -36,7 +37,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         ObjectBoxLiveData(box.query {
             equal(DynalistItem_.isBookmark, true)
             or()
-            equal(DynalistItem_.serverItemId, "root")
+            equal(DynalistItem_.serverItemId, "root", QueryBuilder.StringOrder.CASE_INSENSITIVE)
             orderDesc(DynalistItem_.isInbox)
             orderDesc(DynalistItem_.isBookmark)
             order(DynalistItem_.name)
@@ -114,7 +115,7 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
                 // Backward links later
             }
 
-            notEqual(DynalistItem_.name, "")
+            notEqual(DynalistItem_.name, "", QueryBuilder.StringOrder.CASE_INSENSITIVE)
             equal(DynalistItem_.hidden, false)
             if (!parent.areCheckedItemsVisible) {
                 equal(DynalistItem_.isChecked, false)
@@ -167,11 +168,11 @@ class DynalistItemViewModel(app: Application): AndroidViewModel(app) {
         Transformations.switchMap(searchTerm) { search ->
             val query = box.query {
                 if (search.isNotBlank()) {
-                    contains(DynalistItem_.name, search)
+                    contains(DynalistItem_.name, search, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                     or()
-                    contains(DynalistItem_.note, search)
+                    contains(DynalistItem_.note, search, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 }
-                notEqual(DynalistItem_.name, "")
+                notEqual(DynalistItem_.name, "", QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 equal(DynalistItem_.hidden, false)
                 orderDesc(DynalistItem_.modified)
                 eager(DynalistItem_.children, DynalistItem_.parent)

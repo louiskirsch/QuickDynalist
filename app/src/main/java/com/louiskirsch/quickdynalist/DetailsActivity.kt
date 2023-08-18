@@ -28,7 +28,7 @@ class DetailsActivity : AppCompatActivity() {
         actionBarView.transitionName = "toolbar"
         window.allowEnterTransitionOverlap = true
 
-        displayItem = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)
+        displayItem = intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_ITEM)!!
 
         itemText.apply {
             text = displayItem.getSpannableText(context)
@@ -66,8 +66,8 @@ class DetailsActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item!!.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
             android.R.id.home -> {
                 fixedFinishAfterTransition()
                 true

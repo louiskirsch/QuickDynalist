@@ -14,6 +14,7 @@ import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.doAsync
 import retrofit2.Retrofit
@@ -132,7 +133,7 @@ class DynalistApp : Application() {
         if (version in 2..36) {
             // Remove outdated inbox
             DynalistItem.box.query {
-                equal(DynalistItem_.serverItemId, "inbox")
+                equal(DynalistItem_.serverItemId, "inbox", QueryBuilder.StringOrder.CASE_INSENSITIVE)
             }.remove()
             if (dynalist.isAuthenticated)
                 SyncJob.forceSync(false)

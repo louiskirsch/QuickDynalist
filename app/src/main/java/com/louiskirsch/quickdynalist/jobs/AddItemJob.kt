@@ -6,6 +6,7 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 import org.greenrobot.eventbus.EventBus
 
 
@@ -55,7 +56,9 @@ class AddItemJob(text: String, note: String, val parent: DynalistItem): ItemJob(
             else -> throw BackendException("Invalid response - no itemId included")
         }
         DynalistApp.instance.boxStore.runInTx {
-            val updatedItem = box.query { equal(DynalistItem_.syncJob, id) }.findFirst()?.apply {
+            val updatedItem = box.query {
+                equal(DynalistItem_.syncJob, id, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+            }.findFirst()?.apply {
                 syncJob = null
                 serverItemId = newItemId
             }

@@ -51,7 +51,7 @@ class ShortcutActivity : AppCompatActivity() {
         shortcutIconList.adapter = emojiAdapter
 
         if (intent.hasExtra(EXTRA_LOCATION)) {
-            val parcelableLocation = intent.getParcelableExtra(EXTRA_LOCATION) as Parcelable
+            val parcelableLocation = intent.getParcelableExtra<Parcelable>(EXTRA_LOCATION)
             location = when (parcelableLocation) {
                 is DynalistItem -> ItemLocation(parcelableLocation)
                 is DynalistItemFilter -> FilterLocation(parcelableLocation, this)
@@ -124,8 +124,8 @@ class ShortcutActivity : AppCompatActivity() {
         return super.onPrepareOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item!!.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
             android.R.id.home -> discard()
             R.id.create_shortcut -> createShortcut()
             else -> return super.onOptionsItemSelected(item)

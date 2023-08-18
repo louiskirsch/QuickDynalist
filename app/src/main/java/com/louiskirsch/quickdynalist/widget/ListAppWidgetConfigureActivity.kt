@@ -88,8 +88,8 @@ class ListAppWidgetConfigureActivity : AppCompatActivity() {
         return super.onPrepareOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item!!.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
             android.R.id.home -> cancelWidgetCreation()
             R.id.create_list_app_widget -> createWidget()
             else -> super.onOptionsItemSelected(item)

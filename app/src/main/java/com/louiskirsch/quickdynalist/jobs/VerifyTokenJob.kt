@@ -32,7 +32,7 @@ class VerifyTokenJob(private val token: String)
         EventBus.getDefault().post(AuthenticatedEvent(success))
     }
 
-    override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {
+    override fun onCancel(@CancelReason cancelReason: Int, throwable: Throwable?) {
         EventBus.getDefault().post(AuthenticatedEvent(false))
     }
 

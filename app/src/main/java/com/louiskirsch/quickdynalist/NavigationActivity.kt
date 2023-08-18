@@ -85,7 +85,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         itemsModel.bookmarksLiveData.observe(this, Observer<List<DynalistItem>> { newInboxes ->
             val entries = newInboxes.map { ItemLocation(it) }
             this.inboxes = entries
-            nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu.run {
+            nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu?.run {
                 fillMenuWithItems(entries, R.id.group_bookmarks_list, 0)
                 if (entries.size <= 1) {
                     add(Menu.NONE, R.id.menu_item_bookmarks_hint, 1, R.string.add_inbox).apply {
@@ -96,29 +96,29 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
         })
         documentModel.folderedDocumentsLiveData.observe(this, Observer<List<Location>> { docs ->
             this.documents = docs
-            nav_view.menu.findItem(R.id.submenu_documents_list).subMenu.run {
+            nav_view.menu.findItem(R.id.submenu_documents_list).subMenu?.run {
                 fillMenuWithItems(docs, R.id.group_documents_list, 1)
             }
         })
         filtersModel.filtersLiveData.observe(this, Observer { filters ->
             val entries = filters.map { FilterLocation(it, this) }
             this.filters = entries
-            nav_view.menu.findItem(R.id.submenu_filters_list).subMenu.run {
+            nav_view.menu.findItem(R.id.submenu_filters_list).subMenu?.run {
                 fillMenuWithItems(entries, R.id.group_filters_list, 2)
             }
         })
         fragmentModel.selectedLocation.observe(this, Observer { item ->
             inboxes?.run {
                 val menu = nav_view.menu.findItem(R.id.submenu_bookmarks_list).subMenu
-                updateCheckedBookmark(menu, item, this)
+                updateCheckedBookmark(menu!!, item, this)
             }
             documents?.run {
                 val menu = nav_view.menu.findItem(R.id.submenu_documents_list).subMenu
-                updateCheckedBookmark(menu, item, this)
+                updateCheckedBookmark(menu!!, item, this)
             }
             filters?.run {
                 val menu = nav_view.menu.findItem(R.id.submenu_filters_list).subMenu
-                updateCheckedBookmark(menu, item, this)
+                updateCheckedBookmark(menu!!, item, this)
             }
         })
 
@@ -309,7 +309,7 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             when (requestCode) {
                 resources.getInteger(R.integer.request_code_create_filter) -> {
                     val filter = data!!.getParcelableExtra<DynalistItemFilter>(
-                            DynalistApp.EXTRA_DISPLAY_FILTER)
+                            DynalistApp.EXTRA_DISPLAY_FILTER)!!
                     openDynalistItemFilter(filter)
                 }
             }

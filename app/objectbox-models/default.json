@@ -48,34 +48,30 @@
         {
           "id": "7:3400637193653813728",
           "name": "isInbox",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "8:5862936270318446234",
           "name": "parentId",
           "indexId": "1:9141593498166772183",
           "type": 11,
-          "flags": 1548,
+          "flags": 520,
           "relationTarget": "DynalistItem"
         },
         {
           "id": "9:4447078028805895463",
           "name": "isBookmark",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "10:6352045236723461776",
           "name": "position",
-          "type": 5,
-          "flags": 4
+          "type": 5
         },
         {
           "id": "11:2944964967118606131",
           "name": "isChecked",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "13:1704676466088362766",
@@ -87,27 +83,24 @@
         {
           "id": "14:5829357412349811992",
           "name": "hidden",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "15:2775535655642430617",
           "name": "isChecklist",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "16:8912394732544674842",
           "name": "areCheckedItemsVisible",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "18:6618574385164320569",
           "name": "metaDataId",
           "indexId": "11:6344156678285359920",
           "type": 11,
-          "flags": 1548,
+          "flags": 520,
           "relationTarget": "DynalistItemMetaData"
         },
         {
@@ -118,14 +111,12 @@
         {
           "id": "20:9133627133696584147",
           "name": "color",
-          "type": 5,
-          "flags": 4
+          "type": 5
         },
         {
           "id": "21:2955699074780104570",
           "name": "heading",
-          "type": 5,
-          "flags": 4
+          "type": 5
         },
         {
           "id": "22:7155451369726608497",
@@ -150,8 +141,7 @@
         {
           "id": "27:2634303641565196348",
           "name": "checkbox",
-          "type": 1,
-          "flags": 4
+          "type": 1
         }
       ],
       "relations": [
@@ -183,7 +173,7 @@
           "name": "type",
           "indexId": "8:1822839995269119635",
           "type": 5,
-          "flags": 10
+          "flags": 8
         },
         {
           "id": "3:7312604431729496667",
@@ -226,7 +216,7 @@
           "name": "linkedItemId",
           "indexId": "10:7956760496414387173",
           "type": 11,
-          "flags": 1548,
+          "flags": 520,
           "relationTarget": "DynalistItem"
         }
       ],
@@ -252,26 +242,22 @@
         {
           "id": "2:1273526004346376260",
           "name": "logicMode",
-          "type": 5,
-          "flags": 2
+          "type": 5
         },
         {
           "id": "3:767580563449512533",
           "name": "minRelativeDate",
-          "type": 6,
-          "flags": 2
+          "type": 6
         },
         {
           "id": "4:5742976311477929066",
           "name": "maxRelativeDate",
-          "type": 6,
-          "flags": 2
+          "type": 6
         },
         {
           "id": "5:5955759364150760767",
           "name": "searchDepth",
-          "type": 5,
-          "flags": 4
+          "type": 5
         },
         {
           "id": "6:805046689862737936",
@@ -281,46 +267,40 @@
         {
           "id": "7:2938170548784130416",
           "name": "hideIfParentIncluded",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "8:5343532646031989264",
           "name": "sortOrder",
-          "type": 5,
-          "flags": 2
+          "type": 5
         },
         {
           "id": "9:2888931267130346003",
           "name": "isCompleted",
-          "type": 1,
-          "flags": 2
+          "type": 1
         },
         {
           "id": "10:1972878937208254303",
           "name": "parentId",
           "indexId": "12:6494593317804018478",
           "type": 11,
-          "flags": 1548,
+          "flags": 520,
           "relationTarget": "DynalistItem"
         },
         {
           "id": "11:2271132081632424854",
           "name": "minRelativeModifiedDate",
-          "type": 6,
-          "flags": 2
+          "type": 6
         },
         {
           "id": "12:1129654456015514241",
           "name": "maxRelativeModifiedDate",
-          "type": 6,
-          "flags": 2
+          "type": 6
         },
         {
           "id": "13:6868478242743686286",
           "name": "hasImage",
-          "type": 1,
-          "flags": 2
+          "type": 1
         },
         {
           "id": "14:7099364184872745633",
@@ -330,14 +310,12 @@
         {
           "id": "15:602879671462848965",
           "name": "showAsChecklist",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "17:7627835010696780138",
           "name": "tagsLogicMode",
-          "type": 5,
-          "flags": 2
+          "type": 5
         }
       ],
       "relations": [
@@ -362,8 +340,7 @@
         {
           "id": "2:7543334518950465786",
           "name": "version",
-          "type": 6,
-          "flags": 4
+          "type": 6
         },
         {
           "id": "3:8749843008041710753",
@@ -373,15 +350,14 @@
         {
           "id": "4:3108860744762971673",
           "name": "position",
-          "type": 5,
-          "flags": 4
+          "type": 5
         },
         {
           "id": "5:4449749248425692668",
           "name": "folderId",
           "indexId": "15:5284629061595761952",
           "type": 11,
-          "flags": 1548,
+          "flags": 520,
           "relationTarget": "DynalistFolder"
         }
       ],
@@ -406,8 +382,7 @@
         {
           "id": "3:4436159791475301165",
           "name": "position",
-          "type": 5,
-          "flags": 4
+          "type": 5
         },
         {
           "id": "4:3733508132027154900",
@@ -419,7 +394,7 @@
           "name": "parentId",
           "indexId": "14:6473506801822486995",
           "type": 11,
-          "flags": 1548,
+          "flags": 520,
           "relationTarget": "DynalistFolder"
         }
       ],

@@ -165,8 +165,8 @@ class AdvancedItemActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item!!.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
             android.R.id.home -> discard()
             R.id.send_item -> sendItem()
             R.id.action_record_speech -> recordSpeech()
@@ -189,9 +189,9 @@ class AdvancedItemActivity : AppCompatActivity() {
         outState.putSerializable("CALENDAR", calendar)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val restoredCalendar = savedInstanceState!!.getSerializable("CALENDAR") as Calendar
+        val restoredCalendar = savedInstanceState.getSerializable("CALENDAR") as Calendar
         calendar.time = restoredCalendar.time
     }
 

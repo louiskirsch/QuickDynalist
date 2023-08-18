@@ -7,6 +7,7 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.query
 import io.objectbox.query.Query
+import io.objectbox.query.QueryBuilder
 import java.util.*
 
 
@@ -59,8 +60,9 @@ class CloneItemJob(val item: DynalistItem): ItemJob() {
     @Throws(Throwable::class)
     override fun onRun() {
         // need to wait for db operations to complete
-        val item = waitForItem(box.query { equal(DynalistItem_.syncJob, "$id-root") })
-                ?: throw InvalidJobException("Item to clone has vanished")
+        val item = waitForItem(box.query {
+            equal(DynalistItem_.syncJob, "$id-root", QueryBuilder.StringOrder.CASE_INSENSITIVE)
+        }) ?: throw InvalidJobException("Item to clone has vanished")
 
         val treeService = AddItemTreeService( this)
         val updatedItems = treeService.insert(item)

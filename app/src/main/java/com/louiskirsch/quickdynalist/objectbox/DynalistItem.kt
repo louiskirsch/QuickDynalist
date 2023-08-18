@@ -25,6 +25,7 @@ import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.annotation.*
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 import org.scilab.forge.jlatexmath.TeXConstants
@@ -273,9 +274,9 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
             val fileId = it.groupValues[2]
             val itemId = it.groupValues[3].ifEmpty { "root" }
             val item = box.query {
-                equal(DynalistItem_.serverFileId, fileId)
+                equal(DynalistItem_.serverFileId, fileId, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 and()
-                equal(DynalistItem_.serverItemId, itemId)
+                equal(DynalistItem_.serverItemId, itemId, QueryBuilder.StringOrder.CASE_INSENSITIVE)
             }.findFirst()
             if (item != null && displayParent == item) return@replaceAll ""
             val title = it.groupValues[1].ifBlank { item?.name ?: invalidLinkText }
@@ -578,8 +579,8 @@ class DynalistItem(@Index var serverFileId: String?, @Index var serverParentId: 
 
         fun byServerId(fileId: String, itemId: String): DynalistItem? {
             return box.query {
-                equal(DynalistItem_.serverFileId, fileId)
-                equal(DynalistItem_.serverItemId, itemId)
+                equal(DynalistItem_.serverFileId, fileId, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+                equal(DynalistItem_.serverItemId, itemId, QueryBuilder.StringOrder.CASE_INSENSITIVE)
             }.findFirst()
         }
 

@@ -48,7 +48,7 @@ class DynalistEditActionHelper {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 context.resources.getInteger(R.integer.request_code_link) -> {
-                    val fromViewId = data!!.getBundleExtra("payload").getInt(EXTRA_VIEW_ID)
+                    val fromViewId = data!!.getBundleExtra("payload")!!.getInt(EXTRA_VIEW_ID)
                     val linkTarget = data.getParcelableExtra<DynalistItem>(
                             DynalistApp.EXTRA_DISPLAY_ITEM)!!
                     if (linkTarget.serverFileId != null && linkTarget.serverItemId != null) {

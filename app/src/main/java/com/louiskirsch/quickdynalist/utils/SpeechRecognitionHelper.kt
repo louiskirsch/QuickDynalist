@@ -39,7 +39,7 @@ class SpeechRecognitionHelper {
         if (requestCode == speechRecognitionRequestCode) {
             if (resultCode == Activity.RESULT_OK) {
                 val spokenText = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                        .let { it[0] }
+                        .let { it!![0] }
                 callback(spokenText)
             } else {
                 cancelCallback?.invoke()

@@ -54,7 +54,7 @@ abstract class BaseItemListFragment :Fragment(),
     protected abstract val showItemParentText: Boolean
 
     private val preferences: SharedPreferences
-        get() = context!!.getSharedPreferences("ITEM_LIST_FRAGMENT", Context.MODE_PRIVATE)
+        get() = requireContext().getSharedPreferences("ITEM_LIST_FRAGMENT", Context.MODE_PRIVATE)
 
     private var userHasSwipedToEdit: Boolean
         get() = preferences.getBoolean("USER_SWIPED_TO_EDIT", false)
@@ -74,16 +74,16 @@ abstract class BaseItemListFragment :Fragment(),
                     }, 500)
                 }
             }
-            context!!.inputMethodManager.showSoftInput(view, 0, inputResultReceiver)
+            requireContext().inputMethodManager.showSoftInput(view, 0, inputResultReceiver)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dynalist = Dynalist(context!!)
+        dynalist = Dynalist(requireContext())
         setHasOptionsMenu(true)
 
-        adapter = ItemListAdapter(context!!, showAsChecklist, showItemParentText).apply {
+        adapter = ItemListAdapter(requireContext(), showAsChecklist, showItemParentText).apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (itemCount == 1 && !adapter.moveInProgress) {
@@ -117,7 +117,7 @@ abstract class BaseItemListFragment :Fragment(),
         adapter.onPopupItemClickListener = { item, menuItem ->
             when (menuItem.itemId) {
                 R.id.action_edit -> insertBarFragment.editingItem = item
-                R.id.action_show_image -> ImageCache(context!!).openInGallery(item.image!!)
+                R.id.action_show_image -> ImageCache(requireContext()).openInGallery(item.image!!)
                 R.id.action_duplicate -> {
                     DynalistApp.instance.jobManager.addJobInBackground(CloneItemJob(item))
                 }
@@ -142,9 +142,11 @@ abstract class BaseItemListFragment :Fragment(),
                     DynalistItem.updateGlobally(item) { it.date = null }
                 }
                 R.id.action_move_to_bookmark -> {
-                    fillMenuBookmarks(menuItem.subMenu) { targetLocation ->
-                        moveItem(item, targetLocation)
-                        true
+                    menuItem.subMenu?.let {
+                        fillMenuBookmarks(it) { targetLocation ->
+                            moveItem(item, targetLocation)
+                            true
+                        }
                     }
                 }
                 R.id.action_move_to -> {
@@ -156,7 +158,7 @@ abstract class BaseItemListFragment :Fragment(),
                     showItemPicker(requestCode, item)
                 }
                 R.id.action_manage_tags -> {
-                    val transaction = fragmentManager!!.beginTransaction().addToBackStack(null)
+                    val transaction = requireFragmentManager().beginTransaction().addToBackStack(null)
                     TagManagerFragment.newInstance(item).show(transaction, "manage_tags")
                 }
             }
@@ -185,7 +187,7 @@ abstract class BaseItemListFragment :Fragment(),
             val initializing = adapter.itemCount == 0
             adapter.updateItems(newItems)
              if (newItems.isEmpty()) {
-                 activity!!.appBar.setExpanded(activity!!.itemNotes.text.isNotBlank(), true)
+                 requireActivity().appBar.setExpanded(requireActivity().itemNotes.text.isNotBlank(), true)
                  itemListNoItems.apply {
                      if (visibility != View.VISIBLE) {
                          visibility = View.VISIBLE
@@ -237,14 +239,14 @@ abstract class BaseItemListFragment :Fragment(),
             when (requestCode) {
                 resources.getInteger(R.integer.request_code_move) -> {
                     val item = data!!.getBundleExtra("payload")
-                            .getParcelable<DynalistItem>(DynalistApp.EXTRA_DISPLAY_ITEM)!!
+                            ?.getParcelable<DynalistItem>(DynalistApp.EXTRA_DISPLAY_ITEM)!!
                     val targetLocation = data.getParcelableExtra<DynalistItem>(
                             DynalistApp.EXTRA_DISPLAY_ITEM)!!
                     moveItem(item, targetLocation)
                 }
                 resources.getInteger(R.integer.request_code_link) -> {
                     val fromItem = data!!.getBundleExtra("payload")
-                            .getParcelable<DynalistItem>(DynalistApp.EXTRA_DISPLAY_ITEM)!!
+                            ?.getParcelable<DynalistItem>(DynalistApp.EXTRA_DISPLAY_ITEM)!!
                     val linkTarget = data.getParcelableExtra<DynalistItem>(
                             DynalistApp.EXTRA_DISPLAY_ITEM)!!
                     if (linkTarget.serverFileId != null && linkTarget.serverItemId != null) {
@@ -459,7 +461,9 @@ abstract class BaseItemListFragment :Fragment(),
                 val callback = Intent(context!!, ListAppWidgetConfigurationReceiver::class.java)
                         .also { putWidgetExtras(it) }
                 val requestCode = resources.getInteger(R.integer.request_code_create_widget)
-                val flags = PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_CANCEL_CURRENT
+                val flags = (PendingIntent.FLAG_ONE_SHOT
+                        or PendingIntent.FLAG_CANCEL_CURRENT
+                        or PendingIntent.FLAG_MUTABLE)
                 val pendingCallback = PendingIntent.getBroadcast(
                         context!!, requestCode, callback, flags)
                 widgetManager.requestPinAppWidget(widgetProvider, null, pendingCallback)

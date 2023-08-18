@@ -19,6 +19,7 @@ import io.objectbox.annotation.*
 import io.objectbox.converter.PropertyConverter
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 import io.objectbox.relation.ToMany
 import java.io.Serializable
 
@@ -81,7 +82,7 @@ class DynalistTag(): Serializable {
                 foundTag = box.query {
                     equal(DynalistTag_.type, tag.type.ordinal.toLong())
                     and()
-                    equal(DynalistTag_.name, tag.name)
+                    equal(DynalistTag_.name, tag.name, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 }.findFirst() ?: tag.also { box.put(it) }
             }
             cache[foundTag!!.fullName] = foundTag

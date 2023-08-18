@@ -71,7 +71,7 @@ class EditFilterActivity : AppCompatActivity() {
         window.allowEnterTransitionOverlap = true
 
         filter = if (savedInstanceState == null)
-            intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_FILTER)
+            intent.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_FILTER)!!
         else
             savedInstanceState.getParcelable(DynalistApp.EXTRA_DISPLAY_FILTER)!!
         DynalistItemFilter.box.attach(filter)

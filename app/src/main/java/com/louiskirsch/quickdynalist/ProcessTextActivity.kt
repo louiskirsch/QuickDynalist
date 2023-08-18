@@ -133,7 +133,7 @@ class ProcessTextActivity : AppCompatActivity() {
         val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
         val uploadingBar = showUploadingSnackbar()
         doAsync {
-            val upload = uploadUri(uri)
+            val upload = uri?.let { uploadUri(it) }
             uiThread {
                 uploadingBar.dismiss()
                 if (handleUploadError(upload)) {
@@ -168,7 +168,7 @@ class ProcessTextActivity : AppCompatActivity() {
     }
 
     private fun uploadMultiple() {
-        val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+        val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)!!
         val uploadingBar = showUploadingSnackbar()
         doAsync {
             val uploads = LinkedList<Upload>()

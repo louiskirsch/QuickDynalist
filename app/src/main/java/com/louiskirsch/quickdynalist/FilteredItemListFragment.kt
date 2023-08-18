@@ -99,7 +99,7 @@ class FilteredItemListFragment : BaseItemListFragment() {
         super.onActivityResult(requestCode, resultCode, data)
         val editFilterRequest = resources.getInteger(R.integer.request_code_edit_filter)
         if (requestCode == editFilterRequest && resultCode == Activity.RESULT_OK) {
-            filter = data!!.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_FILTER)
+            filter = data!!.getParcelableExtra(DynalistApp.EXTRA_DISPLAY_FILTER)!!
             applyUpdatedFilter()
         }
     }

@@ -3,8 +3,13 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/QuickDynalist.iml" filepath="$PROJECT_DIR$/QuickDynalist.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/hashkode/hashkode.iml" filepath="$PROJECT_DIR$/hashkode/hashkode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/QuickDynalist.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/QuickDynalist.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/QuickDynalist.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/QuickDynalist.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/QuickDynalist.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/QuickDynalist.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/QuickDynalist.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/QuickDynalist.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hashkode/QuickDynalist.hashkode.iml" filepath="$PROJECT_DIR$/.idea/modules/hashkode/QuickDynalist.hashkode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hashkode/QuickDynalist.hashkode.main.iml" filepath="$PROJECT_DIR$/.idea/modules/hashkode/QuickDynalist.hashkode.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hashkode/QuickDynalist.hashkode.test.iml" filepath="$PROJECT_DIR$/.idea/modules/hashkode/QuickDynalist.hashkode.test.iml" />
     </modules>
   </component>
 </project>

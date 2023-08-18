@@ -9,6 +9,7 @@ import com.louiskirsch.quickdynalist.utils.execRespectRateLimit
 import com.louiskirsch.quickdynalist.widget.ListAppWidget
 import io.objectbox.kotlin.inValues
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 import org.greenrobot.eventbus.EventBus
 import org.jetbrains.anko.collections.forEachWithIndex
 import org.jetbrains.annotations.Nullable
@@ -26,7 +27,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
             DynalistApp.instance.jobManager.run {
                 cancelJobsInBackground({
                     addJobInBackground(SyncJob(false, isManual))
-                }, TagConstraint.ALL, arrayOf(TAG))
+                }, TagConstraint.ALL, TAG)
             }
         }
 
@@ -97,7 +98,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
 
     private fun getModifiedAfterSync(syncStart: Long, file: String): LongArray {
         return DynalistItem.box.query {
-            equal(DynalistItem_.serverFileId, file)
+            equal(DynalistItem_.serverFileId, file, QueryBuilder.StringOrder.CASE_INSENSITIVE)
             greater(DynalistItem_.modified, syncStart)
         }.findIds()
     }
@@ -136,7 +137,7 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         val syncStart = System.currentTimeMillis()
         val newFileIds = newDocuments.map { it.id!! }.toTypedArray()
         val clientItems = DynalistItem.box.query {
-            inValues(DynalistItem_.serverFileId, newFileIds)
+            inValues(DynalistItem_.serverFileId, newFileIds, QueryBuilder.StringOrder.CASE_INSENSITIVE)
         }.find()
         val notAssociatedClientItems = clientItems.toMutableSet()
         val itemsWithInvalidMetaData = LinkedList<DynalistItem>()
@@ -246,13 +247,14 @@ class SyncJob(requireUnmeteredNetwork: Boolean = true, val isManual: Boolean = f
         if (docsToRemove.isNotEmpty()) {
             DynalistDocument.box.remove(docsToRemove.values)
             DynalistItem.box.query {
-                inValues(DynalistItem_.serverFileId, docsToRemove.keys.toTypedArray())
+                inValues(DynalistItem_.serverFileId, docsToRemove.keys.toTypedArray(),
+                         QueryBuilder.StringOrder.CASE_INSENSITIVE)
             }.remove()
         }
     }
 
     override fun getRetryLimit(): Int = 2
-    override fun onCancel(@CancelReason cancelReason: Int, @Nullable throwable: Throwable?) {
+    override fun onCancel(@CancelReason cancelReason: Int, throwable: Throwable?) {
         if (cancelReason == CancelReason.REACHED_RETRY_LIMIT) {
             EventBus.getDefault().apply {
                 postSticky(SyncEvent(SyncStatus.NOT_RUNNING, isManual))

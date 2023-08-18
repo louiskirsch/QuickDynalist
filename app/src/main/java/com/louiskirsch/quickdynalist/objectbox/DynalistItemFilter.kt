@@ -100,9 +100,9 @@ class DynalistItemFilter: Parcelable {
         applyModifiedDateConditions(state)
         if (containsText != null) {
             startCondition(state)
-            contains(DynalistItem_.name, containsText!!)
+            contains(DynalistItem_.name, containsText!!, QueryBuilder.StringOrder.CASE_INSENSITIVE)
             or()
-            contains(DynalistItem_.note, containsText!!)
+            contains(DynalistItem_.note, containsText!!, QueryBuilder.StringOrder.CASE_INSENSITIVE)
         }
         if (isCompleted != null) {
             startCondition(state)
@@ -143,7 +143,7 @@ class DynalistItemFilter: Parcelable {
     }
 
     private fun QueryBuilder<DynalistItem>.applyBasicConditions() {
-        notEqual(DynalistItem_.name, "")
+        notEqual(DynalistItem_.name, "", QueryBuilder.StringOrder.CASE_INSENSITIVE)
         equal(DynalistItem_.hidden, false)
         eager(DynalistItem_.children, DynalistItem_.parent)
     }

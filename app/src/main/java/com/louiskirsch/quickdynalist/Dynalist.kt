@@ -182,7 +182,7 @@ class Dynalist(private val context: Context) {
 
     fun resolveFilterInBundle(bundle: Bundle): DynalistItemFilter? {
         if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_FILTER))
-            return bundle.getParcelable(DynalistApp.EXTRA_DISPLAY_FILTER) as DynalistItemFilter
+            return bundle.getParcelable(DynalistApp.EXTRA_DISPLAY_FILTER)
         if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_FILTER_ID)) {
             val clientId = bundle.getLong(DynalistApp.EXTRA_DISPLAY_FILTER_ID)
             val item = filterBox.get(clientId)
@@ -195,7 +195,7 @@ class Dynalist(private val context: Context) {
 
     fun resolveItemInBundle(bundle: Bundle): DynalistItem? {
         if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_ITEM))
-            return bundle.getParcelable(DynalistApp.EXTRA_DISPLAY_ITEM) as DynalistItem
+            return bundle.getParcelable(DynalistApp.EXTRA_DISPLAY_ITEM)
         if (bundle.containsKey(DynalistApp.EXTRA_DISPLAY_ITEM_ID)) {
             val clientId = bundle.getLong(DynalistApp.EXTRA_DISPLAY_ITEM_ID)
             val item = itemBox.get(clientId)

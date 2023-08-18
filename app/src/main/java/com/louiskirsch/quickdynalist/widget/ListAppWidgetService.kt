@@ -17,6 +17,7 @@ import com.louiskirsch.quickdynalist.objectbox.DynalistItemFilter
 import com.louiskirsch.quickdynalist.objectbox.DynalistItem_
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import io.objectbox.query.QueryBuilder
 
 
 class ListAppWidgetService: RemoteViewsService() {
@@ -91,7 +92,7 @@ class ListViewsFactory(private val context: Context, intent: Intent)
         val parent = box.get(parentId) ?: return emptyList()
         return box.query {
             equal(DynalistItem_.parentId, parentId)
-            notEqual(DynalistItem_.name, "")
+            notEqual(DynalistItem_.name, "", QueryBuilder.StringOrder.CASE_INSENSITIVE)
             equal(DynalistItem_.hidden, false)
             if (!parent.areCheckedItemsVisible) {
                 equal(DynalistItem_.isChecked, false)
